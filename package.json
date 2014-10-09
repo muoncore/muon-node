@@ -1,0 +1,31 @@
+{
+    "name": "control-plane",
+    "description": "Muon bridge to docker api",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": "node app",
+        "test": "./node_modules/mocha/bin/mocha -R spec"
+    },
+    "dependencies": {
+        "underscore": "*",
+        "url": "*",
+        "cors": "*",
+        "node-uuid": "*",
+        "body-parser": "*",
+        "msh": "0.1.9",
+        "restify": "*",
+        "socket.io": "0.9",
+        "socket.io-client": "0.9",
+        "url-template": "*"
+    },
+    "devDependencies": {
+        "mocha": "*",
+        "superagent": "*",
+        "assert": "*",
+        "validator": "*"
+    }
+}
+
+
+
