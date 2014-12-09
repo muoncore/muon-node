@@ -1,7 +1,16 @@
 
 var muon = require("./muon/muon-core.js")("tck");
+var amqpTransport = require("./muon/muon-transport-amqp.js");
+
+muon.addTransport(amqpTransport);
 
 var events = [];
+
+muon.onBroadcast("echoBroadcast", function(event) {
+    console.log("Received the echo broadcast, responding with the same payload");
+    console.dir(JSON.parse(event.payload.toString()));
+    muon.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
+});
 
 muon.onBroadcast("tckBroadcast", function(event) {
     console.log("Got an event " + event.payload.toString());
@@ -10,43 +19,48 @@ muon.onBroadcast("tckBroadcast", function(event) {
     events.push(payload);
 });
 
-muon.onGet("/event", "Get the events", function(event) {
-    return events;
+muon.onGet("/discover", "Get the events", function(event, data, respond) {
+    muon.discoverServices(function(services) {
+        respond(services);
+    });
 });
 
-muon.onDelete("/event", "Delete the events", function(event) {
+muon.onGet("/event", "Get the events", function(event, data, respond) {
+    respond(events);
+});
+
+muon.onDelete("/event", "Delete the events", function(event, data, respond) {
     events = [];
-    return {
-
-    };
+    respond({
+    });
 });
 
-muon.onGet("/echo", "Allow get of some data", function(event) {
-    return {
+muon.onGet("/echo", "Allow get of some data", function(event, data, respond) {
+    respond({
         "something":"awesome",
         "method":"GET"
-    }
+    });
 });
 
-muon.onPost("/echo", "Allow post of some data", function(event, payload) {
-    return {
+muon.onPost("/echo", "Allow post of some data", function(event, data, respond) {
+    respond({
         "something":"awesome",
         "method":"POST"
-    }
+    });
 });
 
-muon.onDelete("/echo", "Allow delete of some data", function(event) {
-    return {
+muon.onDelete("/echo", "Allow delete of some data", function(event, data, respond) {
+    respond({
         "something":"awesome",
         "method":"DELETE"
-    }
+    });
 });
 
-muon.onPut("/echo", "Allow put of some data", function(event, payload) {
-    return {
+muon.onPut("/echo", "Allow put of some data", function(event, data, respond) {
+    respond({
         "something":"awesome",
         "method":"PUT"
-    }
+    });
 });
 
 

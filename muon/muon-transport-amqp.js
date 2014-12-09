@@ -1,127 +1,156 @@
 
+var amqp = require('amqp');
+var uuid = require('node-uuid');
 
-module.exports = function(overrideNucleus) {
-    var nucleusUrl = globalNucleusUrl;
+var amqpurl = "amqp://localhost";
 
-    if (overrideNucleus != null) {
-        nucleusUrl = overrideNucleus;
-    }
-    console.log("Booting Muon Client Connection to " + nucleusUrl + "/ HTTP [" + nucleusHttpUrl + "]");
-
-    var socket = io.connect(nucleusUrl);
-
-    socket.on('connect', function () {
-        console.log("muon socket connected");
-    });
-    socket.on('error', function () {
-        console.log("balls ..");
-    });
-    socket.on('reconnect_failed', function () {
-        console.log("reconnect_failed ..");
-    });
-    socket.on('disconnect', function () {
-        console.log("disconnect ..");
-    });
-
-    socket.on('reconnecting', function () {
-        console.log("reconnecting ..");
-    });
-
-    socket.on('reconnect_error', function (err) {
-        console.log("reconnect_error ..");
-        console.dir(err);
-    });
-    socket.on("nucleus", function(ev) {
-        console.log("Muon Client Received Message!");
-        for(var i = 0; i < callbacks.length; i++) {
-            var c = callbacks[i];
-            console.log("Checking the filter !");
-            console.dir(c);
-            if (messageMatchesQueryFilter(ev, c.filter)) {
-                c.callback(ev);
-            }
-        }
-    });
-
-    return {
-        on:function(filter, callback) {
-            //socket.emit("query", filter);
-
-            callbacks.push({
-                filter:filter,
-                callback:callback
-            });
-        },
-        emit:function(event) {
-            socket.emit("nucleus", event);
-        },
-        createResource : function(event) {
-            event.action = "put";
-            socket.emit("nucleus", event);
-        },
-        deleteResource : function(event) {
-            event.action = "delete";
-            socket.emit("nucleus", event);
-        },
-        shutdown:function() {
-            socket.disconnect();
-        },
-        readNucleus:function(query, callback) {
-
-            var success = function(actions) {
-                console.log("Connected to nucleus and read resource data");
-                console.dir(actions[0].response);
-                callback(actions[0].response);
-            };
-            var failed = function(actions) {
-                console.error("Failed to connect to nucleus and read resource data");
-                console.dir(actions);
-            };
-
-            var urlPath = "/resource/" + query.resource;
-
-            if (query.hasOwnProperty("recordId")) {
-                urlPath += "/record/" + query.recordId;
-            }
-            if (query.hasOwnProperty("type")) {
-                urlPath += "/type/" + query.type;
-            }
-
-            if (query.hasOwnProperty("query")) {
-                urlPath += "?" + query.query.key + "=" + query.query.value;
-            }
-
-            msh.init(success, failed).get(nucleusHost, nucleusPort, urlPath).end();
-        },
-        getIp: function() {
-            return nucleusHost
-        },
-        getPort: function() {
-            return nucleusSocketPort
-        },
-        getHttpPort: function() {
-            return nucleusPort
-        }
-    }
+var implOpts = {
+    reconnect: true,
+    reconnectBackoffStrategy: 'linear',
+    reconnectBackoffTime: 500 // ms
 };
 
-function messageMatchesQueryFilter(message, filter) {
+module.connection = amqp.createConnection({ url: amqpurl }, implOpts);
+module.connection.on('ready', function() {
+    module.connection.exchange("muon-resource", {
+        durable:false,
+        autoDelete:false
+    }, function(exch) {
 
-    if (filter.hasOwnProperty("resource") && message.resource != filter.resource) {
-        return false;
-    }
+        module.resourceExchange = exch;
+    });
+    module.connection.exchange("muon-broadcast", {
+        durable:false,
+        autoDelete:false
+    }, function(exch) {
+        module.broadcastExchange = exch;
 
-    if (filter.hasOwnProperty("type") && message.type != filter.type) {
-        return false;
-    }
-    if (filter.hasOwnProperty("action") && message.action != filter.action) {
-        return false;
-    }
-    if (filter.hasOwnProperty("recordId") && message.recordId != filter.recordId) {
-        return false;
-    }
-    //todo, json query string.
+        startAnnouncements();
+    });
+});
+module.connection.on('error', function (msg) {
+    console.log("Getting an error");
+    console.dir(msg);
+});
 
-    return true;
+module.discoveredServiceList = [];
+module.discoveredServices = [];
+
+setTimeout(function() {
+   //todo, bootup the announcement/ detection
+});
+
+module.exports.setServiceIdentifier = function(serviceIdentifier) {
+    module.serviceIdentifier = serviceIdentifier;
 }
 
+module.exports.emit= function(event) {
+
+    var headers = {};
+    if (event.headers instanceof Object) {
+        headers = event.headers;
+    }
+
+    var options = {
+        headers:headers
+    };
+
+    var exch = module.broadcastExchange;
+    exch.publish(
+        event.name,
+        JSON.stringify(event.payload), options, function(resp) {
+    });
+};
+
+module.exports.sendAndWaitForReply=function (event, callback) {
+
+};
+module.exports.listenOnBroadcast = function (event, callback) {
+    //todo, discover what resource we need to wait for. less than 50ms and setup isn't completed and the queues
+    // don't attach correctly.
+    setTimeout(function () {
+        var queue = "muon-node-broadcastlisten-" + uuid.v1();
+
+        console.log("Creating queue " + queue);
+
+        module.connection.queue(queue, {
+            durable: false,
+            exclusive: true,
+            ack: true,
+            autoDelete: true
+        }, function (q) {
+            q.bind("muon-broadcast", event, function () {
+                console.log("Bound event queue " + queue);
+                q.subscribe(function (message, headers, deliveryInfo, messageObject) {
+                    //todo, headers ...
+                    console.log("Broadcast received");
+                    console.log(message.data.toString());
+
+                    callback({
+                        payload: message.data
+                    }, message.data);
+                });
+            });
+        });
+    }, 200);
+};
+module.exports.listenOnResource = function (resource, method, callback) {
+    //todo, discover what resource we need to wait for. less than 50ms and setup isn't completed and the queues
+    // don't attach correctly.
+    setTimeout(function () {
+        var queue = "muon-node-reslisten-" + uuid.v1();
+
+        console.log("Creating queue " + queue);
+
+        module.connection.queue(queue, {
+            durable: false,
+            exclusive: true,
+            ack: true,
+            autoDelete: true
+        }, function (q) {
+
+            q.bind("muon-resource", module.serviceIdentifier + "." + resource + "." + method, function () {
+                q.subscribe(function (message, headers, deliveryInfo, messageObject) {
+                    var replyTo = messageObject.replyTo;
+
+                    callback({
+                        payload: message.data
+                    }, message.data, function(response) {
+                        module.connection.publish(replyTo, JSON.stringify(response), {
+                            "contentType": "text/plain"
+                        });
+                    });
+                });
+            });
+        });
+    }, 100);
+};
+module.exports.discoverServices=function(callback) {
+    callback(module.discoveredServiceList);
+};
+
+function startAnnouncements() {
+    module.exports.listenOnBroadcast("serviceAnnounce", function(event) {
+        var pay = JSON.parse(event.payload.toString());
+        if(module.discoveredServiceList.indexOf(pay.identifier) < 0) {
+            module.discoveredServiceList.push(pay.identifier);
+            module.discoveredServices.push(pay);
+        }
+    });
+
+    module.exports.emit({
+        name:"serviceAnnounce",
+        payload:{
+            identifier:module.serviceIdentifier
+        }
+    });
+
+    setInterval(function() {
+        module.exports.emit({
+            name:"serviceAnnounce",
+            payload:{
+                identifier:module.serviceIdentifier
+            }
+        });
+    }, 3500);
+}
