@@ -1,15 +1,17 @@
 {
-    "name": "control-plane",
-    "description": "Muon bridge to docker api",
+    "name": "muon-core",
+    "description": "Muon Core for Node",
     "version": "0.0.1",
     "private": true,
     "scripts": {
-        "start": "node app",
         "test": "./node_modules/mocha/bin/mocha -R spec"
     },
+    "repository": {
+        "url": "https://github.com/simplicityitself/muon-core-node"
+    },
+    "main": "index.js",
     "dependencies": {
         "underscore": "*",
-        "url": "*",
         "cors": "*",
         "node-uuid": "*",
         "body-parser": "*",
@@ -23,7 +25,6 @@
     "devDependencies": {
         "mocha": "*",
         "superagent": "*",
-        "assert": "*",
         "validator": "*"
     }
 }
