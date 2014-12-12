@@ -2,7 +2,7 @@
     "name": "muon-core",
     "description": "Muon Core for Node",
     "version": "0.0.1",
-    "private": true,
+    "private": false,
     "scripts": {
         "test": "./node_modules/mocha/bin/mocha -R spec"
     },
