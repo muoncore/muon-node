@@ -1,6 +1,7 @@
 
 var amqp = require('amqp');
 var uuid = require('node-uuid');
+var url = require('url');
 
 var amqpurl = "amqp://localhost";
 
@@ -14,7 +15,8 @@ module.connection = amqp.createConnection({ url: amqpurl }, implOpts);
 module.connection.on('ready', function() {
     module.connection.exchange("muon-resource", {
         durable:false,
-        autoDelete:false
+        autoDelete:false,
+        confirm: true
     }, function(exch) {
 
         module.resourceExchange = exch;
@@ -42,6 +44,7 @@ setTimeout(function() {
 
 module.exports.setServiceIdentifier = function(serviceIdentifier) {
     module.serviceIdentifier = serviceIdentifier;
+	console.log("Setting service identifier.");
 }
 
 module.exports.emit= function(event) {
@@ -62,9 +65,65 @@ module.exports.emit= function(event) {
     });
 };
 
-module.exports.sendAndWaitForReply=function (event, callback) {
-
+module.exports.sendAndWaitForReply = function (event, callback) {
+	
+	//get the url elements
+	
+	var u = url.parse(event.url, true);
+	
+	var locImplOpts = {
+		reconnect: true,
+		reconnectBackoffStrategy: 'linear',
+		reconnectBackoffTime: 2000 // ms
+	};
+	
+	var queue = u.hostname + "." + u.path + "." + event.method;
+	
+	connection = amqp.createConnection({ url: amqpurl }, locImplOpts);
+	
+	connection.on('ready', function() {
+		
+		console.log("Connected");
+		
+		connection.exchange("muon-resource", {
+			durable:false,
+			autoDelete:false,
+			confirm: true
+		}, function(exch) {
+			
+			var options = {
+				replyTo : queue,
+				contentType: "text/plain"
+			};
+			
+			
+			console.log('exchange set');
+			connection.queue(queue, {
+				durable: false,
+				exclusive: true,
+				ack: true,
+				autoDelete: true
+			}, function (q) {
+				
+				console.log("Creating queue " + queue);
+				exch.publish(queue, event.payload, options, function(test) {
+					console.log("publishing to queue");
+					if(test) {
+						console.log('There was an error I think');
+					}
+					
+					callback(test);
+					// 				
+				});
+				
+			});
+			
+		});
+		
+	});
+	
 };
+
 module.exports.listenOnBroadcast = function (event, callback) {
     //todo, discover what resource we need to wait for. less than 50ms and setup isn't completed and the queues
     // don't attach correctly.
@@ -90,7 +149,7 @@ module.exports.listenOnBroadcast = function (event, callback) {
                         payload: message.data
                     }, message.data);
                 });
-            });
+			});
         });
     }, 200);
 };
@@ -104,14 +163,16 @@ module.exports.listenOnResource = function (resource, method, callback) {
 
         module.connection.queue(queue, {
             durable: false,
-            exclusive: true,
+            exclusive: false,
             ack: true,
             autoDelete: true
         }, function (q) {
 
             q.bind("muon-resource", module.serviceIdentifier + "." + resource + "." + method, function () {
+				console.log("Bound resource queue " + module.serviceIdentifier + "." + resource + "." + method);
                 q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                     var replyTo = messageObject.replyTo;
+					console.log("Got a message");
 
                     callback({
                         payload: message.data
