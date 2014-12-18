@@ -99,7 +99,7 @@ module.exports.sendAndWaitForReply = function (event, callback) {
 				contentType: "text/plain"
 			};
 
-			console.log('exchange set');
+			console.log('Exchange set');
 			
 			connection.queue(replyQueue, {
 				durable: false,
@@ -116,14 +116,14 @@ module.exports.sendAndWaitForReply = function (event, callback) {
 					exch.publish(queue, event.payload, options, function(test) {
 						console.log("publishing to queue");
 						if(test) {
-							console.log('There was an error I think');
+							console.log("Publish to queue failed.");
 							callback({failure: true});
 						}
 					});
 					q.subscribe(function (message, headers, deliveryInfo, messageObject) {
 						//var replyTo = messageObject.replyTo;
-						console.log("Got a response");
-						console.dir(message);
+						//console.log("Got a response");
+						//console.dir(message);
 						callback(message);
 						
 						
