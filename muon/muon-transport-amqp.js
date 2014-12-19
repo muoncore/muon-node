@@ -74,7 +74,6 @@ module.exports = exports = function amqpTransport() {
     var scope = {
         setServiceIdentifier: function(serviceIdentifier) {
             _this.serviceIdentifier = serviceIdentifier;
-            console.log("Setting service identifier.");
         },
 
         emit: function(event) {
