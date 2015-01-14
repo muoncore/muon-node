@@ -9,6 +9,7 @@ module.exports = function(serviceIdentifier) {
     return {
         addTransport: function (transport) {
             //todo, verify the transport.
+            //var transport = module.transports[0];
             transport.setServiceIdentifier(serviceIdentifier);
             module.transports.push(transport);
         },
@@ -64,6 +65,13 @@ module.exports = function(serviceIdentifier) {
                 method: "delete"
             }, callback);
         },
+
+        /**
+         * TODO does this need a callback?
+         * @param eventName
+         * @param headers
+         * @param payload
+         */
         emit: function (eventName, headers, payload) {
             var transport = module.transports[0];
             transport.emit({
