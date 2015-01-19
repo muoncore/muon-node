@@ -196,38 +196,51 @@ module.exports = exports = function amqpTransport() {
                             console.log("Bound event queue " + queue);
                             q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                                 //todo, headers ...
-                                console.log("Broadcast received");
-                                console.log(message.data.toString());
+                                //console.log("Broadcast received");
+                                //console.log(message.data.toString());
 
                                 callback({
                                     payload: message.data
                                 }, message.data);
+
+
                             });
                         });
+
+
                     });
+
+
                 }
             }, 100);
         },
 
+        /**
+         * todo: timeouts, dead resources, clearing
+         * @param resource
+         * @param method
+         * @param callback
+         */
+
         listenOnResource: function (resource, method, callback) {
             _this.connection.on('ready', function() {
                 var queue = _this.serviceIdentifier + "." + resource + "." + method; //"muon-node-reslisten-" + uuid.v1();
+                var routing = _this.serviceIdentifier + "." + resource + "." + method;
 
                 console.log("Creating queue " + queue);
 
-                _this.connection.queue(queue, {
+                var resqueue = _this.connection.queue(queue, {
                     durable: false,
                     exclusive: false,
                     ack: true,
                     autoDelete: true
                 }, function (q) {
 
-                    q.bind(_this.serviceIdentifier + "." + resource + "." + method, function () {
+                    q.bind(routing, function () {
                         console.log("Bound resource queue " + _this.serviceIdentifier + "." + resource + "." + method);
                         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                             var replyTo = messageObject.replyTo;
                             console.log("Got a message");
-
                             callback({
                                 payload: message.data
                             }, message.data, function(response) {
@@ -235,9 +248,15 @@ module.exports = exports = function amqpTransport() {
                                     "contentType": "text/plain"
                                 });
                             });
+
+
                         });
+
+
                     });
                 });
+
+
             }, 100);
         },
 

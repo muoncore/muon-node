@@ -3,12 +3,14 @@ var muon = muonCore.muon('tck');
 //muon.addTransport(muonCore.httpTransport);
 
 muon.addTransport(muonCore.amqpTransport());
+muon.addTransport(muonCore.dummyTransport());
 
 var events = [];
 
 
+
 setInterval(function() {
-    muon.emit("echoBroadcast", {reply: "test"}, {identifier: "Emitted Test"});
+    muon.broadcast("echoBroadcast", {reply: "test"}, {identifier: "Emitted Test"});
 },3500);
 
 muon.onBroadcast("echoBroadcast", function(event) {

@@ -1,9 +1,9 @@
-module.exports = exports = new dummyTransport();
-
-function dummyTransport () {
+module.exports = exports = function dummyTransport () {
 
 
     var _this = this;
+
+    console.log("Initialising dummy transport");
 
 
 
@@ -17,11 +17,13 @@ function dummyTransport () {
 
 
         emit: function (event) {
-
+            console.log('Pretending to emit something');
+            console.dir(event);
         },
 
         sendAndWaitForReply: function (event, callback) {
-
+            console.log('Sending something');
+            callback({data:'{"nothing ventured": "nothing gained"}'});
         },
 
         listenOnBroadcast: function (event, callback) {
