@@ -1,11 +1,10 @@
 {
-    "name": "control-plane",
-    "description": "Muon bridge to docker api",
+    "name": "muon-core",
+    "description": "node.js muon implementation",
     "version": "0.0.1",
-    "private": true,
     "scripts": {
         "start": "node app",
-        "test": "./node_modules/mocha/bin/mocha -R spec"
+        "test": "./node_modules/.bin/mocha --recursive -R xunit-file test/"
     },
     "dependencies": {
         "underscore": "*",
@@ -24,7 +23,8 @@
         "mocha": "*",
         "superagent": "*",
         "assert": "*",
-        "validator": "*"
+        "validator": "*",
+        "xunit-file": "*"
     }
 }
 
