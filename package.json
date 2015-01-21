@@ -2,6 +2,7 @@
   "name": "muon-core",
   "description": "node.js muon implementation",
   "version": "20.0.0-0",
+  "main": "./muon/muon-core",
   "scripts": {
     "start": "node app",
     "test": "./node_modules/.bin/mocha --recursive -R xunit-file test/"
