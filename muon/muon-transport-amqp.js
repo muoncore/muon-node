@@ -11,6 +11,7 @@ module.exports = exports = function amqpTransport() {
     var amqpurl = "amqp://localhost";
 
     var implOpts = {
+        defaultExchangeName: '',
         reconnect: true,
         reconnectBackoffStrategy: 'linear',
         reconnectBackoffTime: 500 // ms
@@ -19,7 +20,12 @@ module.exports = exports = function amqpTransport() {
     this.connection =  amqp.createConnection({ url: amqpurl }, implOpts);
     this.connection.on('ready', function() {
 
-        _this.resourceExchange = _this.connection.exchange();
+        _this.resourceExchange = _this.connection.exchange("", {
+            durable:false,
+            type: 'direct',
+            autoDelete:false,
+            confirm: true
+        });
 
 
 
@@ -65,7 +71,7 @@ module.exports = exports = function amqpTransport() {
             }
         });
 
-        console.log('Emitting announcements');
+        //console.log('Emitting announcements');
 
         scope.emit({
             name:"serviceAnnounce",
@@ -119,55 +125,56 @@ module.exports = exports = function amqpTransport() {
 
             //get the url elements
 
+            console.log('Sending something through amqp');
+
             var u = url.parse(event.url, true);
 
-
-
-            var locImplOpts = {
-                reconnect: true,
-
-                reconnectBackoffStrategy: 'linear',
-                reconnectBackoffTime: 2000 // ms
-            };
-
             var queue = u.hostname + "." + u.path + "." + event.method;
+            //var queue = "muon-node-send-" + uuid.v1();
             var replyQueue = queue + ".reply";
+
+            this.listenOnQueue(replyQueue, callback);
+            this.sendOnQueue(queue, event);
+
+            /* Beyond this point is left in for temporary reference until it all works equally well.
+             * because at the moment it's still a  bit broken. Yay!
 
             _this.connection.on('ready', function() {
 
 
-                _this.resourceExchange.on('open', function() {
+                _this.resourceExchange.on('open', function () {
                     console.log('resourceExchange initialised');
 
                     var exch = _this.resourceExchange;
 
                     var options = {
-                        replyTo : replyQueue,
+                        replyTo: replyQueue,
                         contentType: "text/plain"
                     };
 
                     console.log('Exchange set');
 
-                    _this.connection.queue(replyQueue, {
+                    _this.connection.queue(queue, {
                         durable: false,
                         exclusive: true,
                         ack: true,
                         autoDelete: true
                     }, function (q) {
 
-                        console.log("Creating queue " + replyQueue);
+                        console.log("Creating reply queue " + replyQueue);
 
                         q.bind(replyQueue, function () {
                             console.log("Bound resource queue " + replyQueue);
 
-                            exch.publish(queue, event.payload, options, function(test) {
+                            exch.publish(queue, event.payload, options, function (test) {
                                 console.log("publishing to queue");
-                                if(test) {
+                                if (test) {
                                     console.log("Publish to queue failed.");
                                     callback({failure: true});
                                 }
                             });
                             q.subscribe(function (message, headers, deliveryInfo, messageObject) {
+                                console.log('subscribing to queue');
                                 callback(message);
                             });
                         });
@@ -175,6 +182,10 @@ module.exports = exports = function amqpTransport() {
                 });
 
             });
+
+            */
+
+
         },
 
         listenOnBroadcast: function (event, callback) {
@@ -182,7 +193,7 @@ module.exports = exports = function amqpTransport() {
             var waitInterval = setInterval(function() {
                 if(typeof _this.broadcastExchange == 'object') {
                     clearInterval(waitInterval);
-                    var queue = "muon-node-broadcastlisten-" + uuid.v1();
+                    var queue = "muon-node-broadcastlisten-" + uuid.v1();;
 
                     console.log("Creating broadcast listen queue " + queue);
 
@@ -216,54 +227,119 @@ module.exports = exports = function amqpTransport() {
         },
 
         /**
-         * todo: timeouts, dead resources, clearing
+         *
          * @param resource
          * @param method
          * @param callback
          */
 
         listenOnResource: function (resource, method, callback) {
-            _this.connection.on('ready', function() {
-                var queue = _this.serviceIdentifier + "." + resource + "." + method; //"muon-node-reslisten-" + uuid.v1();
-                var routing = _this.serviceIdentifier + "." + resource + "." + method;
 
-                console.log("Creating queue " + queue);
+            //var queue = _this.serviceIdentifier + "." + resource + "." + method + uuid.v1(); //"muon-node-reslisten-" + uuid.v1();
+            var key = _this.serviceIdentifier + "." + resource + "." + method;
 
-                var resqueue = _this.connection.queue(queue, {
-                    durable: false,
-                    exclusive: false,
-                    ack: true,
-                    autoDelete: true
-                }, function (q) {
-
-                    q.bind(routing, function () {
-                        console.log("Bound resource queue " + _this.serviceIdentifier + "." + resource + "." + method);
-                        q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-                            var replyTo = messageObject.replyTo;
-                            console.log("Got a message");
-                            callback({
-                                payload: message.data
-                            }, message.data, function(response) {
-                                _this.connection.publish(replyTo, JSON.stringify(response), {
-                                    "contentType": "text/plain"
-                                });
-                            });
-
-
-                        });
-
-
-                    });
-                });
-
-
-            }, 100);
+            this.listenOnQueue(key, callback);
         },
 
         discoverServices: function (callback) {
             callback(_this.discoveredServiceList);
-        }
+        },
 
+        sendOnQueue: function(qObj, event, callback) {
+            //var queue = "muon-node-send-" + uuid.v1();
+
+            var queue, route;
+
+            if(typeof qObj === 'object') {
+
+                queue = qObj.queue;
+                route = queue;
+
+                if ('route' in qObj) route = qObj.route;
+
+            } else {
+                queue = route = qObj;
+            }
+
+            console.log('sending on queue');
+
+            var options = {
+                replyTo: route + '.reply',
+                contentType: "text/plain"
+            };
+
+            _this.connection.on('ready', function() {
+                console.log('Connection is ready to send on ' + queue);
+
+                var con = _this.connection;
+
+                con.publish(route, event.payload, options, function(test) {
+                    console.log('Publishing to default exchange');
+                });
+            });
+        },
+
+        listenOnQueue: function(qObj, callback) {
+
+
+            var queue, route, replyTo;
+
+            if(typeof qObj === 'object') {
+
+                queue = qObj.queue;
+                route = queue;
+
+                if ('route' in qObj) route = qObj.route;
+
+            } else {
+                queue = route = qObj;
+            }
+
+
+
+            var waitInterval = setInterval(function() {
+                if (typeof _this.resourceExchange == 'object') {
+                    clearInterval(waitInterval);
+
+                    console.log("Creating listening queue " + queue);
+
+                    var resqueue = _this.connection.queue(queue, {
+                        durable: false,
+                        exclusive: false,
+                        ack: true,
+                        autoDelete: true
+                    }, function (q) {
+
+                        q.bind(queue, function () {
+                            console.log("Bound queue " + queue + " to route " + route);
+                            q.subscribe(function (message, headers, deliveryInfo, messageObject) {
+
+                                console.log("Got a message");
+                                //console.dir(messageObject);
+                                callback({
+                                    payload: message.data
+                                }, message.data, function(response) {
+                                    if('replyTo' in messageObject) {
+                                        var replyTo = messageObject.replyTo;
+                                        console.log('MessageObb=ject contains replyto: ' + replyTo);
+
+                                        _this.connection.publish(replyTo, JSON.stringify(response), {
+                                            "contentType": "text/plain"
+                                        });
+                                    } else {
+                                        console.log('No replyTo');
+                                    }
+                                });
+                            });
+                        });
+                    });
+                }
+            });
+        },
+
+        sendAndWaitOnQueue: function(queue, routing, callback) {
+
+        }
     };
 
     return scope;

@@ -22,7 +22,7 @@ module.exports = exports = function dummyTransport () {
         },
 
         sendAndWaitForReply: function (event, callback) {
-            console.log('Sending something');
+            console.log('Pretending to send something');
             callback({data:'{"nothing ventured": "nothing gained"}'});
         },
 

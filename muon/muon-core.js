@@ -59,6 +59,37 @@ module.exports = function(serviceIdentifier) {
         },
 
         /**
+         * Send a message to a queue
+         * @param payload
+         * @param queue an object containing queue and optional routing key
+         * @param callback
+         */
+
+        sendToQueue: function(payload, queue, callback) {
+
+        },
+
+        /**
+         * Send a message to a queue and listen for a reply
+         * @param payload
+         * @param queue
+         * @param callback
+         */
+        sentToQueueAndListen: function(payload, queue, callback) {
+
+        },
+
+        /**
+         *
+         * @param queue an object containing queue and optional routing key
+         * @param callback
+         */
+
+        listenOnQueue: function(queue, callback) {
+
+        },
+
+        /**
          * TODO does this need a callback?
          * @param eventName
          * @param headers
@@ -129,7 +160,7 @@ module.exports = function(serviceIdentifier) {
         var transports = module.transports;
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];
-            transport.discoverServices(callback);
+            transport.discoverServices();
         }
     }
 
