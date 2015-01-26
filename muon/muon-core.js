@@ -1,10 +1,17 @@
 
 var uuid = require('node-uuid');
 
+
 module.exports = function(serviceIdentifier) {
 
     module.transports = [];
     module.serviceIdentifier = serviceIdentifier;
+
+    /* We always require the amqp transport
+    * Maybe this should be handled outside somewhere? I dunno.
+    * */
+    var amqpTransport = require("./muon-transport-amqp.js");
+    module.transports.push(amqpTransport());
 
     return {
         addTransport: function (transport) {
@@ -56,6 +63,19 @@ module.exports = function(serviceIdentifier) {
                 payload: payload,
                 method: "delete"
             }, callback);
+        },
+
+        /**
+         * return a generic queue object
+         */
+        getQueue: function() {
+
+           var q = {
+
+           };
+
+            return q;
+
         },
 
         /**

@@ -2,7 +2,7 @@ var muonCore = require("./index.js");
 var muon = muonCore.muon('tck');
 //muon.addTransport(muonCore.httpTransport);
 
-muon.addTransport(muonCore.amqpTransport());
+//muon.addTransport(muonCore.amqpTransport());
 //muon.addTransport(muonCore.dummyTransport());
 
 var events = [];
