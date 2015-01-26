@@ -7,13 +7,7 @@ module.exports = function(serviceIdentifier) {
     module.transports = [];
     module.serviceIdentifier = serviceIdentifier;
 
-    /* We always require the amqp transport
-    * Maybe this should be handled outside somewhere? I dunno.
-    * */
-    var amqpTransport = require("./muon-transport-amqp.js");
-    module.transports.push(amqpTransport());
-
-    return {
+    var scope = {
         addTransport: function (transport) {
             //todo, verify the transport.
             //var transport = module.transports[0];
@@ -66,50 +60,6 @@ module.exports = function(serviceIdentifier) {
         },
 
         /**
-         * return a generic queue object
-         */
-        getQueue: function() {
-
-           var q = {
-
-           };
-
-            return q;
-
-        },
-
-        /**
-         * Send a message to a queue
-         * @param payload
-         * @param queue an object containing queue and optional routing key
-         * @param callback
-         */
-
-        sendToQueue: function(payload, queue, callback) {
-
-        },
-
-        /**
-         * Send a message to a queue and listen for a reply
-         * @param payload
-         * @param queue
-         * @param callback
-         */
-        sentToQueueAndListen: function(payload, queue, callback) {
-
-        },
-
-        /**
-         *
-         * @param queue an object containing queue and optional routing key
-         * @param callback
-         */
-
-        listenOnQueue: function(queue, callback) {
-
-        },
-
-        /**
          * TODO does this need a callback?
          * @param eventName
          * @param headers
@@ -129,13 +79,26 @@ module.exports = function(serviceIdentifier) {
         },
 
         discoverServices: function (callback) {
-            //todo, fork, join style on the various transports in parallel.
-            var transport = module.transports[0];
-            transport.discoverServices(callback);
+            _discoverServices(callback);
+        },
+
+        /**
+         * return a general queue object
+         */
+        queue: function() {
+
+            return amqpTransport.queue;
+
         }
 
 
     };
+
+    /* We always require the amqp transport
+     * Maybe this should be handled outside somewhere? I dunno.
+     * */
+    var amqpTransport = require("./muon-transport-amqp.js")();
+    scope.addTransport(amqpTransport);
 
     /*
     These do practically all the same thing?
@@ -177,12 +140,10 @@ module.exports = function(serviceIdentifier) {
     }
 
     function _discoverServices() {
-        var transports = module.transports;
-        for(var i=0; i<transports.length; i++) {
-            var transport = transports[i];
-            transport.discoverServices();
-        }
+
     }
+
+    return scope;
 
 
 };

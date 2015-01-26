@@ -7,6 +7,14 @@ var muon = muonCore.muon('tck');
 
 var events = [];
 
+/*
+
+var mQ = muon.queue();
+
+mQ.send('someGenericQ', {event: "a thing"});
+
+*/
+
 
 
 setInterval(function() {
@@ -15,13 +23,13 @@ setInterval(function() {
 
 muon.onBroadcast("echoBroadcast", function(event) {
     //console.log("Received the echo broadcast, responding with the same payload");
-    //console.dir(JSON.parse(event.payload.toString()));
+    console.dir(JSON.parse(event.payload.toString()));
     muon.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
 });
 
 muon.onBroadcast("echoBroadcastResponse", function(event) {
     //console.log("Received the response");
-    //console.dir(JSON.parse(event.payload.toString()));
+    console.dir(JSON.parse(event.payload.toString()));
 });
 
 muon.onBroadcast("tckBroadcast", function(event) {
