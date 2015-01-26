@@ -1,8 +1,6 @@
 var muonCore = require("./index.js");
 var muon = muonCore.muon('tck');
-//muon.addTransport(muonCore.httpTransport);
 
-//muon.addTransport(muonCore.amqpTransport());
 //muon.addTransport(muonCore.dummyTransport());
 
 var events = [];
@@ -23,13 +21,13 @@ setInterval(function() {
 
 muon.onBroadcast("echoBroadcast", function(event) {
     //console.log("Received the echo broadcast, responding with the same payload");
-    console.dir(JSON.parse(event.payload.toString()));
-    muon.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
+    //console.dir(JSON.parse(event.payload.toString()));
+    //muon.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
 });
 
 muon.onBroadcast("echoBroadcastResponse", function(event) {
     //console.log("Received the response");
-    console.dir(JSON.parse(event.payload.toString()));
+    //console.dir(JSON.parse(event.payload.toString()));
 });
 
 muon.onBroadcast("tckBroadcast", function(event) {

@@ -27,23 +27,6 @@ module.exports = exports = function amqpTransport() {
             confirm: true
         });
 
-
-
-        /*
-
-        _this.connection.exchange("muon-resource", {
-            durable:false,
-            type: 'direct',
-            autoDelete:false,
-            confirm: true
-        }, function(exch) {
-
-            _this.resourceExchange = exch;
-        });
-
-        */
-
-
         _this.connection.exchange("muon-broadcast", {
             durable:false,
             autoDelete:false
@@ -70,8 +53,6 @@ module.exports = exports = function amqpTransport() {
                 _this.discoveredServices.push(pay);
             }
         });
-
-        //console.log('Emitting announcements');
 
         scope.emit({
             name:"serviceAnnounce",
@@ -134,7 +115,7 @@ module.exports = exports = function amqpTransport() {
             var replyQueue = queue + ".reply";
 
             this.queue.listen(replyQueue, callback);
-            this.queue.send(queue, event.payload);
+            this.queue.send(queue, event);
 
 
             /* Beyond this point is left in for temporary reference until it all works equally well.
@@ -247,7 +228,7 @@ module.exports = exports = function amqpTransport() {
         },
 
         queue: {
-            send: function(qObj, payload, callback) {
+            send: function(qObj, event, callback) {
 
                 var queue, route;
 
@@ -262,6 +243,20 @@ module.exports = exports = function amqpTransport() {
                     queue = route = qObj;
                 }
 
+                if(typeof event === 'object') {
+                    if(!'payload' in event) {
+                        // we should throw an error here? For now we fail silently
+                        event.payload = '';
+                    }
+
+                } else {
+                    event = {
+                        payload: event
+                    };
+                }
+
+                console.dir(event);
+
                 console.log('sending on queue ' + route);
 
                 var options = {
@@ -269,13 +264,24 @@ module.exports = exports = function amqpTransport() {
                     contentType: "text/plain"
                 };
 
+                if('options' in event) {
+
+                }
+
+                if('headers' in event) options.headers = event.headers;
+
+
                 _this.connection.on('ready', function() {
                     console.log('Connection is ready to send on ' + queue);
 
                     var con = _this.connection;
 
-                    con.publish(route, payload, options, function(test) {
-                        console.log('Publishing to default exchange');
+                    con.publish(route, event.payload, options, function(test) {
+
+                        if(typeof callback === 'function') {
+                            callback();
+                        }
+
                     });
                 });
             },
