@@ -4,12 +4,12 @@ var muon = muonCore.muon('tck');
 
 var mQ = muon.queue();
 
-mQ.listen('tck./echo.post.reply', function(response) {
+mQ.listen('tck.echo.post.reply', function(response) {
     console.dir(JSON.parse(response.payload.toString()));
     process.exit();
 });
 
-mQ.send('tck./echo.post', {payload: {event: "a thing"}});
+mQ.send('tck.echo.post', {payload: {event: "a thing"}});
 
 /*
 muon.post("muon://tck/echo", {"Now": "Then"}, function(response) {

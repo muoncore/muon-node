@@ -110,6 +110,8 @@ module.exports = exports = function amqpTransport() {
 
             var u = url.parse(event.url, true);
 
+            u.path.replace(/^\/|\/$/g, '');
+
             var queue = u.hostname + "." + u.path + "." + event.method;
             //var queue = "muon-node-send-" + uuid.v1();
             var replyQueue = queue + ".reply";
@@ -218,6 +220,9 @@ module.exports = exports = function amqpTransport() {
         listenOnResource: function (resource, method, callback) {
 
             //var queue = _this.serviceIdentifier + "." + resource + "." + method + uuid.v1(); //"muon-node-reslisten-" + uuid.v1();
+
+            resource = resource.replace(/^\/|\/$/g, '');
+
             var key = _this.serviceIdentifier + "." + resource + "." + method;
 
             this.queue.listen(key, callback);
