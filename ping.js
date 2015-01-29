@@ -2,7 +2,8 @@ var muonCore = require('./index.js');
 var muon = muonCore.muon('tck');
 //muon.addTransport(muonCore.amqpTransport());
 
-var mQ = muon.queue();
+var mQ = muonCore.queue();
+mQ.exchange();
 
 mQ.listen('tck.echo.post.reply', function(response) {
     console.dir(JSON.parse(response.payload.toString()));

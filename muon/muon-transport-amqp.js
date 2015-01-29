@@ -1,33 +1,38 @@
 
+/*
 
-var amqp = require('amqp');
-var uuid = require('node-uuid');
-var url = require('url');
+*/
 
-module.exports = exports = function amqpTransport() {
+
+module.exports = function amqpTransport() {
+
+    var util = require('../lib/util.js');
 
     var _this = this;
 
-    var amqpurl = "amqp://localhost";
+    var uuid = require('node-uuid');
+    var url = require('url');
 
-    var implOpts = {
-        defaultExchangeName: '',
-        reconnect: true,
-        reconnectBackoffStrategy: 'linear',
-        reconnectBackoffTime: 500 // ms
-    };
+    this.discoveredServiceList = [];
+    this.discoveredServices = [];
 
-    this.connection =  amqp.createConnection({ url: amqpurl }, implOpts);
-    this.connection.on('ready', function() {
+    this.queue = require('./muon-queue.js')();
 
-        _this.resourceExchange = _this.connection.exchange("", {
+    //_this.exch = new queue();
+    this.queue.connect();
+    //_this.exch.connect();
+
+    this.queue.connection.on('ready', function() {
+
+        _this.resourceExchange = _this.queue.connection.exchange("", {
             durable:false,
             type: 'direct',
             autoDelete:false,
             confirm: true
         });
 
-        _this.connection.exchange("muon-broadcast", {
+        console.log('I am readin');
+        _this.queue.connection.exchange("muon-broadcast", {
             durable:false,
             autoDelete:false
         }, function(exch) {
@@ -37,52 +42,26 @@ module.exports = exports = function amqpTransport() {
         });
     });
 
-    this.connection.on('error', function (msg) {
-        console.log("Getting an error");
-        console.dir(msg);
-    });
-
-    this.discoveredServiceList = [];
-    this.discoveredServices = [];
-
-    function startAnnouncements() {
-        scope.listenOnBroadcast("serviceAnnounce", function(event) {
-            var pay = JSON.parse(event.payload.toString());
-            if(_this.discoveredServiceList.indexOf(pay.identifier) < 0) {
-                _this.discoveredServiceList.push(pay.identifier);
-                _this.discoveredServices.push(pay);
-            }
-        });
-
-        scope.emit({
-            name:"serviceAnnounce",
-            payload:{
-                identifier: _this.serviceIdentifier
-            }
-        });
-
-        setInterval(function() {
-            scope.emit({
-                name:"serviceAnnounce",
-                payload:{
-                    identifier: _this.serviceIdentifier
-                }
-            });
-        }, 3500);
-    }
-
-
     var scope = {
+
+        exch: {},
+
         setServiceIdentifier: function(serviceIdentifier) {
             _this.serviceIdentifier = serviceIdentifier;
         },
 
         emit: function(event) {
+            console.log('Emitting event');
 
-            //console.log('Emitting event');
             var waitInterval = setInterval(function() {
-                if (typeof _this.broadcastExchange == 'object') {
+
+                if (typeof _this.broadcastExchange === 'object') {
+
                     clearInterval(waitInterval);
+
+                    console.log('Event emitted');
+                    console.dir(event);
+
                     var headers = {};
                     if (event.headers instanceof Object) {
                         headers = event.headers;
@@ -98,12 +77,14 @@ module.exports = exports = function amqpTransport() {
                         JSON.stringify(event.payload), options, function (resp) {
                             //wat do
                         });
+                } else {
+
                 }
+
             }, 100);
         },
 
-        sendAndWaitForReply: function (event, callback) {
-
+        sendAndWaitForReply: function(event, callback) {
             //get the url elements
 
             console.log('Sending something through amqp on ' + event.url);
@@ -116,64 +97,11 @@ module.exports = exports = function amqpTransport() {
             //var queue = "muon-node-send-" + uuid.v1();
             var replyQueue = queue + ".reply";
 
-            this.queue.listen(replyQueue, callback);
-            this.queue.send(queue, event);
-
-
-            /* Beyond this point is left in for temporary reference until it all works equally well.
-             * because at the moment it's still a  bit broken. Yay!
-
-            _this.connection.on('ready', function() {
-
-
-                _this.resourceExchange.on('open', function () {
-                    console.log('resourceExchange initialised');
-
-                    var exch = _this.resourceExchange;
-
-                    var options = {
-                        replyTo: replyQueue,
-                        contentType: "text/plain"
-                    };
-
-                    console.log('Exchange set');
-
-                    _this.connection.queue(queue, {
-                        durable: false,
-                        exclusive: true,
-                        ack: true,
-                        autoDelete: true
-                    }, function (q) {
-
-                        console.log("Creating reply queue " + replyQueue);
-
-                        q.bind(replyQueue, function () {
-                            console.log("Bound resource queue " + replyQueue);
-
-                            exch.publish(queue, event.payload, options, function (test) {
-                                console.log("publishing to queue");
-                                if (test) {
-                                    console.log("Publish to queue failed.");
-                                    callback({failure: true});
-                                }
-                            });
-                            q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-                                console.log('subscribing to queue');
-                                callback(message);
-                            });
-                        });
-                    });
-                });
-
-            });
-
-            */
-
-
+            _this.queue.listen(replyQueue, callback);
+            _this.queue.send(queue, event);
         },
 
-        listenOnBroadcast: function (event, callback) {
-            //_this.connection.on('ready', function() {
+        listenOnBroadcast: function(event, callback) {
             var waitInterval = setInterval(function() {
                 if(typeof _this.broadcastExchange == 'object') {
                     clearInterval(waitInterval);
@@ -181,7 +109,7 @@ module.exports = exports = function amqpTransport() {
 
                     console.log("Creating broadcast listen queue " + queue);
 
-                    _this.connection.queue(queue, {
+                    _this.queue.connection.queue(queue, {
                         durable: false,
                         exclusive: true,
                         ack: true,
@@ -210,150 +138,46 @@ module.exports = exports = function amqpTransport() {
             }, 100);
         },
 
-        /**
-         *
-         * @param resource
-         * @param method
-         * @param callback
-         */
-
-        listenOnResource: function (resource, method, callback) {
-
-            //var queue = _this.serviceIdentifier + "." + resource + "." + method + uuid.v1(); //"muon-node-reslisten-" + uuid.v1();
-
+        listenOnResource: function(resource, method, callback) {
             resource = resource.replace(/^\/|\/$/g, '');
 
             var key = _this.serviceIdentifier + "." + resource + "." + method;
 
-            this.queue.listen(key, callback);
+            _this.queue.listen(key, callback);
         },
 
-        discoverServices: function (callback) {
+        discoverServices: function(callback) {
             callback(_this.discoveredServiceList);
-        },
-
-        queue: {
-            send: function(qObj, event, callback) {
-
-                var queue, route;
-
-                if(typeof qObj === 'object') {
-
-                    queue = qObj.queue;
-                    route = queue;
-
-                    if ('route' in qObj) route = qObj.route;
-
-                } else {
-                    queue = route = qObj;
-                }
-
-                if(typeof event === 'object') {
-                    if(!'payload' in event) {
-                        // we should throw an error here? For now we fail silently
-                        event.payload = '';
-                    }
-
-                } else {
-                    event = {
-                        payload: event
-                    };
-                }
-
-                console.dir(event);
-
-                console.log('sending on queue ' + route);
-
-                var options = {
-                    replyTo: route + '.reply',
-                    contentType: "text/plain"
-                };
-
-                if('options' in event) {
-
-                }
-
-                if('headers' in event) options.headers = event.headers;
-
-
-                _this.connection.on('ready', function() {
-                    console.log('Connection is ready to send on ' + queue);
-
-                    var con = _this.connection;
-
-                    con.publish(route, event.payload, options, function(test) {
-
-                        if(typeof callback === 'function') {
-                            callback();
-                        }
-
-                    });
-                });
-            },
-
-            listen: function(qObj, callback) {
-
-
-                var queue, route, replyTo;
-
-                if(typeof qObj === 'object') {
-
-                    queue = qObj.queue;
-                    route = queue;
-
-                    if ('route' in qObj) route = qObj.route;
-
-                } else {
-                    queue = route = qObj;
-                }
-
-
-
-                var waitInterval = setInterval(function() {
-                    if (typeof _this.resourceExchange == 'object') {
-                        clearInterval(waitInterval);
-
-                        console.log("Creating listening queue " + queue);
-
-                        var resqueue = _this.connection.queue(queue, {
-                            durable: false,
-                            exclusive: false,
-                            ack: true,
-                            autoDelete: true
-                        }, function (q) {
-
-                            q.bind(queue, function () {
-                                console.log("Bound queue " + queue + " to route " + route);
-                                q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-
-                                    console.log("Got a message");
-                                    //console.dir(messageObject);
-                                    callback({
-                                        payload: message.data
-                                    }, message.data, function(response) {
-                                        if('replyTo' in messageObject) {
-                                            var replyTo = messageObject.replyTo;
-                                            console.log('MessageObb=ject contains replyto: ' + replyTo);
-
-                                            _this.connection.publish(replyTo, JSON.stringify(response), {
-                                                "contentType": "text/plain"
-                                            });
-                                        } else {
-                                            console.log('No replyTo');
-                                        }
-                                    });
-                                });
-                            });
-                        });
-                    }
-                });
-            },
-
-            close: function() {
-
-            }
         }
     };
+
+
+
+    function startAnnouncements() {
+        scope.listenOnBroadcast("serviceAnnounce", function(event) {
+            var pay = JSON.parse(event.payload.toString());
+            if(_this.discoveredServiceList.indexOf(pay.identifier) < 0) {
+                _this.discoveredServiceList.push(pay.identifier);
+                _this.discoveredServices.push(pay);
+            }
+        });
+
+        scope.emit({
+            name:"serviceAnnounce",
+            payload:{
+                identifier: _this.serviceIdentifier
+            }
+        });
+
+        setInterval(function() {
+            scope.emit({
+                name:"serviceAnnounce",
+                payload:{
+                    identifier: _this.serviceIdentifier
+                }
+            });
+        }, 3500);
+    }
 
     return scope;
 };

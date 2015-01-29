@@ -20,20 +20,20 @@ setInterval(function() {
 },3500);
 
 muon.onBroadcast("echoBroadcast", function(event) {
-    //console.log("Received the echo broadcast, responding with the same payload");
-    //console.dir(JSON.parse(event.payload.toString()));
-    //muon.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
+    console.log("Received the echo broadcast, responding with the same payload");
+    console.dir(JSON.parse(event.payload.toString()));
+    muon.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
 });
 
 muon.onBroadcast("echoBroadcastResponse", function(event) {
-    //console.log("Received the response");
-    //console.dir(JSON.parse(event.payload.toString()));
+    console.log("Received the response");
+    console.dir(JSON.parse(event.payload.toString()));
 });
 
 muon.onBroadcast("tckBroadcast", function(event) {
-    //console.log("Got an event " + event.payload.toString());
+    console.log("Got an event " + event.payload.toString());
     var payload = JSON.parse(event.payload.toString());
-    //console.dir(payload);
+    console.dir(payload);
     events.push(payload);
 });
 
