@@ -20,6 +20,10 @@ module.exports = function amqpTransport() {
 
     //_this.exch = new queue();
     this.queue.connect();
+
+    // This creates a default exchange.
+    this.queue.exchange();
+
     //_this.exch.connect();
 
     this.queue.connection.on('ready', function() {
@@ -51,7 +55,7 @@ module.exports = function amqpTransport() {
         },
 
         emit: function(event) {
-            console.log('Emitting event');
+            //console.log('Emitting event');
 
             var waitInterval = setInterval(function() {
 
@@ -59,8 +63,8 @@ module.exports = function amqpTransport() {
 
                     clearInterval(waitInterval);
 
-                    console.log('Event emitted');
-                    console.dir(event);
+                    //console.log('Event emitted');
+                    //console.dir(event);
 
                     var headers = {};
                     if (event.headers instanceof Object) {
@@ -105,7 +109,7 @@ module.exports = function amqpTransport() {
             var waitInterval = setInterval(function() {
                 if(typeof _this.broadcastExchange == 'object') {
                     clearInterval(waitInterval);
-                    var queue = "muon-node-broadcastlisten-" + uuid.v1();;
+                    var queue = "muon-node-broadcastlisten-" + uuid.v1();
 
                     console.log("Creating broadcast listen queue " + queue);
 
@@ -142,6 +146,8 @@ module.exports = function amqpTransport() {
             resource = resource.replace(/^\/|\/$/g, '');
 
             var key = _this.serviceIdentifier + "." + resource + "." + method;
+
+            console.log('Listening for ' + resource + ' on ' + key);
 
             _this.queue.listen(key, callback);
         },

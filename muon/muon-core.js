@@ -94,11 +94,7 @@ module.exports = function(serviceIdentifier) {
 
     };
 
-    /* We always require the amqp transport
-     * Maybe this should be handled outside somewhere? I dunno.
-     * */
-    var amqpTransport = require("./muon-transport-amqp.js")();
-    scope.addTransport(amqpTransport);
+
 
     /*
     These do practically all the same thing?
