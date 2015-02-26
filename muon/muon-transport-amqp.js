@@ -1,156 +1,189 @@
 
-var amqp = require('amqp');
-var uuid = require('node-uuid');
+/*
 
-var amqpurl = "amqp://localhost";
+*/
 
-var implOpts = {
-    reconnect: true,
-    reconnectBackoffStrategy: 'linear',
-    reconnectBackoffTime: 500 // ms
-};
 
-module.connection = amqp.createConnection({ url: amqpurl }, implOpts);
-module.connection.on('ready', function() {
-    module.connection.exchange("muon-resource", {
-        durable:false,
-        autoDelete:false
-    }, function(exch) {
+module.exports = function amqpTransport() {
 
-        module.resourceExchange = exch;
+    var util = require('../lib/util.js');
+
+    var _this = this;
+
+    var uuid = require('node-uuid');
+    var url = require('url');
+
+    this.discoveredServiceList = [];
+    this.discoveredServices = [];
+
+    this.queue = require('./muon-queue.js')();
+
+    //_this.exch = new queue();
+    this.queue.connect();
+
+    // This creates a default exchange.
+    this.queue.exchange();
+
+    //_this.exch.connect();
+
+    this.queue.connection.on('ready', function() {
+
+        _this.resourceExchange = _this.queue.connection.exchange("", {
+            durable:false,
+            type: 'direct',
+            autoDelete:false,
+            confirm: true
+        });
+
+        console.log('I am readin');
+        _this.queue.connection.exchange("muon-broadcast", {
+            durable:false,
+            autoDelete:false
+        }, function(exch) {
+            _this.broadcastExchange = exch;
+
+            startAnnouncements();
+        });
     });
-    module.connection.exchange("muon-broadcast", {
-        durable:false,
-        autoDelete:false
-    }, function(exch) {
-        module.broadcastExchange = exch;
 
-        startAnnouncements();
-    });
-});
-module.connection.on('error', function (msg) {
-    console.log("Getting an error");
-    console.dir(msg);
-});
+    var scope = {
 
-module.discoveredServiceList = [];
-module.discoveredServices = [];
+        exch: {},
 
-setTimeout(function() {
-   //todo, bootup the announcement/ detection
-});
+        setServiceIdentifier: function(serviceIdentifier) {
+            _this.serviceIdentifier = serviceIdentifier;
+        },
 
-module.exports.setServiceIdentifier = function(serviceIdentifier) {
-    module.serviceIdentifier = serviceIdentifier;
-}
+        emit: function(event) {
+            //console.log('Emitting event');
 
-module.exports.emit= function(event) {
+            var waitInterval = setInterval(function() {
 
-    var headers = {};
-    if (event.headers instanceof Object) {
-        headers = event.headers;
-    }
+                if (typeof _this.broadcastExchange === 'object') {
 
-    var options = {
-        headers:headers
+                    clearInterval(waitInterval);
+
+                    //console.log('Event emitted');
+                    //console.dir(event);
+
+                    var headers = {};
+                    if (event.headers instanceof Object) {
+                        headers = event.headers;
+                    }
+
+                    var options = {
+                        headers: headers
+                    };
+
+                    var exch = _this.broadcastExchange;
+                    exch.publish(
+                        event.name,
+                        JSON.stringify(event.payload), options, function (resp) {
+                            //wat do
+                        });
+                } else {
+
+                }
+
+            }, 100);
+        },
+
+        sendAndWaitForReply: function(event, callback) {
+            //get the url elements
+
+            console.log('Sending something through amqp on ' + event.url);
+
+            var u = url.parse(event.url, true);
+
+            u.path.replace(/^\/|\/$/g, '');
+
+            var queue = u.hostname + "." + u.path + "." + event.method;
+            //var queue = "muon-node-send-" + uuid.v1();
+            var replyQueue = queue + ".reply";
+
+            _this.queue.listen(replyQueue, callback);
+            _this.queue.send(queue, event);
+        },
+
+        listenOnBroadcast: function(event, callback) {
+            var waitInterval = setInterval(function() {
+                if(typeof _this.broadcastExchange == 'object') {
+                    clearInterval(waitInterval);
+                    var queue = "muon-node-broadcastlisten-" + uuid.v1();
+
+                    console.log("Creating broadcast listen queue " + queue);
+
+                    _this.queue.connection.queue(queue, {
+                        durable: false,
+                        exclusive: true,
+                        ack: true,
+                        autoDelete: true
+                    }, function (q) {
+                        q.bind("muon-broadcast", event, function () {
+                            console.log("Bound event queue " + queue);
+                            q.subscribe(function (message, headers, deliveryInfo, messageObject) {
+                                //todo, headers ...
+                                //console.log("Broadcast received");
+                                //console.log(message.data.toString());
+
+                                callback({
+                                    payload: message.data
+                                }, message.data);
+
+
+                            });
+                        });
+
+
+                    });
+
+
+                }
+            }, 100);
+        },
+
+        listenOnResource: function(resource, method, callback) {
+            resource = resource.replace(/^\/|\/$/g, '');
+
+            var key = _this.serviceIdentifier + "." + resource + "." + method;
+
+            console.log('Listening for ' + resource + ' on ' + key);
+
+            _this.queue.listen(key, callback);
+        },
+
+        discoverServices: function(callback) {
+            callback(_this.discoveredServiceList);
+        }
     };
 
-    var exch = module.broadcastExchange;
-    exch.publish(
-        event.name,
-        JSON.stringify(event.payload), options, function(resp) {
-    });
-};
 
-module.exports.sendAndWaitForReply=function (event, callback) {
 
-};
-module.exports.listenOnBroadcast = function (event, callback) {
-    //todo, discover what resource we need to wait for. less than 50ms and setup isn't completed and the queues
-    // don't attach correctly.
-    setTimeout(function () {
-        var queue = "muon-node-broadcastlisten-" + uuid.v1();
-
-        console.log("Creating queue " + queue);
-
-        module.connection.queue(queue, {
-            durable: false,
-            exclusive: true,
-            ack: true,
-            autoDelete: true
-        }, function (q) {
-            q.bind("muon-broadcast", event, function () {
-                console.log("Bound event queue " + queue);
-                q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-                    //todo, headers ...
-                    console.log("Broadcast received");
-                    console.log(message.data.toString());
-
-                    callback({
-                        payload: message.data
-                    }, message.data);
-                });
-            });
-        });
-    }, 200);
-};
-module.exports.listenOnResource = function (resource, method, callback) {
-    //todo, discover what resource we need to wait for. less than 50ms and setup isn't completed and the queues
-    // don't attach correctly.
-    setTimeout(function () {
-        var queue = "muon-node-reslisten-" + uuid.v1();
-
-        console.log("Creating queue " + queue);
-
-        module.connection.queue(queue, {
-            durable: false,
-            exclusive: true,
-            ack: true,
-            autoDelete: true
-        }, function (q) {
-
-            q.bind("muon-resource", module.serviceIdentifier + "." + resource + "." + method, function () {
-                q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-                    var replyTo = messageObject.replyTo;
-
-                    callback({
-                        payload: message.data
-                    }, message.data, function(response) {
-                        module.connection.publish(replyTo, JSON.stringify(response), {
-                            "contentType": "text/plain"
-                        });
-                    });
-                });
-            });
-        });
-    }, 100);
-};
-module.exports.discoverServices=function(callback) {
-    callback(module.discoveredServiceList);
-};
-
-function startAnnouncements() {
-    module.exports.listenOnBroadcast("serviceAnnounce", function(event) {
-        var pay = JSON.parse(event.payload.toString());
-        if(module.discoveredServiceList.indexOf(pay.identifier) < 0) {
-            module.discoveredServiceList.push(pay.identifier);
-            module.discoveredServices.push(pay);
-        }
-    });
-
-    module.exports.emit({
-        name:"serviceAnnounce",
-        payload:{
-            identifier:module.serviceIdentifier
-        }
-    });
-
-    setInterval(function() {
-        module.exports.emit({
-            name:"serviceAnnounce",
-            payload:{
-                identifier:module.serviceIdentifier
+    function startAnnouncements() {
+        scope.listenOnBroadcast("serviceAnnounce", function(event) {
+            var pay = JSON.parse(event.payload.toString());
+            if(_this.discoveredServiceList.indexOf(pay.identifier) < 0) {
+                _this.discoveredServiceList.push(pay.identifier);
+                _this.discoveredServices.push(pay);
             }
         });
-    }, 3500);
-}
+
+        scope.emit({
+            name:"serviceAnnounce",
+            payload:{
+                identifier: _this.serviceIdentifier
+            }
+        });
+
+        setInterval(function() {
+            scope.emit({
+                name:"serviceAnnounce",
+                payload:{
+                    identifier: _this.serviceIdentifier
+                }
+            });
+        }, 3500);
+    }
+
+    return scope;
+};
