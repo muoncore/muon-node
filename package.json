@@ -1,45 +1,30 @@
 {
-  "name": "muon-core",
-  "description": "Muon Core for Node",
-  "version": "0.0.1",
-  "private": false,
-  "scripts": {
-    "test": "./node_modules/mocha/bin/mocha -R spec"
-  },
-  "repository": {
-	"type": "git",
-    "url": "https://github.com/simplicityitself/muon-core-node"
-  },
-  "main": "index.js",
-  "dependencies": {
-    "underscore": "*",
-    "cors": "*",
-    "node-uuid": "*",
-    "body-parser": "*",
-    "msh": "0.1.9",
-    "restify": "*",
-    "socket.io": "0.9",
-    "socket.io-client": "0.9",
-    "url-template": "*",
-    "amqp": "*"
-  },
-  "devDependencies": {
-    "mocha": "*",
-    "superagent": "*",
-    "validator": "*"
-  },
-  "bugs": {
-    "url": "https://github.com/simplicityitself/muon-core-node/issues"
-  },
-  "homepage": "https://github.com/simplicityitself/muon-core-node",
-  "keywords": [
-    "amqp",
-    "muon"
-  ],
-  "author": "David Dawson <david.dawson@simplicityitself.com> (http://simplicityitself.com/)",
-  "contributors": [{
-		"name": "Graham Dawson",
-		"email": "graham.dawson@simplicityitself.com"
-	}],
-  "license": "ISC"
+    "name": "muon-core",
+    "description": "node.js muon implementation",
+    "version": "21.0.0-0",
+    "main": "./muon/muon-core",
+    "scripts": {
+        "start": "node app",
+        "test": "./node_modules/.bin/mocha --recursive -R xunit-file test/"
+    },
+    "dependencies": {
+        "underscore": "*",
+        "url": "*",
+        "cors": "*",
+        "node-uuid": "*",
+        "body-parser": "*",
+        "msh": "0.1.9",
+        "restify": "*",
+        "socket.io": "0.9",
+        "socket.io-client": "0.9",
+        "url-template": "*",
+        "amqp": "*"
+    },
+    "devDependencies": {
+        "mocha": "*",
+        "superagent": "*",
+        "assert": "*",
+        "validator": "*",
+        "xunit-file": "*"
+    }
 }
