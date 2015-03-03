@@ -1,7 +1,7 @@
 module.exports = {
-    "muon": require('./muon/muon-core.js'),
-    "queue": require('./muon/muon-queue.js'),
-    "amqpTransport": require("./muon/muon-transport-amqp.js"),
-    "httpTransport": require("./muon/muon-transport-http.js"),
-    "dummyTransport": require("./muon/muon-transport-dummy.js")
+    "muon": require('./core/muon-core.js'),
+    "amqpTransport": require("./amqp/muon-transport-amqp.js"),
+    "amqpDiscovery": require("./amqp/muon-discovery-amqp.js"),
+    "httpTransport": require("./http/muon-transport-http.js"),
+    "dummyTransport": require("./core/muon-transport-dummy.js")
 };

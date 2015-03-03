@@ -1,7 +1,33 @@
 var muonCore = require("./index.js");
+
+var discovery = muonCore.amqpDiscovery();
+
 var muon = muonCore.muon('tck');
 
-muon.addTransport(muonCore.amqpTransport());
+muon.addTransport(muonCore.amqpTransport("amqp://localhost"));
+
+var queueEvents = [];
+
+setTimeout(function() {
+    muon.queue.listen("tckQueue", function(event) {
+        queueEvents = [];
+        console.log("Got an event " + event.payload);
+        console.dir(event.payload);
+        queueEvents.push(event.payload);
+    });
+
+    muon.queue.listen("tckQueueSend", function(event) {
+
+        var responseQueue = event.payload.data;
+
+        muon.queue.send(responseQueue, {"something":"ofvalue!"});
+    });
+}, 500);
+//
+//muon.resource.onGet("/tckQueueRes", function() {
+//    return JSON.toString(queueEvents);
+//});
+
 
 var events = [];
 
@@ -13,8 +39,7 @@ mQ.send('someGenericQ', {event: "a thing"});
 
 */
 
-
-
+/*
 setInterval(function() {
     muon.broadcast("echoBroadcast", {reply: "test"}, {identifier: "Emitted Test"});
 },3500);
@@ -83,7 +108,7 @@ muon.onPut("/echo", "Allow put of some data", function(event, data, respond) {
         "something":"awesome",
         "method":"PUT"
     });
-});
+});*/
 
 
 console.log("Starting Muon Node TCK");

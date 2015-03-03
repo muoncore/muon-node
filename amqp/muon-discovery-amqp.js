@@ -1,32 +1,29 @@
+var util = require('util');
 
-/*
+var _this = this;
 
-*/
+var uuid = require('node-uuid');
+var url = require('url');
 
 
-module.exports = function amqpTransport() {
-
-    var util = require('../lib/util.js');
+module.exports = function amqpTransport(url) {
 
     var _this = this;
-
-    var uuid = require('node-uuid');
-    var url = require('url');
 
     this.discoveredServiceList = [];
     this.discoveredServices = [];
 
-    this.queue = require('./muon-queue.js')();
+    //this.queue = require('./amqp-queues.js')(url);
 
     //_this.exch = new queue();
-    this.queue.connect();
+    //this.queue.connect();
 
     // This creates a default exchange.
-    this.queue.exchange();
+    //this.queue.exchange();
 
     //_this.exch.connect();
 
-    this.queue.connection.on('ready', function() {
+    /*this.queue.connection.on('ready', function() {
 
         _this.resourceExchange = _this.queue.connection.exchange("", {
             durable:false,
@@ -45,7 +42,7 @@ module.exports = function amqpTransport() {
             startAnnouncements();
         });
     });
-
+*/
     var scope = {
 
         exch: {},

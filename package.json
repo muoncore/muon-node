@@ -2,7 +2,16 @@
     "name": "muon-core",
     "description": "node.js muon implementation",
     "version": "21.0.0-0",
-    "main": "./muon/muon-core",
+    "author": "Simplicity Itself Ltd",
+    "keywords": [
+      "muon",
+      "microservices",
+      "antifragile"
+    ],
+    "private": false,
+    "repository": {
+      "url": "https://github.com/muoncore/muon-node"
+    },
     "scripts": {
         "start": "node app",
         "test": "./node_modules/.bin/mocha --recursive -R xunit-file test/"
@@ -26,5 +35,8 @@
         "assert": "*",
         "validator": "*",
         "xunit-file": "*"
+    },
+    "engines": {
+      "node": "*"
     }
 }

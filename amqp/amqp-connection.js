@@ -1,12 +1,9 @@
-module.exports = function(opts) {
+var amqp = require('amqp');
+
+module.exports = function(url, opts) {
 
     var _this = this;
-
-    var amqp = require('amqp');
-    var uuid = require('node-uuid');
-    var url = require('url');
-
-    var amqpurl = "amqp://localhost";
+    _this.url = url;
 
     var implOpts = {
         defaultExchangeName: '',
@@ -15,38 +12,38 @@ module.exports = function(opts) {
         reconnectBackoffTime: 500 // ms
     };
 
-    this.connection =  amqp.createConnection({ url: amqpurl }, implOpts);
+    return {
 
-    this.connection.on('error', function (msg) {
-        console.log("Getting an error");
-        console.dir(msg);
-    });
+        connect: function(callback) {
+            var connection =  amqp.createConnection({ url: _this.url }, implOpts);
+            connection.on('error', function (msg) {
+                console.log("Getting an error");
+                console.dir(msg);
+            });
+            connection.on("ready", callback);
 
-    var scope = {
-
-        connect: function(url, opts) {
-
-            this.connection = _this.connection;
-
+            _this.connection = connection;
         },
 
-        exchange: function(name) {
+        queue: function(name, params, callback) {
+            _this.connection.queue(name, params, callback);
+        },
+
+        exchange: function(name, callback) {
 
             if(typeof name === 'undefined' || name.length == 0) name = '';
 
             console.log('Setting up new exchange at ' + name);
-
-
-
-            _this.connection.on('ready', function() {
-                //console.log('An exchange has been created at ' + name);
-                _this.resourceExchange = _this.connection.exchange(name, {
-                    durable:false,
-                    type: 'direct',
-                    autoDelete:false,
-                    confirm: true
-                });
+            var exch = _this.connection.exchange(name, {
+                durable:false,
+                type: 'direct',
+                autoDelete:false,
+                confirm: true
             });
+            if (typeof callback === 'function') {
+                callback(exch);
+            }
+            return exch;
         },
 
         send: function(qObj, event, callback) {
@@ -158,14 +155,6 @@ module.exports = function(opts) {
                     });
                 }
             });
-        },
-
-        close: function() {
-
         }
     };
-
-
-
-    return scope;
 };
