@@ -1,7 +1,16 @@
 
+var uuid = require('node-uuid');
+
 module.exports = function(connection) {
 
-    var exchange;
+    var broadcastExchange = connection.exchange("muon-broadcast", function() {
+
+    }, {
+        durable:false,
+        "type":"topic",
+        autoDelete:false,
+        confirm: true
+    });
 
     return {
         emit: function(event) {
@@ -9,7 +18,7 @@ module.exports = function(connection) {
 
             var waitInterval = setInterval(function() {
 
-                if (typeof _this.broadcastExchange === 'object') {
+                if (typeof broadcastExchange === 'object') {
 
                     clearInterval(waitInterval);
 
@@ -25,7 +34,7 @@ module.exports = function(connection) {
                         headers: headers
                     };
 
-                    var exch = _this.broadcastExchange;
+                    var exch = broadcastExchange;
                     exch.publish(
                         event.name,
                         JSON.stringify(event.payload), options, function (resp) {
@@ -39,13 +48,13 @@ module.exports = function(connection) {
         },
         listenOnBroadcast: function(event, callback) {
             var waitInterval = setInterval(function() {
-                if(typeof _this.broadcastExchange == 'object') {
+                if(typeof broadcastExchange == 'object') {
                     clearInterval(waitInterval);
                     var queue = "muon-node-broadcastlisten-" + uuid.v1();
 
                     console.log("Creating broadcast listen queue " + queue);
 
-                    _this.queue.connection.queue(queue, {
+                    connection.queue(queue, {
                         durable: false,
                         exclusive: true,
                         ack: true,
@@ -55,21 +64,16 @@ module.exports = function(connection) {
                             console.log("Bound event queue " + queue);
                             q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                                 //todo, headers ...
-                                //console.log("Broadcast received");
+                                console.log("Broadcast received");
                                 //console.log(message.data.toString());
 
                                 callback({
+                                    headers:headers,
                                     payload: message.data
                                 }, message.data);
-
-
                             });
                         });
-
-
                     });
-
-
                 }
             }, 100);
         }

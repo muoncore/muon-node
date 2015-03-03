@@ -29,17 +29,20 @@ module.exports = function(url, opts) {
             _this.connection.queue(name, params, callback);
         },
 
-        exchange: function(name, callback) {
+        exchange: function(name, callback, params) {
 
+            if(typeof params === 'undefined') {
+              params = {
+                  durable:false,
+                  type: "direct",
+                  autoDelete:true,
+                  confirm: true
+              };
+            }
             if(typeof name === 'undefined' || name.length == 0) name = '';
 
             console.log('Setting up new exchange at ' + name);
-            var exch = _this.connection.exchange(name, {
-                durable:false,
-                type: 'direct',
-                autoDelete:false,
-                confirm: true
-            });
+            var exch = _this.connection.exchange(name, params);
             if (typeof callback === 'function') {
                 callback(exch);
             }

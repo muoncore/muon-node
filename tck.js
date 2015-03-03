@@ -9,6 +9,7 @@ muon.addTransport(muonCore.amqpTransport("amqp://localhost"));
 var queueEvents = [];
 
 setTimeout(function() {
+    //TODO, get rid of this awful timeout.
     muon.queue.listen("tckQueue", function(event) {
         queueEvents = [];
         console.log("Got an event " + event.payload);
@@ -22,11 +23,12 @@ setTimeout(function() {
 
         muon.queue.send(responseQueue, {"something":"ofvalue!"});
     });
-}, 500);
-//
-//muon.resource.onGet("/tckQueueRes", function() {
-//    return JSON.toString(queueEvents);
-//});
+    muon.resource.onGet("/tckQueueRes","", function(request, message, response) {
+        console.log("Hello world");
+        response(queueEvents);
+    });
+
+
 
 
 var events = [];
@@ -39,47 +41,47 @@ mQ.send('someGenericQ', {event: "a thing"});
 
 */
 
-/*
+
 setInterval(function() {
-    muon.broadcast("echoBroadcast", {reply: "test"}, {identifier: "Emitted Test"});
+    muon.broadcast.emit("echoBroadcast", {reply: "test"}, {identifier: "Emitted Test"});
 },3500);
 
-muon.onBroadcast("echoBroadcast", function(event) {
+muon.broadcast.on("echoBroadcast", function(event) {
     //console.log("Received the echo broadcast, responding with the same payload");
     //console.dir(JSON.parse(event.payload.toString()));
-    muon.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
+    muon.broadcast.emit("echoBroadcastResponse", {}, JSON.parse(event.payload.toString()));
 });
 
-muon.onBroadcast("echoBroadcastResponse", function(event) {
+muon.broadcast.on("echoBroadcastResponse", function(event) {
     console.log("Received the response");
     //console.dir(JSON.parse(event.payload.toString()));
 });
 
-muon.onBroadcast("tckBroadcast", function(event) {
+muon.broadcast.on("tckBroadcast", function(event) {
     console.log("Got an event " + event.payload.toString());
     var payload = JSON.parse(event.payload.toString());
     //console.dir(payload);
     events.push(payload);
 });
 
-muon.onGet("/discover", "Get the events", function(event, data, respond) {
+muon.resource.onGet("/discover", "Get the events", function(event, data, respond) {
     muon.discoverServices(function(services) {
         console.log('I was got');
         respond(services);
     });
 });
 
-muon.onGet("/event", "Get the events", function(event, data, respond) {
+muon.resource.onGet("/event", "Get the events", function(event, data, respond) {
     respond(events);
 });
 
-muon.onDelete("/event", "Delete the events", function(event, data, respond) {
+muon.resource.onDelete("/event", "Delete the events", function(event, data, respond) {
     events = [];
     respond({
     });
 });
 
-muon.onGet("/echo", "Allow get of some data", function(event, data, respond) {
+muon.resource.onGet("/echo", "Allow get of some data", function(event, data, respond) {
     console.log('Echoing');
     respond({
         "something":"awesome",
@@ -87,7 +89,7 @@ muon.onGet("/echo", "Allow get of some data", function(event, data, respond) {
     });
 });
 
-muon.onPost("/echo", "Allow post of some data", function(event, data, respond) {
+muon.resource.onPost("/echo", "Allow post of some data", function(event, data, respond) {
     console.log('I got a thing');
     console.dir(data);
     respond({
@@ -96,19 +98,21 @@ muon.onPost("/echo", "Allow post of some data", function(event, data, respond) {
     });
 });
 
-muon.onDelete("/echo", "Allow delete of some data", function(event, data, respond) {
+muon.resource.onDelete("/echo", "Allow delete of some data", function(event, data, respond) {
     respond({
         "something":"awesome",
         "method":"DELETE"
     });
 });
 
-muon.onPut("/echo", "Allow put of some data", function(event, data, respond) {
+muon.resource.onPut("/echo", "Allow put of some data", function(event, data, respond) {
     respond({
         "something":"awesome",
         "method":"PUT"
     });
-});*/
+});
+
+}, 500);
 
 
 console.log("Starting Muon Node TCK");

@@ -102,7 +102,7 @@ module.exports = function(serviceIdentifier) {
 
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];
-            transport.listenOnBroadcast(event, callback);
+            transport.broadcast.listenOnBroadcast(event, callback);
         }
 
     }
@@ -112,7 +112,7 @@ module.exports = function(serviceIdentifier) {
 
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];
-            transport.emit(payload);
+            transport.broadcast.emit(payload);
         }
     }
 
@@ -120,7 +120,7 @@ module.exports = function(serviceIdentifier) {
         var transports = module.transports;
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];
-            transport.listenOnResource(resource, method, callback);
+            transport.resource.listenOnResource(resource, method, callback);
         }
     }
 
@@ -128,7 +128,7 @@ module.exports = function(serviceIdentifier) {
         var transports = module.transports;
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];
-            transport.sendAndWaitForReply(payload, callback);
+            transport.resource.sendAndWaitForReply(payload, callback);
         }
     }
 

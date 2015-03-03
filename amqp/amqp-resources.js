@@ -1,77 +1,97 @@
 
 module.exports = function(queues) {
 
-    var exchange;
+    //module.serviceIdentifier = serviceIdentifier;
+    module.queues = queues;
+
+    var resourceHandlers = {};
+
+    setupResourceHandler(resourceHandlers);
 
     return {
-        emit: function(event) {
-            //console.log('Emitting event');
-
-            var waitInterval = setInterval(function() {
-
-                if (typeof _this.broadcastExchange === 'object') {
-
-                    clearInterval(waitInterval);
-
-                    //console.log('Event emitted');
-                    //console.dir(event);
-
-                    var headers = {};
-                    if (event.headers instanceof Object) {
-                        headers = event.headers;
-                    }
-
-                    var options = {
-                        headers: headers
-                    };
-
-                    var exch = _this.broadcastExchange;
-                    exch.publish(
-                        event.name,
-                        JSON.stringify(event.payload), options, function (resp) {
-                            //wat do
-                        });
-                } else {
-
-                }
-
-            }, 100);
+        setServiceIdentifier: function(ident) {
+            module.serviceIdentifier = ident;
         },
-        listenOnBroadcast: function(event, callback) {
-            var waitInterval = setInterval(function() {
-                if(typeof _this.broadcastExchange == 'object') {
-                    clearInterval(waitInterval);
-                    var queue = "muon-node-broadcastlisten-" + uuid.v1();
+        sendAndWaitForReply: function(event, callback) {
+            //get the url elements
 
-                    console.log("Creating broadcast listen queue " + queue);
+            console.log('Sending something through amqp on ' + event.url);
 
-                    _this.queue.connection.queue(queue, {
-                        durable: false,
-                        exclusive: true,
-                        ack: true,
-                        autoDelete: true
-                    }, function (q) {
-                        q.bind("muon-broadcast", event, function () {
-                            console.log("Bound event queue " + queue);
-                            q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-                                //todo, headers ...
-                                //console.log("Broadcast received");
-                                //console.log(message.data.toString());
+            var u = url.parse(event.url, true);
 
-                                callback({
-                                    payload: message.data
-                                }, message.data);
+            u.path.replace(/^\/|\/$/g, '');
 
+            var queue = u.hostname + "." + u.path + "." + event.method;
+            //var queue = "muon-node-send-" + uuid.v1();
+            var replyQueue = queue + ".reply";
 
-                            });
-                        });
+            module.queues.listen(replyQueue, callback);
+            module.queues.send(queue, event);
+        },
 
-
-                    });
-
-
-                }
-            }, 100);
+        listenOnResource: function(resource, method, callback) {
+            resource = resource.replace(/^\/|\/$/g, '');
+            var key = resource + "-" + method;
+            console.log("Storing handler for " + key);
+            resourceHandlers[key] = callback;
         }
-    }
+    };
 };
+
+function setupResourceHandler(handlers) {
+    var waitInterval = setInterval(function () {
+        console.log('Setting up resource listener ' + module.serviceIdentifier);
+
+        if (typeof module.queues == 'object' && module.serviceIdentifier !== 'undefined') {
+            clearInterval(waitInterval);
+
+            var resourceQueueName = 'resource-listen.' + module.serviceIdentifier;
+
+            console.log('Listening for resources on ' + resourceQueueName);
+
+            module.queues.listen(resourceQueueName, function (request, message) {
+                console.log("REQUEST!!!");
+                console.dir(request);
+                var verb = request.headers.verb;
+                var resource = request.headers.RESOURCE;
+                resource = resource.replace(/^\/|\/$/g, '');
+                var key = resource + "-" + verb;
+                var responseQueue = request.headers.RESPONSE_QUEUE;
+
+                console.log("Received resource request " + key);
+                console.log("Response requested on " + responseQueue);
+
+                //TODO, look up the resource handler
+                //TODO, get a response and send it.
+
+                //TODO, have a 404 handler built in here.
+                //the 404 handler
+                var handler = function(request, message, response) {
+                    response({
+                        "message":"no resource with the name " + resource + " with method " + verb
+                    }, {
+                        "Status":"404"
+                    })
+                };
+                if (key in handlers && typeof handlers[key] !== 'undefined') {
+                    console.log("Found " + key + " in registered handlers");
+                    handler = handlers[key];
+                }
+                console.log("Trying now " + handler);
+                handler({
+                    verb:verb,
+                    resource:resource
+                }, message, function(response, headers) {
+                    if (typeof headers === 'undefined') {
+                        headers = {};
+                    }
+                    module.queues.send(responseQueue, {
+                        "headers":headers,
+                        "payload":response
+                    });
+                });
+
+            });
+        }
+    }, 100);
+}

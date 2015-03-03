@@ -50,7 +50,8 @@ module.exports = function(connection) {
                     console.log(message);
 
                     callback({
-                        payload: message
+                        "headers":headers,
+                        "payload": message
                     }, message);
                 });
             });

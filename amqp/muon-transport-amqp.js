@@ -16,6 +16,14 @@ module.exports = function amqpTransport(url) {
         _this.broadcast = require('./amqp-broadcast.js')(_this.connection);
         _this.queues    = require('./amqp-queues.js')(_this.connection);
         _this.resources = require('./amqp-resources.js')(_this.queues);
+        var waitInterval = setInterval(function() {
+            console.log("Checking " + _this.serviceIdentifier);
+            if (typeof _this.serviceIdentifier !== 'undefined') {
+                clearInterval(waitInterval);
+                console.dir(_this.serviceIdentifier);
+                _this.resources.setServiceIdentifier(_this.serviceIdentifier);
+            }
+        }, 10);
         console.log("Ready!");
     });
 
@@ -27,11 +35,13 @@ module.exports = function amqpTransport(url) {
             _this.serviceIdentifier = serviceIdentifier;
         },
 
-        emit: function(event) {
-
-        },
-        listenOnBroadcast: function(event, callback) {
-
+        broadcast: {
+            emit: function (event) {
+                _this.broadcast.emit(event);
+            },
+            listenOnBroadcast: function (event, callback) {
+                _this.broadcast.listenOnBroadcast(event, callback);
+            }
         },
 
         queue: {
@@ -43,31 +53,14 @@ module.exports = function amqpTransport(url) {
             }
         },
 
-        sendAndWaitForReply: function(event, callback) {
-            //get the url elements
+        resource: {
+            sendAndWaitForReply: function (event, callback) {
+                _this.resources.sendAndWaitForReply(event, callback);
+            },
 
-            console.log('Sending something through amqp on ' + event.url);
-
-            var u = url.parse(event.url, true);
-
-            u.path.replace(/^\/|\/$/g, '');
-
-            var queue = u.hostname + "." + u.path + "." + event.method;
-            //var queue = "muon-node-send-" + uuid.v1();
-            var replyQueue = queue + ".reply";
-
-            _this.queues.listen(replyQueue, callback);
-            _this.queues.send(queue, event);
-        },
-
-        listenOnResource: function(resource, method, callback) {
-            resource = resource.replace(/^\/|\/$/g, '');
-
-            var key = _this.serviceIdentifier + "." + resource + "." + method;
-
-            console.log('Listening for ' + resource + ' on ' + key);
-
-            _this.queues.listen(key, callback);
+            listenOnResource: function (resource, method, callback) {
+                _this.resources.listenOnResource(resource, method, callback);
+            }
         }
     };
 };
