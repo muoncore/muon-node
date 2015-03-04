@@ -20,7 +20,7 @@ module.exports = function (scope) {
     };
 
     this.discoverServices=function(callback) {
-        callback(scope.discoveredServiceList);
+        callback(scope.discoveredServices);
     };
 };
 

@@ -1,3 +1,5 @@
+
+var _ = require("underscore");
 var muonCore = require("./index.js");
 
 var amqp = muonCore.amqpTransport("amqp://localhost:5672");
@@ -27,8 +29,6 @@ setTimeout(function() {
         console.log("Hello world");
         response(queueEvents);
     });
-
-
 
 
 var events = [];
@@ -67,7 +67,9 @@ muon.broadcast.on("tckBroadcast", function(event) {
 muon.resource.onGet("/discover", "Get the events", function(event, data, respond) {
     muon.discoverServices(function(services) {
         console.log('I was got');
-        respond(services);
+        respond(_.collect(services, function(it) {
+            return it.identifier;
+        }));
     });
 });
 
