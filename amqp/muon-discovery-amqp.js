@@ -1,186 +1,63 @@
-var util = require('util');
 
-var _this = this;
+var _ = require("underscore");
 
-var uuid = require('node-uuid');
-var url = require('url');
-
-
-module.exports = function amqpTransport(url) {
+module.exports = function (scope) {
 
     var _this = this;
+    _this.descriptors = [];
 
-    this.discoveredServiceList = [];
-    this.discoveredServices = [];
+    scope.discoveredServiceList = [];
+    scope.discoveredServices = [];
 
-    //this.queue = require('./amqp-queues.js')(url);
+    startAnnouncements(scope, _this);
+    console.log("AMQP Discovery becomes ready!");
 
-    //_this.exch = new queue();
-    //this.queue.connect();
-
-    // This creates a default exchange.
-    //this.queue.exchange();
-
-    //_this.exch.connect();
-
-    /*this.queue.connection.on('ready', function() {
-
-        _this.resourceExchange = _this.queue.connection.exchange("", {
-            durable:false,
-            type: 'direct',
-            autoDelete:false,
-            confirm: true
-        });
-
-        console.log('I am readin');
-        _this.queue.connection.exchange("muon-broadcast", {
-            durable:false,
-            autoDelete:false
-        }, function(exch) {
-            _this.broadcastExchange = exch;
-
-            startAnnouncements();
-        });
-    });
-*/
-    var scope = {
-
-        exch: {},
-
-        setServiceIdentifier: function(serviceIdentifier) {
-            _this.serviceIdentifier = serviceIdentifier;
-        },
-
-        emit: function(event) {
-            //console.log('Emitting event');
-
-            var waitInterval = setInterval(function() {
-
-                if (typeof _this.broadcastExchange === 'object') {
-
-                    clearInterval(waitInterval);
-
-                    //console.log('Event emitted');
-                    //console.dir(event);
-
-                    var headers = {};
-                    if (event.headers instanceof Object) {
-                        headers = event.headers;
-                    }
-
-                    var options = {
-                        headers: headers
-                    };
-
-                    var exch = _this.broadcastExchange;
-                    exch.publish(
-                        event.name,
-                        JSON.stringify(event.payload), options, function (resp) {
-                            //wat do
-                        });
-                } else {
-
-                }
-
-            }, 100);
-        },
-
-        sendAndWaitForReply: function(event, callback) {
-            //get the url elements
-
-            console.log('Sending something through amqp on ' + event.url);
-
-            var u = url.parse(event.url, true);
-
-            u.path.replace(/^\/|\/$/g, '');
-
-            var queue = u.hostname + "." + u.path + "." + event.method;
-            //var queue = "muon-node-send-" + uuid.v1();
-            var replyQueue = queue + ".reply";
-
-            _this.queue.listen(replyQueue, callback);
-            _this.queue.send(queue, event);
-        },
-
-        listenOnBroadcast: function(event, callback) {
-            var waitInterval = setInterval(function() {
-                if(typeof _this.broadcastExchange == 'object') {
-                    clearInterval(waitInterval);
-                    var queue = "muon-node-broadcastlisten-" + uuid.v1();
-
-                    console.log("Creating broadcast listen queue " + queue);
-
-                    _this.queue.connection.queue(queue, {
-                        durable: false,
-                        exclusive: true,
-                        ack: true,
-                        autoDelete: true
-                    }, function (q) {
-                        q.bind("muon-broadcast", event, function () {
-                            console.log("Bound event queue " + queue);
-                            q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-                                //todo, headers ...
-                                //console.log("Broadcast received");
-                                //console.log(message.data.toString());
-
-                                callback({
-                                    payload: message.data
-                                }, message.data);
-
-
-                            });
-                        });
-
-
-                    });
-
-
-                }
-            }, 100);
-        },
-
-        listenOnResource: function(resource, method, callback) {
-            resource = resource.replace(/^\/|\/$/g, '');
-
-            var key = _this.serviceIdentifier + "." + resource + "." + method;
-
-            console.log('Listening for ' + resource + ' on ' + key);
-
-            _this.queue.listen(key, callback);
-        },
-
-        discoverServices: function(callback) {
-            callback(_this.discoveredServiceList);
-        }
+    this.announceService=function(serviceDescriptor) {
+        _this.descriptors.push(serviceDescriptor);
+    };
+    this.clearAnnouncements = function() {
+        _this.descriptors = [];
     };
 
+    this.discoverServices=function(callback) {
+        callback(scope.discoveredServiceList);
+    };
+};
 
+function startAnnouncements(scope, _this) {
+    var waitInterval = setInterval(function() {
+        console.log("discovery waiting .. " + scope.broadcast);
+        if (typeof scope.broadcast !== 'undefined') {
+            clearInterval(waitInterval);
 
-    function startAnnouncements() {
-        scope.listenOnBroadcast("serviceAnnounce", function(event) {
-            var pay = JSON.parse(event.payload.toString());
-            if(_this.discoveredServiceList.indexOf(pay.identifier) < 0) {
-                _this.discoveredServiceList.push(pay.identifier);
-                _this.discoveredServices.push(pay);
-            }
-        });
-
-        scope.emit({
-            name:"serviceAnnounce",
-            payload:{
-                identifier: _this.serviceIdentifier
-            }
-        });
-
-        setInterval(function() {
-            scope.emit({
-                name:"serviceAnnounce",
-                payload:{
-                    identifier: _this.serviceIdentifier
+            scope.broadcast.listenOnBroadcast("serviceAnnounce", function(event) {
+                console.log("Saying");
+                var pay = JSON.parse(event.payload.toString());
+                if(scope.discoveredServiceList.indexOf(pay.identifier) < 0) {
+                    scope.discoveredServiceList.push(pay.identifier);
+                    scope.discoveredServices.push(pay);
                 }
             });
-        }, 3500);
-    }
 
-    return scope;
-};
+            _.each(_this.descriptors, function(it) {
+                scope.broadcast.emit(
+                    {
+                        name:"serviceAnnounce",
+                        payload:it
+                    });
+            });
+
+            setInterval(function() {
+                console.log("Announcing service!");
+                _.each(_this.descriptors, function(it) {
+                    scope.broadcast.emit(
+                        {
+                            name:"serviceAnnounce",
+                            payload:it
+                        });
+                });
+            }, 3500);
+        }
+    }, 100);
+
+}

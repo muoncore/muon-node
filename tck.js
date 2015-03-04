@@ -1,10 +1,10 @@
 var muonCore = require("./index.js");
 
-var discovery = muonCore.amqpDiscovery();
-
-var muon = muonCore.muon('tck');
-
-muon.addTransport(muonCore.amqpTransport("amqp://localhost"));
+var amqp = muonCore.amqpTransport("amqp://localhost:5672");
+var muon = muonCore.muon('tck', amqp.getDiscovery(), [
+    ["my-tag", "tck-service", "node-service"]
+]);
+muon.addTransport(amqp);
 
 var queueEvents = [];
 

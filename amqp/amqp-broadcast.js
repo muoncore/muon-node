@@ -3,7 +3,8 @@ var uuid = require('node-uuid');
 
 module.exports = function(connection) {
 
-    var broadcastExchange = connection.exchange("muon-broadcast", function() {
+    var _this = this;
+    this.broadcastExchange = connection.exchange("muon-broadcast", function() {
 
     }, {
         durable:false,
@@ -12,13 +13,12 @@ module.exports = function(connection) {
         confirm: true
     });
 
-    return {
-        emit: function(event) {
+    this.emit= function(event) {
             //console.log('Emitting event');
 
             var waitInterval = setInterval(function() {
 
-                if (typeof broadcastExchange === 'object') {
+                if (typeof _this.broadcastExchange === 'object') {
 
                     clearInterval(waitInterval);
 
@@ -34,8 +34,7 @@ module.exports = function(connection) {
                         headers: headers
                     };
 
-                    var exch = broadcastExchange;
-                    exch.publish(
+                    _this.broadcastExchange.publish(
                         event.name,
                         JSON.stringify(event.payload), options, function (resp) {
                             //wat do
@@ -45,10 +44,10 @@ module.exports = function(connection) {
                 }
 
             }, 100);
-        },
-        listenOnBroadcast: function(event, callback) {
+        };
+        this.listenOnBroadcast=function(event, callback) {
             var waitInterval = setInterval(function() {
-                if(typeof broadcastExchange == 'object') {
+                if(typeof _this.broadcastExchange == 'object') {
                     clearInterval(waitInterval);
                     var queue = "muon-node-broadcastlisten-" + uuid.v1();
 
@@ -77,5 +76,4 @@ module.exports = function(connection) {
                 }
             }, 100);
         }
-    }
 };

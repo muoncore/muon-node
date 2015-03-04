@@ -4,16 +4,19 @@ var _this = this;
 
 var uuid = require('node-uuid');
 var url = require('url');
-
+var Connection = require('./amqp-connection.js');
+var Broadcast = require('./amqp-broadcast.js');
+var Discovery = require("./muon-discovery-amqp.js");
 
 module.exports = function amqpTransport(url) {
 
     var _this = this;
 
-    _this.connection = require('./amqp-connection.js')(url);
+    _this.connection = new Connection(url);
+    _this.url = url;
 
     _this.connection.connect(function() {
-        _this.broadcast = require('./amqp-broadcast.js')(_this.connection);
+        _this.broadcast = new Broadcast(_this.connection);
         _this.queues    = require('./amqp-queues.js')(_this.connection);
         _this.resources = require('./amqp-resources.js')(_this.queues);
         var waitInterval = setInterval(function() {
@@ -29,10 +32,16 @@ module.exports = function amqpTransport(url) {
 
     return {
 
-        exch: {},
+        getDiscovery: function() {
+            return new Discovery(_this);
+        },
 
         setServiceIdentifier: function(serviceIdentifier) {
             _this.serviceIdentifier = serviceIdentifier;
+        },
+
+        getUrl: function() {
+            return _this.url;
         },
 
         broadcast: {

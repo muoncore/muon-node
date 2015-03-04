@@ -1,12 +1,36 @@
 
 var uuid = require('node-uuid');
+var _ = require("underscore");
 
 //TODO - add prioritisation feature
 
-module.exports = function(serviceIdentifier) {
+module.exports = function(serviceIdentifier, discoveryService, tags) {
 
+    module.tags = tags;
+    module.discoveryService = discoveryService;
     module.transports = [];
     module.serviceIdentifier = serviceIdentifier;
+
+    function generateDescriptor() {
+        return {
+            "identifier": module.serviceIdentifier,
+            "tags": module.tags,
+
+            "resourceConnections":  _.collect(
+                _.filter(module.transports, function(it) {
+                    return !!("resource" in it);
+                }), function(it) {
+                    return it.getUrl();
+                }),
+
+            "stream": _.collect(
+                _.filter(module.transports, function(it) {
+                    return !!("stream" in it);
+                }), function(it) {
+                    return it.getUrl();
+                })
+        };
+    }
 
     var scope = {
         addTransport: function (transport) {
@@ -14,17 +38,14 @@ module.exports = function(serviceIdentifier) {
             //var transport = module.transports[0];
             transport.setServiceIdentifier(serviceIdentifier);
             module.transports.push(transport);
+            module.discoveryService.clearAnnouncements();
+            module.discoveryService.announceService(generateDescriptor());
+
         },
         broadcast: {
             on: function (event, callback) {
                 _listenOnBroadcast(event, callback);
             },
-            /**
-             * TODO does this need a callback?
-             * @param eventName
-             * @param headers
-             * @param payload
-             */
             emit: function (eventName, headers, payload) {
                 //var transport = module.transports[0];
                 _emit({
@@ -88,10 +109,9 @@ module.exports = function(serviceIdentifier) {
             }
         },
         discoverServices: function (callback) {
-            _discoverServices(callback);
+            module.discoveryService.discoverServices(callback);
         }
     };
-
 
     /*
     These do practically all the same thing?
@@ -132,9 +152,6 @@ module.exports = function(serviceIdentifier) {
         }
     }
 
-    function _discoverServices() {
-
-    }
 
     return scope;
 
