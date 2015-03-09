@@ -10,7 +10,7 @@ module.exports = function (scope) {
     scope.discoveredServices = [];
 
     startAnnouncements(scope, _this);
-    console.log("AMQP Discovery becomes ready!");
+    logger.debug("AMQP Discovery becomes ready!");
 
     this.announceService=function(serviceDescriptor) {
         _this.descriptors.push(serviceDescriptor);
@@ -26,12 +26,11 @@ module.exports = function (scope) {
 
 function startAnnouncements(scope, _this) {
     var waitInterval = setInterval(function() {
-        console.log("discovery waiting .. " + scope.broadcast);
+        logger.debug("discovery waiting .. " + scope.broadcast);
         if (typeof scope.broadcast !== 'undefined') {
             clearInterval(waitInterval);
 
             scope.broadcast.listenOnBroadcast("serviceAnnounce", function(event) {
-                console.log("Saying");
                 var pay = JSON.parse(event.payload.toString());
                 if(scope.discoveredServiceList.indexOf(pay.identifier) < 0) {
                     scope.discoveredServiceList.push(pay.identifier);
@@ -48,13 +47,13 @@ function startAnnouncements(scope, _this) {
             });
 
             setInterval(function() {
-                console.log("Announcing service!");
+                var announce = {
+                    name:"serviceAnnounce",
+                    payload:it
+                };
+                logger.trace("Announcing service", announce);
                 _.each(_this.descriptors, function(it) {
-                    scope.broadcast.emit(
-                        {
-                            name:"serviceAnnounce",
-                            payload:it
-                        });
+                    scope.broadcast.emit(announce);
                 });
             }, 3500);
         }

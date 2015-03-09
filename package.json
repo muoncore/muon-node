@@ -27,7 +27,11 @@
     "socket.io": "0.9",
     "socket.io-client": "0.9",
     "url-template": "*",
-    "amqp": "*"
+    "amqp": "*",
+    "winston": "*",
+    "colors": "*",
+    "callsite": "*",
+    "stack-trace": "*"
   },
   "devDependencies": {
     "mocha": "*",
@@ -38,5 +42,9 @@
   },
   "engines": {
     "node": "*"
+  },
+  "preferGlobal": "true",
+  "bin": {
+    "muon" : "cli.js"
   }
 }

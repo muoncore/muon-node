@@ -5,14 +5,11 @@ module.exports = function(connection) {
 
     return {
         send: function(queueName, event) {
-            console.log('Emitting ' + queueName);
+            logger.trace('Emitting event on ' + queueName, event);
 
             var waitInterval = setInterval(function() {
                 if (typeof module.exchange === 'object') {
                     clearInterval(waitInterval);
-
-                    //console.log('Event emitted');
-                    console.dir(event);
 
                     var headers = {};
                     if (event.headers instanceof Object) {
@@ -30,14 +27,14 @@ module.exports = function(connection) {
 
                     module.exchange.publish(
                         queueName, payload, options, function (resp) {
-                            console.log("done?");
+
                         });
                 }
             }, 100);
         },
         listen: function(queueName, callback) {
 
-            console.log("Creating listen queue " + queueName);
+            logger.debug("Creating listen queue " + queueName);
             connection.queue(queueName, {
                 durable: false,
                 exclusive: true,
@@ -46,8 +43,7 @@ module.exports = function(connection) {
             }, function (q) {
                 q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                     //todo, headers ...
-                    console.log("Queue message received");
-                    console.log(message);
+                    logger.trace("Queue message received on " + queueName, message);
 
                     callback({
                         "headers":headers,

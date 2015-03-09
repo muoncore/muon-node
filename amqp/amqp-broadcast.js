@@ -51,7 +51,7 @@ module.exports = function(connection) {
                     clearInterval(waitInterval);
                     var queue = "muon-node-broadcastlisten-" + uuid.v1();
 
-                    console.log("Creating broadcast listen queue " + queue);
+                    logger.debug("Creating broadcast listen queue " + queue);
 
                     connection.queue(queue, {
                         durable: false,
@@ -60,12 +60,9 @@ module.exports = function(connection) {
                         autoDelete: true
                     }, function (q) {
                         q.bind("muon-broadcast", event, function () {
-                            console.log("Bound event queue " + queue);
+                            logger.debug("Bound event queue " + queue);
                             q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                                 //todo, headers ...
-                                console.log("Broadcast received");
-                                //console.log(message.data.toString());
-
                                 callback({
                                     headers:headers,
                                     payload: message.data

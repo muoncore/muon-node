@@ -20,14 +20,12 @@ module.exports = function amqpTransport(url) {
         _this.queues    = require('./amqp-queues.js')(_this.connection);
         _this.resources = require('./amqp-resources.js')(_this.queues);
         var waitInterval = setInterval(function() {
-            console.log("Checking " + _this.serviceIdentifier);
             if (typeof _this.serviceIdentifier !== 'undefined') {
                 clearInterval(waitInterval);
-                console.dir(_this.serviceIdentifier);
                 _this.resources.setServiceIdentifier(_this.serviceIdentifier);
             }
         }, 10);
-        console.log("Ready!");
+        logger.debug("AMQP Transport is ready");
     });
 
     return {

@@ -1,4 +1,6 @@
 
+var url = require("url");
+
 module.exports = function(queues) {
 
     //module.serviceIdentifier = serviceIdentifier;
@@ -15,24 +17,27 @@ module.exports = function(queues) {
         sendAndWaitForReply: function(event, callback) {
             //get the url elements
 
-            console.log('Sending something through amqp on ' + event.url);
+            logger.debug('Dispatch resource request on ' + event.url);
 
             var u = url.parse(event.url, true);
 
-            u.path.replace(/^\/|\/$/g, '');
-
-            var queue = u.hostname + "." + u.path + "." + event.method;
-            //var queue = "muon-node-send-" + uuid.v1();
+            var queue = "resource-listen." + u.hostname;
             var replyQueue = queue + ".reply";
 
             module.queues.listen(replyQueue, callback);
+
+            event.headers = {
+                "verb":event.method,
+                "RESOURCE":u.path,
+                "RESPONSE_QUEUE":replyQueue
+            };
+
             module.queues.send(queue, event);
         },
 
         listenOnResource: function(resource, method, callback) {
             resource = resource.replace(/^\/|\/$/g, '');
             var key = resource + "-" + method;
-            console.log("Storing handler for " + key);
             resourceHandlers[key] = callback;
         }
     };
@@ -40,32 +45,22 @@ module.exports = function(queues) {
 
 function setupResourceHandler(handlers) {
     var waitInterval = setInterval(function () {
-        console.log('Setting up resource listener ' + module.serviceIdentifier);
 
         if (typeof module.queues == 'object' && module.serviceIdentifier !== 'undefined') {
             clearInterval(waitInterval);
 
             var resourceQueueName = 'resource-listen.' + module.serviceIdentifier;
 
-            console.log('Listening for resources on ' + resourceQueueName);
-
             module.queues.listen(resourceQueueName, function (request, message) {
-                console.log("REQUEST!!!");
-                console.dir(request);
                 var verb = request.headers.verb;
                 var resource = request.headers.RESOURCE;
                 resource = resource.replace(/^\/|\/$/g, '');
                 var key = resource + "-" + verb;
                 var responseQueue = request.headers.RESPONSE_QUEUE;
 
-                console.log("Received resource request " + key);
-                console.log("Response requested on " + responseQueue);
+                logger.debug("Received resource request " + key);
+                logger.debug("Response requested on " + responseQueue);
 
-                //TODO, look up the resource handler
-                //TODO, get a response and send it.
-
-                //TODO, have a 404 handler built in here.
-                //the 404 handler
                 var handler = function(request, message, response) {
                     response({
                         "message":"no resource with the name " + resource + " with method " + verb
@@ -74,10 +69,9 @@ function setupResourceHandler(handlers) {
                     })
                 };
                 if (key in handlers && typeof handlers[key] !== 'undefined') {
-                    console.log("Found " + key + " in registered handlers");
+                    logger.trace("Found " + key + " in registered handlers");
                     handler = handlers[key];
                 }
-                console.log("Trying now " + handler);
                 handler({
                     verb:verb,
                     resource:resource

@@ -13,8 +13,7 @@ module.exports = function(url) {
     this.connect = function (callback) {
         var connection = this.amqp.createConnection({url: this.url}, this.implOpts);
         connection.on('error', function (msg) {
-            console.log("Getting an error");
-            console.dir(msg);
+            logger.error("Getting an error in the AMQP Connection", msg);
         });
         connection.on("ready", callback);
 
@@ -36,7 +35,7 @@ module.exports = function(url) {
         }
         if (typeof name === 'undefined' || name.length == 0) name = '';
 
-        console.log('Setting up new exchange at ' + name);
+        logger.debug('Setting up new exchange at ' + name);
         var exch = this.connection.exchange(name, params);
         if (typeof callback === 'function') {
             callback(exch);
@@ -70,24 +69,15 @@ module.exports = function(url) {
             };
         }
 
-        console.dir(event);
-
-        console.log('sending on queue ' + route);
-
         var options = {
             replyTo: route + '.reply',
             contentType: "text/plain"
         };
 
-        if ('options' in event) {
-
-        }
-
         if ('headers' in event) options.headers = event.headers;
 
-
         this.connection.on('ready', function () {
-            console.log('Connection is ready to send on ' + queue);
+            logger.debug('Connection is ready to send on ' + queue);
 
             var con = this.connection;
 
@@ -119,7 +109,7 @@ module.exports = function(url) {
             if (typeof this.resourceExchange == 'object') {
                 clearInterval(waitInterval);
 
-                console.log("Creating listening queue " + queue);
+                logger.debug("Creating listening queue " + queue);
 
                 var resqueue = this.connection.queue(queue, {
                     durable: false,
@@ -129,23 +119,19 @@ module.exports = function(url) {
                 }, function (q) {
 
                     q.bind(queue, function () {
-                        console.log("Bound queue " + queue + " to route " + route);
+                        logger.debug("Bound queue " + queue + " to route " + route);
                         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-
-                            console.log("Got a message");
-                            //console.dir(messageObject);
+                            logger.trace("Got a message ", messageObject);
                             callback({
                                 payload: message.data
                             }, message.data, function (response) {
                                 if ('replyTo' in messageObject) {
                                     var replyTo = messageObject.replyTo;
-                                    console.log('MessageObb=ject contains replyto: ' + replyTo);
-
                                     this.connection.publish(replyTo, JSON.stringify(response), {
                                         "contentType": "text/plain"
                                     });
                                 } else {
-                                    console.log('No replyTo');
+                                    logger.warn("Received resource request with no reply-to header. This is incorrect and has been discarded", messageObject);
                                 }
                             });
                         });
