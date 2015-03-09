@@ -145,6 +145,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     }
 
     function _sendAndWaitForReply(payload, callback) {
+        //TOD, pick the 'best' transport and only send on that one.
         var transports = module.transports;
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];

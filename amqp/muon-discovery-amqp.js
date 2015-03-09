@@ -47,13 +47,11 @@ function startAnnouncements(scope, _this) {
             });
 
             setInterval(function() {
-                var announce = {
-                    name:"serviceAnnounce",
-                    payload:it
-                };
-                logger.trace("Announcing service", announce);
                 _.each(_this.descriptors, function(it) {
-                    scope.broadcast.emit(announce);
+                    scope.broadcast.emit({
+                        name:"serviceAnnounce",
+                        payload:it
+                    });
                 });
             }, 3500);
         }
