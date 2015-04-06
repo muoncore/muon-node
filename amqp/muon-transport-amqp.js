@@ -19,6 +19,7 @@ module.exports = function amqpTransport(url) {
         _this.broadcast = new Broadcast(_this.connection);
         _this.queues    = require('./amqp-queues.js')(_this.connection);
         _this.resources = require('./amqp-resources.js')(_this.queues);
+        _this.streams = require('./amqp-stream.js')(_this.queues);
         var waitInterval = setInterval(function() {
             if (typeof _this.serviceIdentifier !== 'undefined') {
                 clearInterval(waitInterval);
@@ -67,6 +68,15 @@ module.exports = function amqpTransport(url) {
 
             listenOnResource: function (resource, method, callback) {
                 _this.resources.listenOnResource(resource, method, callback);
+            }
+        },
+
+        stream: {
+            provideStream: function(streamName, stream) {
+                _this.streams.provideStream(streamName, stream);
+            },
+            subscribe: function(streamUri) {
+                _this.streams.subscribe(streamUri);
             }
         }
     };

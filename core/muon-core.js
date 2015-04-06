@@ -108,6 +108,16 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
                 module.transports[0].queue.send(queueName, event);
             }
         },
+        stream: {
+            provideStream: function(streamName, stream) {
+                //TODO, transport discovery
+                module.transports[0].stream.provideStream(streamName, stream);
+            },
+            subscribe: function(streamUri) {
+                //TODO, transport discovery
+                module.transports[0].stream.subscribe(streamUri, callback);
+            }
+        },
         discoverServices: function (callback) {
             module.discoveryService.discoverServices(callback);
         }

@@ -37,7 +37,7 @@ module.exports = function(connection) {
             logger.debug("Creating listen queue " + queueName);
             connection.queue(queueName, {
                 durable: false,
-                exclusive: true,
+                exclusive: false,
                 ack: true,
                 autoDelete: true
             }, function (q) {

@@ -70,7 +70,7 @@ module.exports = function(url) {
         }
 
         var options = {
-            replyTo: route + '.reply',
+            //replyTo: route + '.reply',
             contentType: "text/plain"
         };
 

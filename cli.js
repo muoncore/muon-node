@@ -34,11 +34,11 @@ cli.main(function(args, options) {
 
     initialiseMuon(options);
 
-    //cli.spinner('Connecting ... ');
+    cli.spinner('Connecting ... ');
 
     setTimeout(function () {
         //TODO, get rid of this awful timeout with events coming out of muon instead.
-        //cli.spinner('', true); //End the spinner
+        cli.spinner('', true); //End the spinner
 
         switch(cli.command) {
             case "discover":
@@ -52,6 +52,7 @@ cli.main(function(args, options) {
     }, 3500);
 
 });
+
 
 function getService(args) {
 
@@ -85,7 +86,7 @@ function initialiseMuon(options) {
         discovery = amqp.getDiscovery();
 
         muon = muonCore.muon('cli', discovery, [
-            ["my-tag", "tck-service", "node-service"]
+            []
         ]);
 
         muon.addTransport(amqp);
