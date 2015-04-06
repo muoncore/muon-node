@@ -1,7 +1,7 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "32.0.0-0",
+  "version": "34.0.0-0",
   "author": "Simplicity Itself Ltd",
   "keywords": [
     "muon",
@@ -32,8 +32,8 @@
     "colors": "*",
     "callsite": "*",
     "stack-trace": "*",
-    "cli":"0.6.5",
-    "daemon":"*"
+    "cli": "0.6.5",
+    "daemon": "*"
   },
   "devDependencies": {
     "mocha": "*",
