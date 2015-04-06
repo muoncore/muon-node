@@ -89,7 +89,6 @@ function setupResourceHandler(handlers) {
 
                 var handler = function(request, message, response) {
                     response({
-
                         "message":"no resource with the name " + resource + " with method " + verb
                     }, {
                         "RequestID":requestId,

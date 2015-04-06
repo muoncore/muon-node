@@ -58,12 +58,14 @@ function getService(args) {
 
     //TODO, check the first arg is a valud URI
 
-    muon.resource.get(args[0], function(event) {
-        //logger.info("Received some data back!");
-
-        var json = JSON.parse(event.payload.data.toString());
-
-        console.log(event.payload.data.toString());
+    muon.resource.get(args[0], function(event, payload) {
+        console.log("Rendering!");
+        //var json = JSON.parse(payload.data.toString());
+        try {
+            console.log(payload.data.toString());
+        } catch (e) {
+            logger.error("Failed to render the response", e);
+        }
         process.exit(0);
     });
 }
