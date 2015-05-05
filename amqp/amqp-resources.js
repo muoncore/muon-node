@@ -25,7 +25,9 @@ module.exports = function(queues) {
             return;
         }
 
-        handler(headers, event.payload);
+        var payload = JSON.parse(event.payload.data.toString());
+
+        handler(headers, payload);
     });
 
     setupResourceHandler(resourceHandlers);

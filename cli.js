@@ -3,13 +3,22 @@
 var muonCore = require("./index.js");
 var _ = require("underscore");
 var uuid = require("node-uuid");
+var fs = require('fs');
 
 var cli = require('cli').enable('status'); //Enable 2 plugins
 
+var discoveryConfig;
+try {
+    discoveryConfigFile = getUserHome() + '/.muon/discovery.json';
+    discoveryConfig = JSON.parse(fs.readFileSync(discoveryConfigFile, 'utf8'));
+} catch(e) {
+    logger.warn("No Discovery file found at " + discoveryConfig);
+    logger.warn("You must create one before proceeding" + discoveryConfig);
+}
+
 cli.parse({
     log:   ['l', 'Enable logging'],
-    discovery: ['d', 'the discovery system to use', 'string'],
-    discoveryConfig: ['dc', 'the configuration option for the discovery', 'string']
+    discovery: ['d', 'the discovery configuration to use from the config file', 'string']
 }, [
     "discover",
     "get",
@@ -20,7 +29,6 @@ cli.parse({
 ]);
 
 var muon;
-
 
 cli.main(function(args, options) {
 
@@ -50,19 +58,19 @@ cli.main(function(args, options) {
             default:
         }
     }, 3500);
-
 });
-
 
 function getService(args) {
 
     //TODO, check the first arg is a valud URI
 
     muon.resource.get(args[0], function(event, payload) {
-        console.log("Rendering!");
-        //var json = JSON.parse(payload.data.toString());
         try {
-            console.log(payload.data.toString());
+            if (event.Status == "404") {
+                logger.error("Service returned 404 when accessing " + args[0]);
+            } else {
+                console.dir(payload);
+            }
         } catch (e) {
             logger.error("Failed to render the response", e);
         }
@@ -82,18 +90,36 @@ function discoverServices() {
 }
 
 function initialiseMuon(options) {
-    var discovery;
-    if (options.discovery == "amqp") {
-        var amqp = muonCore.amqpTransport("amqp://localhost:5672");
-        discovery = amqp.getDiscovery();
+    var discovery = _.find(discoveryConfig, function(it) {
+        return it.name == options.discovery;
+    });
 
-        muon = muonCore.muon('cli', discovery, [
-            []
-        ]);
+    if (typeof discovery !== 'undefined') {
 
-        muon.addTransport(amqp);
+        switch(discovery.type) {
+            case "amqp":
+                var amqp = muonCore.amqpTransport(discovery.uri);
+                discovery = amqp.getDiscovery();
+
+                muon = muonCore.muon('cli', discovery, [
+                    []
+                ]);
+
+                muon.addTransport(amqp);
+                break;
+            default:
+                logger.error("Discovery type is not supported: " + discovery.type);
+        }
     } else {
-        logger.error("Currently, only AMQP discovery is available. Pull requests welcome");
-        process.exit(0);
+        logger.error("No discovery configuration with the name: " + options.discovery);
+        var configs = _.collect(discoveryConfig, function(it) {
+            return it.name;
+        });
+        logger.info("Available configurations : " + configs);
+        process.exit(1);
     }
+}
+
+function getUserHome() {
+    return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 }
