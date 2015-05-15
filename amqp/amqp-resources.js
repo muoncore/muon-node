@@ -42,6 +42,7 @@ module.exports = function(queues) {
             logger.info('Dispatch resource request on ' + event.url);
 
             var u = url.parse(event.url, true);
+            console.dir(u.query);
             var requestId = uuid.v1();
 
             responseHandlers[requestId] = function(header, payload) {
@@ -50,14 +51,19 @@ module.exports = function(queues) {
 
             var queue = "resource-listen." + u.hostname;
 
-            event.headers = {
+            var head = {
                 "Content-Type":"application/json",
                 "Accept":"application/json",
                 "verb":event.method,
-                "RESOURCE":u.path,
+                "RESOURCE":u.pathname,
                 "RESPONSE_QUEUE":replyQueue,
                 "RequestID": requestId
             };
+
+            for(var k in u.query) head[k]= u.query[k];
+
+            event.headers = head;
+            console.dir(event.headers);
 
             module.queues.send(queue, event);
         },

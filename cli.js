@@ -95,7 +95,6 @@ function initialiseMuon(options) {
     });
 
     if (typeof discovery !== 'undefined') {
-
         switch(discovery.type) {
             case "amqp":
                 var amqp = muonCore.amqpTransport(discovery.uri);
