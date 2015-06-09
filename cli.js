@@ -103,7 +103,7 @@ function streamService(args) {
 
     //TODO, check the first arg is a valid URI
     muon.stream.subscribe(args[0], function(event, payload) {
-        console.dir(payload);
+        console.log(JSON.stringify(payload));
     });
 }
 

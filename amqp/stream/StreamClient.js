@@ -85,6 +85,7 @@ module.exports = function(queues) {
 
     cl.subscribe = function(url) {
         var u = Url.parse(url, true);
+
         cl.connection.streamName = u.pathname;
         cl.connection.remoteCommandQueue = u.hostname + "_stream_control";
 
@@ -94,13 +95,17 @@ module.exports = function(queues) {
             cl.inboundMessageReceived.dispatch(data);
         });
 
-        queues.send(cl.connection.remoteCommandQueue, {
-            headers:{
-                command:"SUBSCRIBE",
+        var headers = {
+            command:"SUBSCRIBE",
                 REQUESTED_STREAM_NAME: cl.connection.streamName,
-                "KEEPALIVE_QUEUE_NAME":cl.connection.replyQueue,
-                "REPLY_QUEUE_NAME":cl.connection.replyQueue
-            },
+            "KEEPALIVE_QUEUE_NAME":cl.connection.replyQueue,
+            "REPLY_QUEUE_NAME":cl.connection.replyQueue
+        };
+
+        for(var k in u.query) headers[k]= u.query[k];
+
+        queues.send(cl.connection.remoteCommandQueue, {
+            headers:headers,
             payload:{}
         });
 

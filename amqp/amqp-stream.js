@@ -15,15 +15,24 @@ module.exports = function(queues) {
 
                 var stream = new StreamProxyClient(queues);
 
+                var batchSize = 10;
+                var handled = 0;
+
                 stream.dataReceived.add(onData);
+                stream.dataReceived.add(function() {
+                    if(++handled >= batchSize) {
+                        handled=0;
+                        stream.requestData(batchSize);
+                    }
+                });
 
                 stream.subscribed.add((function() {
                     //TODO,Ideally expose this to the using library as the back pressure signal, but that needs more work ...
-                    stream.requestData(100);
+                    stream.requestData(batchSize);
                 }));
                 stream.errored.add((function(event) {
                     logger.error("An error occurred in the stream");
-                    console.dir(event);
+                    console.log(JSON.stringify(event));
 
                     if (event.headers.command != "SUBSCRIPTION_NACK") {
                         setTimeout(function() {
