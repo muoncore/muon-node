@@ -56,56 +56,25 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
             }
         },
         resource: {
-            onGet: function (resource, doc, callback) {
+            onQuery: function (resource, doc, callback) {
                 _listenOnResource(resource, "get", callback);
             },
-            onPost: function (resource, doc, callback) {
+            onCommand: function (resource, doc, callback) {
                 _listenOnResource(resource, "post", callback);
             },
-            onPut: function (resource, doc, callback) {
-                _listenOnResource(resource, "put", callback);
-            },
-            onDelete: function (resource, doc, callback) {
-                _listenOnResource(resource, "delete", callback);
-            },
-            get: function (url, callback) {
+            query: function (url, callback) {
                 _sendAndWaitForReply({
                     url: url,
                     payload: {},
                     method: "get"
                 }, callback);
             },
-            put: function (url, payload, callback) {
-                _sendAndWaitForReply({
-                    url: url,
-                    payload: payload,
-                    method: "put"
-                }, callback);
-            },
-            post: function (url, payload, callback) {
+            command: function (url, payload, callback) {
                 _sendAndWaitForReply({
                     url: url,
                     payload: payload,
                     method: "post"
                 }, callback);
-            },
-            del: function (url, payload, callback) {
-
-                _sendAndWaitForReply({
-                    url: url,
-                    payload: payload,
-                    method: "delete"
-                }, callback);
-            }
-        },
-        queue: {
-            listen: function(queueName, callback) {
-                //TODO, transport discovery
-                module.transports[0].queue.listen(queueName, callback);
-            },
-            send: function(queueName, event) {
-                //TODO, transport discovery
-                module.transports[0].queue.send(queueName, event);
             }
         },
         stream: {
@@ -113,7 +82,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
                 //TODO, transport discovery
                 module.transports[0].stream.provideStream(streamName, stream);
             },
-            subscribe: function(streamUri) {
+            subscribe: function(streamUri, callback) {
                 //TODO, transport discovery
                 module.transports[0].stream.subscribe(streamUri, callback);
             }

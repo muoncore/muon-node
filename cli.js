@@ -21,11 +21,9 @@ cli.parse({
     discovery: ['d', 'the discovery configuration to use from the config file', 'string']
 }, [
     "discover",
-    "get",
-    //"post",
-    //"put",
-    //"delete",
-    //"stream"
+    "query",
+    "command",
+    "stream"
 ]);
 
 var muon;
@@ -42,29 +40,34 @@ cli.main(function(args, options) {
 
     initialiseMuon(options);
 
-    cli.spinner('Connecting ... ');
+    //cli.spinner('Connecting ... ');
 
     setTimeout(function () {
         //TODO, get rid of this awful timeout with events coming out of muon instead.
-        cli.spinner('', true); //End the spinner
+        //cli.spinner('', true); //End the spinner
 
         switch(cli.command) {
             case "discover":
                 discoverServices();
                 break;
-            case "get":
+            case "query":
                 getService(args);
+                break;
+            case "command":
+                postService(args);
+                break;
+            case "stream":
+                streamService(args);
                 break;
             default:
         }
     }, 3500);
 });
 
-function getService(args) {
+function postService(args) {
 
     //TODO, check the first arg is a valud URI
-
-    muon.resource.get(args[0], function(event, payload) {
+    muon.resource.command(args[0], args[1], function(event, payload) {
         try {
             if (event.Status == "404") {
                 logger.error("Service returned 404 when accessing " + args[0]);
@@ -75,6 +78,32 @@ function getService(args) {
             logger.error("Failed to render the response", e);
         }
         process.exit(0);
+    });
+}
+
+function getService(args) {
+
+    //TODO, check the first arg is a valud URI
+
+    muon.resource.query(args[0], function(event, payload) {
+        try {
+            if (event.Status == "404") {
+                logger.error("Service returned 404 when accessing " + args[0]);
+            } else {
+                console.dir(payload);
+            }
+        } catch (e) {
+            logger.error("Failed to render the response", e);
+        }
+        process.exit(0);
+    });
+}
+
+function streamService(args) {
+
+    //TODO, check the first arg is a valid URI
+    muon.stream.subscribe(args[0], function(event, payload) {
+        console.dir(payload);
     });
 }
 

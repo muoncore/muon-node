@@ -20,6 +20,10 @@ module.exports = function(url) {
         this.connection = connection;
     };
 
+    this.close = function() {
+        this.connection.close()
+    };
+
     this.queue = function (name, params, callback) {
         this.connection.queue(name, params, callback);
     };

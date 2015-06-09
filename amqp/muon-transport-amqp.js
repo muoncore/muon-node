@@ -75,8 +75,8 @@ module.exports = function amqpTransport(url) {
             provideStream: function(streamName, stream) {
                 _this.streams.provideStream(streamName, stream);
             },
-            subscribe: function(streamUri) {
-                _this.streams.subscribe(streamUri);
+            subscribe: function(streamUri, dataCallback) {
+                _this.streams.subscribe(streamUri, dataCallback);
             }
         }
     };
