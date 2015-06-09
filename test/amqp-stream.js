@@ -35,7 +35,7 @@ describe("AMQP Stream Client", function () {
             sinon.match({
                 headers:{
                     command:"SUBSCRIBE",
-                    "REQUESTED_STREAM_NAME":"something"
+                    "REQUESTED_STREAM_NAME":"/something"
                 }
             }));
 
@@ -51,7 +51,7 @@ describe("AMQP Stream Client", function () {
             sinon.match({
                 headers:{
                     command:"SUBSCRIBE",
-                    "REQUESTED_STREAM_NAME":"something",
+                    "REQUESTED_STREAM_NAME":"/something",
                     "KEEPALIVE_QUEUE_NAME":sinon.match.string,
                     "REPLY_QUEUE_NAME":sinon.match.string
                 }
@@ -66,36 +66,10 @@ describe("AMQP Stream Client", function () {
         mockqueues.verify();
     });
 
-    it("auto requests data after SUBSCRIBE", function () {
-        //subscribe.
-        mockqueues.expects("send").once().withArgs("remote_stream_control",
-            sinon.match({
-                headers:{
-                    command:"REQUEST",
-                    "REQUESTED_STREAM_NAME":"something",
-                    SUBSCRIPTION_STREAM_ID:"12345",
-                    "N":100
-                }
-            }));
-
-        var client = new StreamClient(fakeQueue);
-        client.connection.streamName="something";
-        client.connection.remoteCommandQueue = "remote_stream_control";
-
-        client.subscribed.dispatch({
-            headers:{
-                "command":"SUBSCRIPTION_ACK",
-                "SUBSCRIPTION_STREAM_ID":"12345"
-            }
-        });
-
-        mockqueues.verify();
-    });
-
     it("dispatches DATA messages to the listeners", function (done) {
 
         var client = new StreamClient(fakeQueue);
-        client.connection.streamName="something";
+        client.connection.streamName="/something";
         client.dataReceived.add(function(data) {
             assert.equal(data.headers.TYPE, "data");
             done()
@@ -107,7 +81,9 @@ describe("AMQP Stream Client", function () {
                 "SUBSCRIPTION_STREAM_ID":"12345"
             },
             payload: {
-              "msg":"awesome"
+                data :JSON.stringify({
+                    "msg": "awesome"
+                })
             }
         });
 
@@ -117,7 +93,7 @@ describe("AMQP Stream Client", function () {
     it("dispatches ERROR messages to the listeners", function (done) {
 
         var client = new StreamClient(fakeQueue);
-        client.connection.streamName="something";
+        client.connection.streamName="/something";
         client.errored.add(function(data) {
             assert.equal(data.headers.command, "ERROR");
             done()
@@ -135,7 +111,7 @@ describe("AMQP Stream Client", function () {
     it("dispatches COMPLETE messages to the listeners", function (done) {
 
         var client = new StreamClient(fakeQueue);
-        client.connection.streamName="something";
+        client.connection.streamName="/something";
         client.completed.add(function(data) {
             assert.equal(data.headers.command, "COMPLETE");
             done()
@@ -161,7 +137,7 @@ describe("AMQP Stream Client", function () {
             }));
 
         var client = new StreamClient(fakeQueue);
-        client.connection.streamName="something";
+        client.connection.streamName="/something";
         client.connection.remoteCommandQueue="remote_stream_control";
         client.connection.subscriberId="12345";
         client.connection.replyQueue="simples";
