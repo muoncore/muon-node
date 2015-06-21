@@ -63,7 +63,7 @@ module.exports = function(queues) {
             for(var k in u.query) head[k]= u.query[k];
 
             event.headers = head;
-            console.dir(event.headers);
+            event.headers._QUERY = u.query;
 
             module.queues.send(queue, event);
         },
@@ -109,7 +109,8 @@ function setupResourceHandler(handlers) {
                 }
                 handler({
                     verb:verb,
-                    resource:resource
+                    resource:resource,
+                    query: request.headers._QUERY
                 }, message, function(response, headers) {
                     if (typeof headers === 'undefined') {
                         headers = {};
