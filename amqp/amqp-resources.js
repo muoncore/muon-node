@@ -110,7 +110,7 @@ function setupResourceHandler(handlers) {
                 handler({
                     verb:verb,
                     resource:resource,
-					query: request.headers._QUERY
+                    query: request.headers._QUERY
                 }, message, function(response, headers) {
                     if (typeof headers === 'undefined') {
                         headers = {};
