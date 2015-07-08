@@ -8,18 +8,20 @@ var fs = require('fs');
 var cli = require('cli').enable('status'); //Enable 2 plugins
 
 var discoveryConfig;
+var discoveryConfigFile;
+
 try {
     discoveryConfigFile = getUserHome() + '/.muon/discovery.json';
     discoveryConfig = JSON.parse(fs.readFileSync(discoveryConfigFile, 'utf8'));
 } catch(e) {
-    logger.warn("No Discovery file found at " + discoveryConfig);
-    logger.warn("You must create one before proceeding" + discoveryConfig);
+    noConfigFile(discoveryConfigFile);
 }
 
 cli.parse({
     log:   ['l', 'Enable logging'],
     discovery: ['d', 'the discovery configuration to use from the config file', 'string']
 }, [
+    "setup",
     "discover",
     "query",
     "command",
@@ -29,6 +31,12 @@ cli.parse({
 var muon;
 
 cli.main(function(args, options) {
+
+    if (cli.command === "setup") {
+        setupConfig();
+        logger.info("Default configuration has been generated at " + discoveryConfigFile);
+        return;
+    }
 
     if (options.log) {
         //GLOBAL.logger = Logger('muon', "info", '/tmp/muon.log', true,
@@ -64,10 +72,29 @@ cli.main(function(args, options) {
     }, 3500);
 });
 
+function setupConfig() {
+    var defaultConfig = [{
+        "name":"local",
+        "type":"amqp",
+        "uri":"amqp://localhost"
+    }];
+
+    fs.writeFile(discoveryConfigFile, JSON.stringify(defaultConfig), function(err) {
+        if(err) {
+            logger.warn("FAILED" + err);
+            return console.log(err);
+        }
+
+        logger.warn("A default configuration has been created, view it at " + discoveryConfig);
+        process.exit(0);
+    });
+
+}
+
 function postService(args) {
 
     //TODO, check the first arg is a valud URI
-    muon.resource.command(args[0], args[1], function(event, payload) {
+    muon.resource.command(args[0], JSON.parse(args[1]), function(event, payload) {
         try {
             if (event.Status == "404") {
                 logger.error("Service returned 404 when accessing " + args[0]);
@@ -150,4 +177,9 @@ function initialiseMuon(options) {
 
 function getUserHome() {
     return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+}
+
+function noConfigFile(discoveryConfigFile) {
+    console.log("\n\nNo Discovery file found at " + discoveryConfigFile);
+    console.log("You can generate a default file by running 'muon setup'\n\n");
 }

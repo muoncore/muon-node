@@ -11,7 +11,6 @@ muon.addTransport(amqp);
 var queueEvents = [];
 
 setTimeout(function() {
-    //TODO, get rid of this awful timeout.
     muon.queue.listen("tckQueue", function(event) {
         queueEvents = [];
         queueEvents.push(event.payload);
@@ -61,7 +60,7 @@ setInterval(function() {
         events.push(payload);
     });
 
-    muon.resource.onGet("/discover", "Get the events", function(event, data, respond) {
+    muon.resource.onQuery("/discover", "Get the events", function(event, data, respond) {
         muon.discoverServices(function(services) {
             logger.info('Discovery called');
             respond(_.collect(services, function(it) {
@@ -70,47 +69,20 @@ setInterval(function() {
         });
     });
 
-    muon.resource.onGet("/event", "Get the events", function(event, data, respond) {
+    muon.resource.onQuery("/event", "Get the events", function(event, data, respond) {
         respond(events);
     });
 
-    muon.resource.onDelete("/event", "Delete the events", function(event, data, respond) {
-        events = [];
-        respond({
-        });
-    });
-
-    muon.resource.onGet("/echo", "Allow get of some data", function(event, data, respond) {
-        respond({
-            "something":"awesome",
-            "method":"GET"
-        });
-    });
-
-    muon.resource.onPost("/echo", "Allow post of some data", function(event, data, respond) {
+    muon.resource.onCommand("/echo", "Allow post of some data", function(event, data, respond) {
         respond({
             "something":"awesome",
             "method":"POST"
         });
     });
 
-    muon.resource.onDelete("/echo", "Allow delete of some data", function(event, data, respond) {
-        respond({
-            "something":"awesome",
-            "method":"DELETE"
-        });
-    });
-
-    muon.resource.onPut("/echo", "Allow put of some data", function(event, data, respond) {
-        respond({
-            "something":"awesome",
-            "method":"PUT"
-        });
-    });
-
     var requestStore = {};
 
-    muon.resource.onGet("/invokeresponse", "hh", function(event, data, respond) {
+    muon.resource.onQuery("/invokeresponse", "hh", function(event, data, respond) {
 
         muon.resource.get(data.resource, function(event, payload) {
             logger.info("We have a GET response");
@@ -120,7 +92,7 @@ setInterval(function() {
         });
     });
 
-    muon.resource.onGet("/invokeresponse-store", "hh", function(event, data, respond) {
+    muon.resource.onQuery("/invokeresponse-store", "hh", function(event, data, respond) {
         logger.info("invokeresponse-store has been requested");
         respond(requestStore);
     });

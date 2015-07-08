@@ -36,7 +36,6 @@ module.exports = function(queues) {
     cl.completed.add(clearKeepAlive);
 
     this.inboundMessageReceived.add(function(data) {
-        //logger.info("Received inbound message " + data.headers.command);
         if (data.headers["TYPE"] == "data") {
             cl.dataReceived.dispatch(
                 data, JSON.parse(data.payload.data.toString()));

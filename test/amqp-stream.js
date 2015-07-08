@@ -183,9 +183,6 @@ describe("AMQP Stream Client", function () {
         }, 4000);
     });
 
-    //accepts keep-alive messages from server and stores
     //expires the connection with an ERROR if the server doesn't send keep-alive
-
-    //on demand will cancel the client. sends appropriatye message to server to unsubscribe.
 
 });
