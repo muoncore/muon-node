@@ -50,10 +50,7 @@ cli.main(function(args, options) {
 
     //cli.spinner('Connecting ... ');
 
-    setTimeout(function () {
-        //TODO, get rid of this awful timeout with events coming out of muon instead.
-        //cli.spinner('', true); //End the spinner
-
+    muon.onReady(function () {
         switch(cli.command) {
             case "discover":
                 discoverServices();
@@ -69,7 +66,7 @@ cli.main(function(args, options) {
                 break;
             default:
         }
-    }, 3500);
+    });
 });
 
 function setupConfig() {
