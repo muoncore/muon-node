@@ -34,7 +34,8 @@
     "stack-trace": "*",
     "cli": "0.6.6",
     "daemon": "*",
-    "signals": "*"
+    "signals": "*",
+    "sleep": "*"
   },
   "devDependencies": {
     "mocha": "*",
