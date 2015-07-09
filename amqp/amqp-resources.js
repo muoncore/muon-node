@@ -42,7 +42,7 @@ module.exports = function(queues) {
             logger.info('Dispatch resource request on ' + event.url);
 
             var u = url.parse(event.url, true);
-            console.dir(u.query);
+            logger.debug('resource query params: ', u.query);
             var requestId = uuid.v1();
 
             responseHandlers[requestId] = function(header, payload) {
@@ -63,8 +63,7 @@ module.exports = function(queues) {
             for(var k in u.query) head[k]= u.query[k];
 
             event.headers = head;
-            console.dir(event.headers);
-
+            logger.debug('sending event with headers: ', event.headers);
             module.queues.send(queue, event);
         },
 

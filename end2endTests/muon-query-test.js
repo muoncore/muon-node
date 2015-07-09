@@ -23,11 +23,14 @@ setTimeout(function() {
 //sleep.sleep(3);
 
 setTimeout(function() {
-    muonServer.resource.query("muon://node-service/query", function(event, payload) {
+    muonServer.resource.query("muon://node-service/query?arg1=foobar&arg2=soa", function(event, payload) {
             console.log('muon node-service client: response event:', event);
             console.log(payload);
         });
 },3500);
+
+
+
 
 
 
