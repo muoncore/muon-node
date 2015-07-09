@@ -13,7 +13,7 @@ module.exports = function(queues) {
     var responseHandlers = {};
 
     module.queues.listen(replyQueue, function(event) {
-        logger.info("Resource response received!");
+        logger.info("Resource response received: ", event.headers);
         var headers = event.headers;
 
         //TODO assert that it's JSON!
@@ -42,7 +42,7 @@ module.exports = function(queues) {
             logger.info('Dispatch resource request on ' + event.url);
 
             var u = url.parse(event.url, true);
-            logger.debug('resource query params: ', u.query);
+            logger.trace('resource query params: ', u.query);
             var requestId = uuid.v1();
 
             responseHandlers[requestId] = function(header, payload) {
@@ -63,7 +63,7 @@ module.exports = function(queues) {
             for(var k in u.query) head[k]= u.query[k];
 
             event.headers = head;
-            logger.debug('sending event with headers: ', event.headers);
+            logger.debug('sending event ' + event.headers.RequestID);
             module.queues.send(queue, event);
         },
 
@@ -91,10 +91,12 @@ function setupResourceHandler(handlers) {
                 var responseQueue = request.headers.RESPONSE_QUEUE;
                 var requestId = request.headers.RequestID;
 
-                logger.debug("Received resource request " + key);
-                logger.debug("Response requested on " + responseQueue);
+                logger.debug("Received resource request " + key + " on " + responseQueue);
+                 logger.info('listener received request: ', request);
+                logger.info('listener received message: ', message);
 
                 var handler = function(request, message, response) {
+
                     response({
                         "message":"no resource with the name " + resource + " with method " + verb
                     }, {
@@ -108,7 +110,8 @@ function setupResourceHandler(handlers) {
                 }
                 handler({
                     verb:verb,
-                    resource:resource
+                    resource:resource,
+                    headers: request.headers
                 }, message, function(response, headers) {
                     if (typeof headers === 'undefined') {
                         headers = {};

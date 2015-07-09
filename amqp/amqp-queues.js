@@ -5,7 +5,7 @@ module.exports = function(connection) {
 
     return {
         send: function(queueName, event) {
-            logger.trace('Emitting event on ' + queueName, event);
+            logger.debug('Emitting event on queue ' + queueName);
 
             var waitInterval = setInterval(function() {
                 if (typeof module.exchange === 'object') {
@@ -19,6 +19,8 @@ module.exports = function(connection) {
                     var options = {
                         headers: headers
                     };
+
+                    logger.debug('event options & headers: ' + options);
 
                     var payload = JSON.stringify(event.payload);
                     if (typeof payload === 'undefined') {
