@@ -16,11 +16,18 @@ module.exports = function(connection) {
                         headers = event.headers;
                     }
 
+                    var params = {};
+                    if (event.params instanceof Object) {
+                        params = event.params;
+                    }
+
+                    headers.qparams = params;
+
                     var options = {
                         headers: headers
                     };
 
-                    logger.debug('event options & headers: ' + options);
+                    logger.debug('event options: ', options);
 
                     var payload = JSON.stringify(event.payload);
                     if (typeof payload === 'undefined') {

@@ -60,9 +60,12 @@ module.exports = function(queues) {
                 "RequestID": requestId
             };
 
-            for(var k in u.query) head[k]= u.query[k];
+            var queryParams = {};
+
+            for(var k in u.query) queryParams[k]= u.query[k];
 
             event.headers = head;
+            event.params = queryParams;
             logger.debug('sending event ' + event.headers.RequestID);
             module.queues.send(queue, event);
         },
