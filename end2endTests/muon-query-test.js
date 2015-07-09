@@ -26,18 +26,17 @@ describe("Simple muon resource client/server test", function () {
 
     it("server echoes back client query parameters", function (done) {
 
-        setTimeout(function() {
             muonServer.resource.query('muon://node-service/query?name=' + params.name + '&email=' + params.email, function(event, payload) {
                     console.log('muon node-service client: response event: ', event);
                     console.log('muon node-service client: response payload :',payload);
 
-                        assert.equal(payload.message, serverMessage.a, 'server response message');
-                        assert.equal(payload.params.name, params.name, 'server response message');
-                        assert.equal(payload.params.email, params.email, 'server response message');
+                        assert.equal(payload.message, serverMessage, 'server response message');
+                        assert.equal(payload.params.name, params.name, 'user name');
+                        assert.equal(payload.params.email, params.email, 'user email');
                         done();
 
                 });
-        },2000);
+
 
 
     });
@@ -46,13 +45,11 @@ describe("Simple muon resource client/server test", function () {
 
 
 function startServer() {
-    setTimeout(function() {
-        muonServer.resource.onQuery("/query", "Get the events", function(event, data, respond) {
-                console.log('muon node-service server onQuery("/query"): event:', event);
-                respond({'message': serverMessage, 'params': event.headers.qparams});
-            });
-    },2000);
 
+    muonServer.resource.onQuery("/query", "Get the events", function(event, data, respond) {
+            console.log('muon node-service server onQuery("/query"): event:', event);
+            respond({'message': serverMessage, 'params': event.headers.qparams});
+        });
 }
 
 

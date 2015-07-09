@@ -9,16 +9,11 @@ var muonServer = muonCore.muon('node-server', amqp.getDiscovery(), [
     ["my-tag", "tck-service", "node-service"]
 ]);
 
-
 muonServer.addTransport(amqp);
 
+muonServer.resource.onQuery("/query", "Get the events", function(event, data, respond) {
+        respond({"echo":"this is the server response"});
+    });
 
 
-
-setTimeout(function() {
-    muonServer.resource.onQuery("/query", "Get the events", function(event, data, respond) {
-            respond({"echo":"this is the server response"});
-        });
-
-},3500);
 

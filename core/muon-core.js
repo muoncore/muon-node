@@ -42,11 +42,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
 
     var scope = {
         onReady: function(callback) {
-            if (module.isReady) {
-                callback();
-            } else {
-                module.ready.add(callback);
-            }
+            readyWait(callback);
         },
         addTransport: function (transport) {
             //todo, verify the transport.
@@ -72,7 +68,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
         },
         resource: {
             onQuery: function (resource, doc, callback) {
-                _listenOnResource(resource, "get", callback);
+                    _listenOnResource(resource, "get", callback);
             },
             onCommand: function (resource, doc, callback) {
                 _listenOnResource(resource, "post", callback);
@@ -115,49 +111,61 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
      */
 
     function _listenOnBroadcast(event, callback) {
-        checkReady();
-        var transports = module.transports;
+        readyWait(function() {
+            var transports = module.transports;
 
-        for(var i=0; i<transports.length; i++) {
-            var transport = transports[i];
-            transport.broadcast.listenOnBroadcast(event, callback);
-        }
+            for(var i=0; i<transports.length; i++) {
+                var transport = transports[i];
+                transport.broadcast.listenOnBroadcast(event, callback);
+            }
+        });
 
     }
 
     function _emit(payload) {
-        checkReady();
-        var transports = module.transports;
+        readyWait(function() {
+            var transports = module.transports;
 
-        for(var i=0; i<transports.length; i++) {
-            var transport = transports[i];
-            transport.broadcast.emit(payload);
-        }
+            for(var i=0; i<transports.length; i++) {
+                var transport = transports[i];
+                transport.broadcast.emit(payload);
+            }
+        });
     }
 
     function _listenOnResource(resource, method, callback) {
-        checkReady();
-        var transports = module.transports;
-        for(var i=0; i<transports.length; i++) {
-            var transport = transports[i];
-            transport.resource.listenOnResource(resource, method, callback);
-        }
+        readyWait(function() {
+            var transports = module.transports;
+            for(var i=0; i<transports.length; i++) {
+                var transport = transports[i];
+                transport.resource.listenOnResource(resource, method, callback);
+            }
+        });
     }
 
     function _sendAndWaitForReply(payload, callback) {
-        checkReady();
-        //TOD, pick the 'best' transport and only send on that one.
-        var transports = module.transports;
-        for(var i=0; i<transports.length; i++) {
-            var transport = transports[i];
-            transport.resource.sendAndWaitForReply(payload, callback);
-        }
+        readyWait(function() {
+            //TOD, pick the 'best' transport and only send on that one.
+            var transports = module.transports;
+            for(var i=0; i<transports.length; i++) {
+                var transport = transports[i];
+                transport.resource.sendAndWaitForReply(payload, callback);
+            }
+        });
     }
 
     function checkReady() {
         if (!module.isReady) {
             logger.error("Muon instance is not yet ready, and cannot be interacted with. Use onReady");
             throw new Error("Muon instance is not yet ready, and cannot be interacted with. Use onReady");
+        }
+    }
+
+    function readyWait(callback) {
+        if (module.isReady) {
+            callback();
+        } else {
+            module.ready.add(callback);
         }
     }
 
