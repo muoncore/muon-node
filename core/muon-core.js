@@ -1,6 +1,7 @@
 
 var uuid = require('node-uuid');
 var _ = require("underscore");
+var signals = require("signals");
 
 //TODO - add prioritisation feature
 
@@ -10,6 +11,13 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     module.discoveryService = discoveryService;
     module.transports = [];
     module.serviceIdentifier = serviceIdentifier;
+    module.ready = new signals.Signal();
+    module.isReady = false;
+
+    setTimeout(function() {
+        module.isReady = true;
+        module.ready.dispatch();
+    }, 3500);
 
     function generateDescriptor() {
         return {
@@ -33,6 +41,13 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     }
 
     var scope = {
+        onReady: function(callback) {
+            if (module.isReady) {
+                callback();
+            } else {
+                module.ready.add(callback);
+            }
+        },
         addTransport: function (transport) {
             //todo, verify the transport.
             //var transport = module.transports[0];
@@ -79,15 +94,18 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
         },
         stream: {
             provideStream: function(streamName, stream) {
+                checkReady();
                 //TODO, transport discovery
                 module.transports[0].stream.provideStream(streamName, stream);
             },
             subscribe: function(streamUri, callback) {
+                checkReady();
                 //TODO, transport discovery
                 module.transports[0].stream.subscribe(streamUri, callback);
             }
         },
         discoverServices: function (callback) {
+            checkReady();
             module.discoveryService.discoverServices(callback);
         }
     };
@@ -97,6 +115,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
      */
 
     function _listenOnBroadcast(event, callback) {
+        checkReady();
         var transports = module.transports;
 
         for(var i=0; i<transports.length; i++) {
@@ -107,6 +126,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     }
 
     function _emit(payload) {
+        checkReady();
         var transports = module.transports;
 
         for(var i=0; i<transports.length; i++) {
@@ -116,6 +136,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     }
 
     function _listenOnResource(resource, method, callback) {
+        checkReady();
         var transports = module.transports;
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];
@@ -124,11 +145,19 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     }
 
     function _sendAndWaitForReply(payload, callback) {
+        checkReady();
         //TOD, pick the 'best' transport and only send on that one.
         var transports = module.transports;
         for(var i=0; i<transports.length; i++) {
             var transport = transports[i];
             transport.resource.sendAndWaitForReply(payload, callback);
+        }
+    }
+
+    function checkReady() {
+        if (!module.isReady) {
+            logger.error("Muon instance is not yet ready, and cannot be interacted with. Use onReady");
+            throw new Error("Muon instance is not yet ready, and cannot be interacted with. Use onReady");
         }
     }
 
