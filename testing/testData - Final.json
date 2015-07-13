@@ -1,0 +1,1892 @@
+{
+    "phrases": [
+        {
+            "phrase": "nps",
+            "count": 700,
+            "sentiment": 222,
+            "type": [
+                "keyPhrases",
+                "hashtags"
+            ],
+            "sentiments": [
+                -5,
+                -11,
+                77,
+                5,
+                8,
+                -8,
+                18,
+                145,
+                -7
+            ],
+            "meanSentiment": 24.6666666667,
+            "highestSentiment": 145,
+            "lowestSentiment": -11,
+            "normalisedSentiment": 11.796588553682607
+        },
+        {
+            "phrase": "offer",
+            "count": 551,
+            "sentiment": -210,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -24,
+                -12,
+                -27,
+                -26,
+                -10,
+                -2,
+                -29,
+                -36,
+                -44
+            ],
+            "meanSentiment": -23.3333333333,
+            "highestSentiment": -2,
+            "lowestSentiment": -44,
+            "normalisedSentiment": -11.158935118317393
+        },
+        {
+            "phrase": "training",
+            "count": 312,
+            "sentiment": 16,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -4,
+                5,
+                -6,
+                -3,
+                23,
+                -18,
+                5,
+                15
+            ],
+            "meanSentiment": 1.7777777778,
+            "highestSentiment": 23,
+            "lowestSentiment": -18,
+            "normalisedSentiment": 0.850204580455072
+        },
+        {
+            "phrase": "upgrade",
+            "count": 182,
+            "sentiment": -249,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -13,
+                -12,
+                -51,
+                -20,
+                -66,
+                -15,
+                -26,
+                -32,
+                -14
+            ],
+            "meanSentiment": -27.6666666667,
+            "highestSentiment": -12,
+            "lowestSentiment": -66,
+            "normalisedSentiment": -13.231308783182609
+        },
+        {
+            "phrase": "sky talk",
+            "count": 173,
+            "sentiment": -227,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -8,
+                -7,
+                -58,
+                -11,
+                -62,
+                -22,
+                -39,
+                -19,
+                -1
+            ],
+            "meanSentiment": -25.2222222222,
+            "highestSentiment": -1,
+            "lowestSentiment": -62,
+            "normalisedSentiment": -12.062277485044929
+        },
+        {
+            "phrase": "on demand",
+            "count": 161,
+            "sentiment": -196,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -29,
+                -14,
+                -39,
+                -22,
+                -12,
+                -3,
+                -8,
+                -46,
+                -23
+            ],
+            "meanSentiment": -21.7777777778,
+            "highestSentiment": -3,
+            "lowestSentiment": -46,
+            "normalisedSentiment": -10.415006110455073
+        },
+        {
+            "phrase": "resolution",
+            "count": 160,
+            "sentiment": 28,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -7,
+                6,
+                10,
+                14,
+                -2,
+                5,
+                0,
+                10,
+                -8
+            ],
+            "meanSentiment": 3.1111111111,
+            "highestSentiment": 14,
+            "lowestSentiment": -8,
+            "normalisedSentiment": 1.487858015772464
+        },
+        {
+            "phrase": "save sky",
+            "count": 107,
+            "sentiment": -136,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -20,
+                -16,
+                -50,
+                -12,
+                -9,
+                1,
+                -16,
+                -6,
+                -8
+            ],
+            "meanSentiment": -15.1111111111,
+            "highestSentiment": 1,
+            "lowestSentiment": -50,
+            "normalisedSentiment": -7.226738933772464
+        },
+        {
+            "phrase": "team work",
+            "count": 101,
+            "sentiment": 71,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -5,
+                62,
+                8,
+                6,
+                -2,
+                5,
+                0
+            ],
+            "meanSentiment": 8.875,
+            "highestSentiment": 62,
+            "lowestSentiment": -5,
+            "normalisedSentiment": 4.2443806789375
+        },
+        {
+            "phrase": "sky sports",
+            "count": 96,
+            "sentiment": -175,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -36,
+                -25,
+                -44,
+                -9,
+                -8,
+                -45,
+                -8
+            ],
+            "meanSentiment": -25,
+            "highestSentiment": -8,
+            "lowestSentiment": -45,
+            "normalisedSentiment": -11.9560019125
+        },
+        {
+            "phrase": "bill",
+            "count": 86,
+            "sentiment": -60,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -13,
+                -22,
+                -10,
+                -10,
+                15,
+                -11,
+                -9
+            ],
+            "meanSentiment": -8.5714285714,
+            "highestSentiment": 15,
+            "lowestSentiment": -22,
+            "normalisedSentiment": -4.0992006557006215
+        },
+        {
+            "phrase": "billing",
+            "count": 84,
+            "sentiment": -23,
+            "type": [
+                "keyPhrases",
+                "hashtags"
+            ],
+            "sentiments": [
+                -2,
+                -5,
+                -13,
+                -6,
+                9,
+                -6,
+                1,
+                -1
+            ],
+            "meanSentiment": -2.875,
+            "highestSentiment": 9,
+            "lowestSentiment": -13,
+            "normalisedSentiment": -1.3749402199375
+        },
+        {
+            "phrase": "sky fibre",
+            "count": 83,
+            "sentiment": -71,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -7,
+                -42,
+                -10,
+                -10
+            ],
+            "meanSentiment": -14.2,
+            "highestSentiment": -2,
+            "lowestSentiment": -42,
+            "normalisedSentiment": -6.7910090863
+        },
+        {
+            "phrase": "mhr",
+            "count": 69,
+            "sentiment": -55,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -5,
+                -2,
+                1,
+                -2,
+                -34,
+                -5,
+                -8
+            ],
+            "meanSentiment": -7.8571428571,
+            "highestSentiment": 1,
+            "lowestSentiment": -34,
+            "normalisedSentiment": -3.7576006010509326
+        },
+        {
+            "phrase": "shift swap",
+            "count": 68,
+            "sentiment": -64,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -16,
+                -8,
+                -6,
+                -2,
+                -6,
+                -3,
+                -3,
+                -8,
+                -11,
+                -1
+            ],
+            "meanSentiment": -6.4,
+            "highestSentiment": -1,
+            "lowestSentiment": -16,
+            "normalisedSentiment": -3.0607364896
+        },
+        {
+            "phrase": "sky go",
+            "count": 68,
+            "sentiment": 9,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -16,
+                -4,
+                -11,
+                -8,
+                -1,
+                -4,
+                -13,
+                66
+            ],
+            "meanSentiment": 1.125,
+            "highestSentiment": 66,
+            "lowestSentiment": -16,
+            "normalisedSentiment": 0.5380200860625
+        },
+        {
+            "phrase": "transfer",
+            "count": 68,
+            "sentiment": -89,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -11,
+                -6,
+                -15,
+                -10,
+                -9,
+                -10,
+                -20,
+                -7,
+                -1
+            ],
+            "meanSentiment": -9.8888888889,
+            "highestSentiment": -1,
+            "lowestSentiment": -20,
+            "normalisedSentiment": -4.729262978727536
+        },
+        {
+            "phrase": "incentive",
+            "count": 63,
+            "sentiment": -69,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -8,
+                -19,
+                -5,
+                -6,
+                -2,
+                3,
+                -24,
+                -8
+            ],
+            "meanSentiment": -8.625,
+            "highestSentiment": 3,
+            "lowestSentiment": -24,
+            "normalisedSentiment": -4.1248206598125
+        },
+        {
+            "phrase": "on demand connector",
+            "count": 62,
+            "sentiment": -42,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -10,
+                -9,
+                -2,
+                -5,
+                -9,
+                0,
+                -3,
+                2,
+                -6
+            ],
+            "meanSentiment": -4.6666666667,
+            "highestSentiment": 2,
+            "lowestSentiment": -10,
+            "normalisedSentiment": -2.231787023682608
+        },
+        {
+            "phrase": "live chat",
+            "count": 57,
+            "sentiment": -53,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -7,
+                -3,
+                2,
+                -10,
+                -10,
+                0,
+                -17,
+                -4,
+                -4
+            ],
+            "meanSentiment": -5.8888888889,
+            "highestSentiment": 2,
+            "lowestSentiment": -17,
+            "normalisedSentiment": -2.816302672727536
+        },
+        {
+            "phrase": "service call",
+            "count": 56,
+            "sentiment": -58,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -8,
+                -14,
+                -5,
+                -2,
+                -5,
+                2,
+                -8,
+                -10,
+                -8
+            ],
+            "meanSentiment": -6.4444444444,
+            "highestSentiment": 2,
+            "lowestSentiment": -14,
+            "normalisedSentiment": -3.081991604089856
+        },
+        {
+            "phrase": "bonus",
+            "count": 56,
+            "sentiment": -27,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -4,
+                3,
+                -2,
+                0,
+                -2,
+                -20
+            ],
+            "meanSentiment": -3.8571428571,
+            "highestSentiment": 3,
+            "lowestSentiment": -20,
+            "normalisedSentiment": -1.8446402950509326
+        },
+        {
+            "phrase": "box sets",
+            "count": 54,
+            "sentiment": -78,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -8,
+                -4,
+                -32,
+                -10,
+                -1,
+                -3,
+                -7,
+                -13
+            ],
+            "meanSentiment": -9.75,
+            "highestSentiment": -1,
+            "lowestSentiment": -32,
+            "normalisedSentiment": -4.662840745875
+        },
+        {
+            "phrase": "fibre unlimited",
+            "count": 51,
+            "sentiment": -68,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -8,
+                -2,
+                -6,
+                -3,
+                -41,
+                -8
+            ],
+            "meanSentiment": -11.3333333333,
+            "highestSentiment": -2,
+            "lowestSentiment": -41,
+            "normalisedSentiment": -5.420054200317392
+        },
+        {
+            "phrase": "sky broadband",
+            "count": 49,
+            "sentiment": -189,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -44,
+                -11,
+                -62,
+                -14,
+                -19,
+                -37
+            ],
+            "meanSentiment": -27,
+            "highestSentiment": -2,
+            "lowestSentiment": -62,
+            "normalisedSentiment": -12.9124820655
+        },
+        {
+            "phrase": "home move",
+            "count": 46,
+            "sentiment": -65,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -12,
+                -2,
+                -14,
+                -8,
+                -13,
+                -3,
+                -2,
+                -11
+            ],
+            "meanSentiment": -8.125,
+            "highestSentiment": -2,
+            "lowestSentiment": -14,
+            "normalisedSentiment": -3.8857006215625
+        },
+        {
+            "phrase": "best service in the country",
+            "count": 36,
+            "sentiment": 50,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                10,
+                3,
+                8,
+                1,
+                1,
+                27
+            ],
+            "meanSentiment": 8.3333333333,
+            "highestSentiment": 27,
+            "lowestSentiment": 1,
+            "normalisedSentiment": 3.985333970817392
+        },
+        {
+            "phrase": "sky living",
+            "count": 34,
+            "sentiment": -26,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -12,
+                -1,
+                -9,
+                0,
+                1,
+                -5
+            ],
+            "meanSentiment": -4.3333333333,
+            "highestSentiment": 1,
+            "lowestSentiment": -12,
+            "normalisedSentiment": -2.072373664817392
+        },
+        {
+            "phrase": "fibre pro",
+            "count": 30,
+            "sentiment": -66,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -2,
+                -10,
+                -43,
+                -8
+            ],
+            "meanSentiment": -13.2,
+            "highestSentiment": -2,
+            "lowestSentiment": -43,
+            "normalisedSentiment": -6.3127690098
+        },
+        {
+            "phrase": "pro",
+            "count": 27,
+            "sentiment": -54,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -7,
+                -5,
+                -36,
+                -6
+            ],
+            "meanSentiment": -13.5,
+            "highestSentiment": -5,
+            "lowestSentiment": -36,
+            "normalisedSentiment": -6.45624103275
+        },
+        {
+            "phrase": "sky+hd",
+            "count": 26,
+            "sentiment": -41,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -9,
+                -9,
+                -1,
+                -5,
+                -1,
+                -4,
+                -6,
+                -6
+            ],
+            "meanSentiment": -5.125,
+            "highestSentiment": -1,
+            "lowestSentiment": -9,
+            "normalisedSentiment": -2.4509803920625
+        },
+        {
+            "phrase": "downgrade",
+            "count": 26,
+            "sentiment": -30,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -3,
+                -3,
+                -12,
+                -3,
+                -6
+            ],
+            "meanSentiment": -5,
+            "highestSentiment": -3,
+            "lowestSentiment": -12,
+            "normalisedSentiment": -2.3912003825
+        },
+        {
+            "phrase": "wireless connector",
+            "count": 26,
+            "sentiment": -21,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -2,
+                -1,
+                -4,
+                -4,
+                -1,
+                -4,
+                -2
+            ],
+            "meanSentiment": -2.625,
+            "highestSentiment": -1,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -1.2553802008125
+        },
+        {
+            "phrase": "sky movies",
+            "count": 26,
+            "sentiment": -33,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -11,
+                -2,
+                -12,
+                -1,
+                1,
+                -6
+            ],
+            "meanSentiment": -4.7142857143,
+            "highestSentiment": 1,
+            "lowestSentiment": -12,
+            "normalisedSentiment": -2.2545603606496893
+        },
+        {
+            "phrase": "winback",
+            "count": 26,
+            "sentiment": -26,
+            "type": [
+                "keyPhrases",
+                "hashtags"
+            ],
+            "sentiments": [
+                -1,
+                -6,
+                -1,
+                -10,
+                -1,
+                -7
+            ],
+            "meanSentiment": -4.3333333333,
+            "highestSentiment": -1,
+            "lowestSentiment": -10,
+            "normalisedSentiment": -2.072373664817392
+        },
+        {
+            "phrase": "my sky",
+            "count": 25,
+            "sentiment": -7,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                0,
+                -4,
+                3,
+                2,
+                -3,
+                -2,
+                0,
+                -2,
+                -1
+            ],
+            "meanSentiment": -0.7777777778,
+            "highestSentiment": 3,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -0.371964503955072
+        },
+        {
+            "phrase": "sky+",
+            "count": 24,
+            "sentiment": -46,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -9,
+                -2,
+                -10,
+                -5,
+                -9,
+                -10,
+                -1
+            ],
+            "meanSentiment": -6.5714285714,
+            "highestSentiment": -1,
+            "lowestSentiment": -10,
+            "normalisedSentiment": -3.1427205027006218
+        },
+        {
+            "phrase": "osm",
+            "count": 22,
+            "sentiment": -32,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6,
+                -2,
+                -1,
+                -2,
+                -4,
+                -17
+            ],
+            "meanSentiment": -5.3333333333,
+            "highestSentiment": -1,
+            "lowestSentiment": -17,
+            "normalisedSentiment": -2.550613741317392
+        },
+        {
+            "phrase": "benefits",
+            "count": 20,
+            "sentiment": -9,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                5,
+                -10,
+                3,
+                -4,
+                -5,
+                2
+            ],
+            "meanSentiment": -1.5,
+            "highestSentiment": 5,
+            "lowestSentiment": -10,
+            "normalisedSentiment": -0.71736011475
+        },
+        {
+            "phrase": "sell sky",
+            "count": 20,
+            "sentiment": -53,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -14,
+                -14,
+                -2,
+                -2,
+                -20
+            ],
+            "meanSentiment": -8.8333333333,
+            "highestSentiment": -1,
+            "lowestSentiment": -20,
+            "normalisedSentiment": -4.224454009067392
+        },
+        {
+            "phrase": "job number",
+            "count": 20,
+            "sentiment": -48,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -5,
+                -7,
+                -9,
+                1,
+                -2,
+                -10,
+                -16
+            ],
+            "meanSentiment": -6.8571428571,
+            "highestSentiment": 1,
+            "lowestSentiment": -16,
+            "normalisedSentiment": -3.2793605245509325
+        },
+        {
+            "phrase": "sky fibre unlimited pro",
+            "count": 20,
+            "sentiment": -41,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -35,
+                -6
+            ],
+            "meanSentiment": -20.5,
+            "highestSentiment": -6,
+            "lowestSentiment": -35,
+            "normalisedSentiment": -9.80392156825
+        },
+        {
+            "phrase": "catch up",
+            "count": 18,
+            "sentiment": 1,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                0,
+                2,
+                -2,
+                3,
+                -3,
+                1,
+                0
+            ],
+            "meanSentiment": 0.1428571429,
+            "highestSentiment": 3,
+            "lowestSentiment": -3,
+            "normalisedSentiment": 0.06832001094906744
+        },
+        {
+            "phrase": "sales through service",
+            "count": 16,
+            "sentiment": -14,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -5,
+                -9,
+                0,
+                0,
+                1
+            ],
+            "meanSentiment": -2.3333333333,
+            "highestSentiment": 1,
+            "lowestSentiment": -9,
+            "normalisedSentiment": -1.115893511817392
+        },
+        {
+            "phrase": "line rental",
+            "count": 16,
+            "sentiment": -41,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -7,
+                -6,
+                -10,
+                -4,
+                -3,
+                -9,
+                -2
+            ],
+            "meanSentiment": -5.8571428571,
+            "highestSentiment": -2,
+            "lowestSentiment": -10,
+            "normalisedSentiment": -2.8011204480509324
+        },
+        {
+            "phrase": "sky hub",
+            "count": 16,
+            "sentiment": -28,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -2,
+                0,
+                -2,
+                1,
+                -23
+            ],
+            "meanSentiment": -4.6666666667,
+            "highestSentiment": 1,
+            "lowestSentiment": -23,
+            "normalisedSentiment": -2.231787023682608
+        },
+        {
+            "phrase": "new media support",
+            "count": 16,
+            "sentiment": -25,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -2,
+                -6,
+                -1,
+                -2,
+                -6,
+                -6
+            ],
+            "meanSentiment": -3.5714285714,
+            "highestSentiment": -1,
+            "lowestSentiment": -6,
+            "normalisedSentiment": -1.7080002732006216
+        },
+        {
+            "phrase": "bb and talk",
+            "count": 14,
+            "sentiment": -27,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -4,
+                -2,
+                1,
+                -6,
+                -11,
+                -4
+            ],
+            "meanSentiment": -3.8571428571,
+            "highestSentiment": 1,
+            "lowestSentiment": -11,
+            "normalisedSentiment": -1.8446402950509326
+        },
+        {
+            "phrase": "improvement chain",
+            "count": 14,
+            "sentiment": 14,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                5,
+                2,
+                7
+            ],
+            "meanSentiment": 4.6666666667,
+            "highestSentiment": 7,
+            "lowestSentiment": 2,
+            "normalisedSentiment": 2.231787023682608
+        },
+        {
+            "phrase": "being the best",
+            "count": 14,
+            "sentiment": 28,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                6,
+                -2,
+                24
+            ],
+            "meanSentiment": 9.3333333333,
+            "highestSentiment": 24,
+            "lowestSentiment": -2,
+            "normalisedSentiment": 4.463574047317392
+        },
+        {
+            "phrase": "wireless booster",
+            "count": 13,
+            "sentiment": -23,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6,
+                -4,
+                -1,
+                -7,
+                -4,
+                -1
+            ],
+            "meanSentiment": -3.8333333333,
+            "highestSentiment": -1,
+            "lowestSentiment": -7,
+            "normalisedSentiment": -1.833253626567392
+        },
+        {
+            "phrase": "sky atlantic",
+            "count": 13,
+            "sentiment": -61,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -15,
+                -10,
+                -36
+            ],
+            "meanSentiment": -20.3333333333,
+            "highestSentiment": -10,
+            "lowestSentiment": -36,
+            "normalisedSentiment": -9.724214888817391
+        },
+        {
+            "phrase": "sky 1",
+            "count": 12,
+            "sentiment": -23,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6,
+                -17,
+                1,
+                -2,
+                1
+            ],
+            "meanSentiment": -4.6,
+            "highestSentiment": 1,
+            "lowestSentiment": -17,
+            "normalisedSentiment": -2.1999043519
+        },
+        {
+            "phrase": "sky+hdw",
+            "count": 12,
+            "sentiment": -23,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -12,
+                -4,
+                -7
+            ],
+            "meanSentiment": -7.6666666667,
+            "highestSentiment": -4,
+            "lowestSentiment": -12,
+            "normalisedSentiment": -3.666507253182608
+        },
+        {
+            "phrase": "sky retail",
+            "count": 11,
+            "sentiment": -7,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                0,
+                -5,
+                -2
+            ],
+            "meanSentiment": -2.3333333333,
+            "highestSentiment": 0,
+            "lowestSentiment": -5,
+            "normalisedSentiment": -1.115893511817392
+        },
+        {
+            "phrase": "half price",
+            "count": 11,
+            "sentiment": -16,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -9,
+                0,
+                -3,
+                -4
+            ],
+            "meanSentiment": -4,
+            "highestSentiment": 0,
+            "lowestSentiment": -9,
+            "normalisedSentiment": -1.912960306
+        },
+        {
+            "phrase": "fix and learn",
+            "count": 11,
+            "sentiment": -24,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -5,
+                -7,
+                -6,
+                -1,
+                -4
+            ],
+            "meanSentiment": -4,
+            "highestSentiment": -1,
+            "lowestSentiment": -7,
+            "normalisedSentiment": -1.912960306
+        },
+        {
+            "phrase": "bigger picture",
+            "count": 11,
+            "sentiment": 62,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                63,
+                -1,
+                0
+            ],
+            "meanSentiment": 20.6666666667,
+            "highestSentiment": 63,
+            "lowestSentiment": -1,
+            "normalisedSentiment": 9.883628247682609
+        },
+        {
+            "phrase": "cold transfer",
+            "count": 10,
+            "sentiment": -22,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -4,
+                -7,
+                -1,
+                -6,
+                -4
+            ],
+            "meanSentiment": -4.4,
+            "highestSentiment": -1,
+            "lowestSentiment": -7,
+            "normalisedSentiment": -2.1042563366
+        },
+        {
+            "phrase": "ethernet cable",
+            "count": 10,
+            "sentiment": -32,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -6,
+                -15,
+                -10
+            ],
+            "meanSentiment": -8,
+            "highestSentiment": -1,
+            "lowestSentiment": -15,
+            "normalisedSentiment": -3.825920612
+        },
+        {
+            "phrase": "open reach",
+            "count": 10,
+            "sentiment": -29,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6,
+                -4,
+                -14,
+                -1,
+                -4
+            ],
+            "meanSentiment": -5.8,
+            "highestSentiment": -1,
+            "lowestSentiment": -14,
+            "normalisedSentiment": -2.7737924437
+        },
+        {
+            "phrase": "my time",
+            "count": 10,
+            "sentiment": -6,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                3,
+                -3,
+                -4,
+                -2
+            ],
+            "meanSentiment": -1.5,
+            "highestSentiment": 3,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -0.71736011475
+        },
+        {
+            "phrase": "releasing potential",
+            "count": 10,
+            "sentiment": 66,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                63,
+                3
+            ],
+            "meanSentiment": 33,
+            "highestSentiment": 63,
+            "lowestSentiment": 3,
+            "normalisedSentiment": 15.7819225245
+        },
+        {
+            "phrase": "leadership team",
+            "count": 9,
+            "sentiment": -5,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                0,
+                -5
+            ],
+            "meanSentiment": -2.5,
+            "highestSentiment": 0,
+            "lowestSentiment": -5,
+            "normalisedSentiment": -1.19560019125
+        },
+        {
+            "phrase": "master socket",
+            "count": 9,
+            "sentiment": -3,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                1,
+                2,
+                -3,
+                -2,
+                -1
+            ],
+            "meanSentiment": -0.6,
+            "highestSentiment": 2,
+            "lowestSentiment": -3,
+            "normalisedSentiment": -0.2869440459
+        },
+        {
+            "phrase": "sky asia",
+            "count": 9,
+            "sentiment": -13,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -4,
+                -3,
+                -5,
+                -1
+            ],
+            "meanSentiment": -3.25,
+            "highestSentiment": -1,
+            "lowestSentiment": -5,
+            "normalisedSentiment": -1.554280248625
+        },
+        {
+            "phrase": "home service and supply",
+            "count": 8,
+            "sentiment": -16,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -5,
+                -1,
+                -3,
+                -6
+        {
+            "phrase": "self install",
+            "count": 8,
+            "sentiment": -15,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -1,
+                -1,
+                -12
+            ],
+            "meanSentiment": -3.75,
+            "highestSentiment": -1,
+            "lowestSentiment": -12,
+            "normalisedSentiment": -1.793400286875
+        },
+        {
+            "phrase": "sky store",
+            "count": 7,
+            "sentiment": -10,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -4,
+                -1,
+                -1,
+                -2,
+                -1,
+                -1
+            ],
+            "meanSentiment": -1.6666666667,
+            "highestSentiment": -1,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -0.797066794182608
+        },
+        {
+            "phrase": "fairy",
+            "count": 7,
+            "sentiment": -8,
+            "type": [
+                "nouns",
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -1,
+                -5,
+                -1
+            ],
+            "meanSentiment": -2,
+            "highestSentiment": -1,
+            "lowestSentiment": -5,
+            "normalisedSentiment": -0.956480153
+        },
+        {
+            "phrase": "order recovery",
+            "count": 7,
+            "sentiment": -14,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                0,
+                -8,
+                -2,
+                -4
+            ],
+            "meanSentiment": -3.5,
+            "highestSentiment": 0,
+            "lowestSentiment": -8,
+            "normalisedSentiment": -1.67384026775
+        },
+        {
+            "phrase": "team sky",
+            "count": 7,
+            "sentiment": -49,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -46
+            ],
+            "meanSentiment": -24.5,
+            "highestSentiment": -3,
+            "lowestSentiment": -46,
+            "normalisedSentiment": -11.71688187425
+        },
+        {
+            "phrase": "game of thrones",
+            "count": 6,
+            "sentiment": -7,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -4,
+                -2,
+                -1
+            ],
+            "meanSentiment": -2.3333333333,
+            "highestSentiment": -1,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -1.115893511817392
+        },
+        {
+            "phrase": "asia pack",
+            "count": 6,
+            "sentiment": -6,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -2,
+                -1
+            ],
+            "meanSentiment": -2,
+            "highestSentiment": -1,
+            "lowestSentiment": -3,
+            "normalisedSentiment": -0.956480153
+        },
+        {
+            "phrase": "multi screen",
+            "count": 6,
+            "sentiment": -4,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -4,
+                -3,
+                3,
+                0
+            ],
+            "meanSentiment": -1,
+            "highestSentiment": 3,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -0.4782400765
+        },
+        {
+            "phrase": "sky go extra",
+            "count": 6,
+            "sentiment": -9,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -4,
+                1,
+                -3,
+                -3
+            ],
+            "meanSentiment": -2.25,
+            "highestSentiment": 1,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -1.076040172125
+        },
+        {
+            "phrase": "planner rebuild",
+            "count": 6,
+            "sentiment": -20,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -9,
+                -1,
+                -4,
+                -3
+            ],
+            "meanSentiment": -4,
+            "highestSentiment": -1,
+            "lowestSentiment": -9,
+            "normalisedSentiment": -1.912960306
+        },
+        {
+            "phrase": "sky sports news",
+            "count": 5,
+            "sentiment": -7,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6,
+                0,
+                -1
+            ],
+            "meanSentiment": -2.3333333333,
+            "highestSentiment": 0,
+            "lowestSentiment": -6,
+            "normalisedSentiment": -1.115893511817392
+        },
+        {
+            "phrase": "sky sports news hq",
+            "count": 5,
+            "sentiment": -7,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6,
+                0,
+                -1
+            ],
+            "meanSentiment": -2.3333333333,
+            "highestSentiment": 0,
+            "lowestSentiment": -6,
+            "normalisedSentiment": -1.115893511817392
+        },
+        {
+            "phrase": "national home move centre",
+            "count": 5,
+            "sentiment": -14,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6,
+                -5,
+                -1,
+                -1,
+                -1
+            ],
+            "meanSentiment": -2.8,
+            "highestSentiment": -1,
+            "lowestSentiment": -6,
+            "normalisedSentiment": -1.3390722142
+        },
+        {
+            "phrase": "sky+ subs",
+            "count": 5,
+            "sentiment": -11,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -8
+            ],
+            "meanSentiment": -5.5,
+            "highestSentiment": -3,
+            "lowestSentiment": -8,
+            "normalisedSentiment": -2.63032042075
+        },
+        {
+            "phrase": "sky plus",
+            "count": 5,
+            "sentiment": -1,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                1,
+                -2,
+                0
+            ],
+            "meanSentiment": -0.3333333333,
+            "highestSentiment": 1,
+            "lowestSentiment": -2,
+            "normalisedSentiment": -0.159413358817392
+        },
+        {
+            "phrase": "sky network",
+            "count": 4,
+            "sentiment": 1,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                1,
+                0
+            ],
+            "meanSentiment": 0.5,
+            "highestSentiment": 1,
+            "lowestSentiment": 0,
+            "normalisedSentiment": 0.23912003825
+        },
+        {
+            "phrase": "price increase",
+            "count": 4,
+            "sentiment": -10,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -3,
+                -4
+            ],
+            "meanSentiment": -3.3333333333,
+            "highestSentiment": -3,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -1.594133588317392
+        },
+        {
+            "phrase": "ethernet port",
+            "count": 4,
+            "sentiment": -12,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1,
+                -4,
+                -3,
+                -4
+            ],
+            "meanSentiment": -3,
+            "highestSentiment": -1,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -1.4347202295
+        },
+        {
+            "phrase": "nfl",
+            "count": 4,
+            "sentiment": -1,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -1
+            ],
+            "meanSentiment": -1,
+            "highestSentiment": -1,
+            "lowestSentiment": -1,
+            "normalisedSentiment": -0.4782400765
+        },
+        {
+            "phrase": "diamond",
+            "count": 4,
+            "sentiment": -1,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                0,
+                -1
+            ],
+            "meanSentiment": -0.5,
+            "highestSentiment": 0,
+            "lowestSentiment": -1,
+            "normalisedSentiment": -0.23912003825
+        },
+        {
+            "phrase": "box office",
+            "count": 4,
+            "sentiment": -2,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                2,
+                -1
+            ],
+            "meanSentiment": -0.6666666667,
+            "highestSentiment": 2,
+            "lowestSentiment": -3,
+            "normalisedSentiment": -0.318826717682608
+        },
+        {
+            "phrase": "my sky rewards",
+            "count": 4,
+            "sentiment": -7,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -3,
+                0,
+                -2
+            ],
+            "meanSentiment": -1.75,
+            "highestSentiment": 0,
+            "lowestSentiment": -3,
+            "normalisedSentiment": -0.836920133875
+        },
+        {
+            "phrase": "sky rewards",
+            "count": 4,
+            "sentiment": -7,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -3,
+                0,
+                -2
+            ],
+            "meanSentiment": -1.75,
+            "highestSentiment": 0,
+            "lowestSentiment": -3,
+            "normalisedSentiment": -0.836920133875
+        },
+        {
+            "phrase": "sky+ box",
+            "count": 3,
+            "sentiment": -4,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -4,
+                1,
+                -1
+            ],
+            "meanSentiment": -1.3333333333,
+            "highestSentiment": 1,
+            "lowestSentiment": -4,
+            "normalisedSentiment": -0.637653435317392
+        },
+        {
+            "phrase": "sky wifi",
+            "count": 3,
+            "sentiment": -10,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3,
+                -5,
+                -2
+            ],
+            "meanSentiment": -3.3333333333,
+            "highestSentiment": -2,
+            "lowestSentiment": -5,
+            "normalisedSentiment": -1.594133588317392
+        },
+        {
+            "phrase": "sky protect",
+            "count": 3,
+            "sentiment": -3,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -3
+            ],
+            "meanSentiment": -3,
+            "highestSentiment": -3,
+            "lowestSentiment": -3,
+            "normalisedSentiment": -1.4347202295
+        },
+        {
+            "phrase": "staff account",
+            "count": 3,
+            "sentiment": -5,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -2,
+                -3
+            ],
+            "meanSentiment": -2.5,
+            "highestSentiment": -2,
+            "lowestSentiment": -3,
+            "normalisedSentiment": -1.19560019125
+        },
+        {
+            "phrase": "believe in better",
+            "count": 3,
+            "sentiment": 5,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                5
+            ],
+            "meanSentiment": 5,
+            "highestSentiment": 5,
+            "lowestSentiment": 5,
+            "normalisedSentiment": 2.3912003825
+        },
+        {
+            "phrase": "sky dish",
+            "count": 3,
+            "sentiment": -1,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                4,
+                -5
+            ],
+            "meanSentiment": -0.5,
+            "highestSentiment": 4,
+            "lowestSentiment": -5,
+            "normalisedSentiment": -0.23912003825
+        },
+        {
+            "phrase": "sky news",
+            "count": 3,
+            "sentiment": -6,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                -6
+            ],
+            "meanSentiment": -6,
+            "highestSentiment": -6,
+            "lowestSentiment": -6,
+            "normalisedSentiment": -2.869440459
+        },
+        {
+            "phrase": "sky bet",
+            "count": 3,
+            "sentiment": 1,
+            "type": [
+                "keyPhrases"
+            ],
+            "sentiments": [
+                1
+            ],
+            "meanSentiment": 1,
+            "highestSentiment": 1,
+            "lowestSentiment": 1,
+            "normalisedSentiment": 0.4782400765
+        }
+    ]
+}

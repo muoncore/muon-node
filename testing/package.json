@@ -1,0 +1,15 @@
+{
+  "name": "dataConvert",
+  "version": "0.0.1",
+  "description": "JS to manipulate the incoming data schema into the outgoing one",
+  "main": "convertJSON.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "NJW",
+  "license": "ISC",
+  "dependencies": {
+    "lokijs": "^1.3.7",
+    "oboe": "^2.1.2"
+  }
+}
