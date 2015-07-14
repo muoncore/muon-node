@@ -9,7 +9,6 @@
   "author": "NJW",
   "license": "ISC",
   "dependencies": {
-    "lokijs": "^1.3.7",
     "oboe": "^2.1.2"
   }
 }

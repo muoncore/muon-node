@@ -31,10 +31,26 @@ function buildData( keywords, sentiment, callback) {
       //Increment counters
       summary[thisDate][keywords[i].phrase][count] = summary[thisDate][keywords[i].phrase][count]++;
 
+      //Add sentiment
+      summary[thisDate][keywords[i].phrase][sentiment] = summary[thisDate][keywords[i].phrase][sentiment] + sentiment;
+
+      //Update Average
+      summary[thisDate][keywords[i].phrase][average_sentiment] = (summary[thisDate][keywords[i].phrase][sentiment] / summary[thisDate][keywords[i].phrase][count]);
+
+      //Update min_sentiment
+      if ( (summary[thisDate][keywords[i].phrase][min_sentiment]) < sentiment ) {
+        (summary[thisDate][keywords[i].phrase][min_sentiment]) = sentiment;
+      }
+
+      //Update max_sentiment
+      if ( (summary[thisDate][keywords[i].phrase][max_sentiment]) < sentiment ) {
+        (summary[thisDate][keywords[i].phrase][max_sentiment]) = sentiment;
+      }
+
     }
     else {
       //Create keyword object
-      summary[thisDate][keywords[i].phrase] = { "keyphrase": keywords[i].phrase, "count": 1, "min_sentiment": sentiment, "average_sentiment": sentiment, "max_sentiment": sentiment, "normalised_sentiment": sentiment};
+      summary[thisDate][keywords[i].phrase] = { "keyphrase": keywords[i].phrase, "count": 1, "sentiment": sentiment, "min_sentiment": sentiment, "average_sentiment": sentiment, "max_sentiment": sentiment, "normalised_sentiment": sentiment};
     }
 
     //console.log(summary);
