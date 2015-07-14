@@ -75,12 +75,12 @@ function eventHandler(state, event) {
 
   });
 
-  return state;
+  return (JSON.stringify(state));
 
 }
 
 
-/* test *
+/* test */
 
 console.log( eventHandler({ '20150101':
    { inofficiousness:
@@ -162,8 +162,10 @@ console.log( eventHandler({ '20150101':
         min_sentiment: 10,
         average_sentiment: 10,
         max_sentiment: 10,
-        normalised_sentiment: 10 } } }
-, {
+        normalised_sentiment: 10 }
+    }
+},
+{
     "service-id": "muon://chatter",
     "local-id": "019ef59c-dfb5-404c-8202-6574c42baa0f",
     "payload": {
