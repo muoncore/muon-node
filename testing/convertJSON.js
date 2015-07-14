@@ -5,7 +5,7 @@ var counter = 0;
 var curentTimeStamp = null;
 var summary = {};
 
-function buildData( keywords, sentiment) {
+function buildData( keywords, sentiment, callback) {
 
   var i=0;
 
@@ -44,30 +44,37 @@ function buildData( keywords, sentiment) {
     //console.log(keywords[i].phrase);
 
   }
-  
-  console.log(summary);
 
-  return true;
+  //console.log(summary);
+
+  callback(true);
 }
 
-
-
-oboe( fs.createReadStream(  __dirname + '/testData - Start.json' ) )
+var final = oboe( fs.createReadStream(  __dirname + '/testData - Start.json' ) )
   .on('node', {
         'server-timestamp': function(sts){
           //console.log('Time ' + sts);
           curentTimeStamp = sts;
         },
         '{aggregateSentiment keyphrases}': function(analysis){
-           buildData(analysis.keyphrases, analysis.aggregateSentiment);
+          var result = buildData(analysis.keyphrases, analysis.aggregateSentiment, function(result) {
+            console.log('callback');
+          });
            //console.log(analysis);
+           return result;
         }
      })
-     .on('done', function(){
-        //console.log("---------------------");
+     .on('done', function(event){
+        //console.log("---------- event: ---------------------------------------------");
+        //console.dir(event);
         return oboe.drop;
      })
      .on('fail', function(e){
         console.log("Errors");
         console.error(e);
      });
+
+
+
+console.log('======== DONE: final drop: ==============================================');
+console.dir(final);

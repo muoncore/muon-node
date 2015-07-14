@@ -51,27 +51,3 @@ function startServer() {
             respond({'message': serverMessage, 'params': event.headers.qparams});
         });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
