@@ -36,9 +36,6 @@ describe("Simple muon resource client/server test", function () {
                         done();
 
                 });
-
-
-
     });
 
 });

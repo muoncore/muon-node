@@ -13,7 +13,7 @@ module.exports = function(queues) {
     var responseHandlers = {};
 
     module.queues.listen(replyQueue, function(event) {
-        logger.info("Resource response received: ", event.headers);
+        logger.debug("Resource response received: ", event.headers);
         var headers = event.headers;
 
         //TODO assert that it's JSON!
@@ -39,7 +39,7 @@ module.exports = function(queues) {
         sendAndWaitForReply: function(event, callback) {
             //get the url elements
 
-            logger.info('Dispatch resource request on ' + event.url);
+            logger.debug('Dispatch resource request on ' + event.url);
 
             var u = url.parse(event.url, true);
             logger.trace('resource query params: ', u.query);
@@ -94,9 +94,9 @@ function setupResourceHandler(handlers) {
                 var responseQueue = request.headers.RESPONSE_QUEUE;
                 var requestId = request.headers.RequestID;
 
-                logger.debug("Received resource request " + key + " on " + responseQueue);
-                 logger.info('listener received request: ', request);
-                logger.info('listener received message: ', message);
+                logger.trace("Received resource request " + key + " on " + responseQueue);
+                 logger.trace('listener received request: ', request);
+                logger.trace('listener received message: ', message);
 
                 var handler = function(request, message, response) {
 
