@@ -73,10 +73,11 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
             onCommand: function (resource, doc, callback) {
                 _listenOnResource(resource, "post", callback);
             },
-            query: function (url, callback) {
+            query: function (url, callback, resource) {
+                resource = resource || {};
                 _sendAndWaitForReply({
                     url: url,
-                    payload: {},
+                    payload: resource,
                     method: "get"
                 }, callback);
             },
