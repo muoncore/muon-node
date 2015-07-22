@@ -5,7 +5,7 @@ var sleep = require('sleep');
 var expect = require('expect.js');
 var assert = require('assert');
 
-var amqp = muonCore.amqpTransport("amqp://muon:microservices@msg.cistechfutures.net:5672");
+var amqp = muonCore.amqpTransport("amqp://localhost");
 
 var counterServer = muonCore.muon('counter', amqp.getDiscovery(), [
     ["increment", "integer", "counter"]
