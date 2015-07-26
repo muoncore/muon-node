@@ -17,7 +17,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     setTimeout(function() {
         module.isReady = true;
         module.ready.dispatch();
-    }, 3500);
+    }, 4000);
 
     function generateDescriptor() {
         return {
