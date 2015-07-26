@@ -17,6 +17,7 @@
     "test": "./node_modules/.bin/mocha --recursive -R xunit-file test/"
   },
   "dependencies": {
+    "split": "*",
     "underscore": "*",
     "url": "*",
     "cors": "*",

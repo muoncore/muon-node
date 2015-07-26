@@ -94,6 +94,10 @@ function setupResourceHandler(handlers) {
                 var responseQueue = request.headers.RESPONSE_QUEUE;
                 var requestId = request.headers.RequestID;
 
+                var msg = message.toString();
+                
+                var payload = JSON.parse(msg);
+
                 logger.trace("Received resource request " + key + " on " + responseQueue);
                  logger.trace('listener received request: ', request);
                 logger.trace('listener received message: ', message);
@@ -115,7 +119,7 @@ function setupResourceHandler(handlers) {
                     verb:verb,
                     resource:resource,
                     headers: request.headers
-                }, message, function(response, headers) {
+                }, payload, function(response, headers) {
                     if (typeof headers === 'undefined') {
                         headers = {};
                     }

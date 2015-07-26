@@ -20,13 +20,14 @@ try {
 cli.parse({
     log:   ['l', 'Enable logging'],
     discovery: ['d', 'the discovery configuration to use from the config file', 'string']
-}, [
-    "setup",
-    "discover",
-    "query",
-    "command",
-    "stream"
-]);
+},
+{
+    "setup": "Hello TODO",
+    "discover":"Hello TODO",
+    "query":"Hello TODO",
+    "command":"Submit a command to a remote service. Auto detects whenn used in a unix pipe and submits one command per line of input",
+    "stream":"Tap into a remote stream exposed by a service and output to standard out"
+});
 
 var muon;
 
@@ -85,25 +86,57 @@ function setupConfig() {
         logger.warn("A default configuration has been created, view it at " + discoveryConfig);
         process.exit(0);
     });
-
 }
 
 function postService(args) {
+    if (process.stdin.isTTY) {
+        processCommand(args[0], args[1], function(output) {
+            console.dir(output);
+        }, function() { process.exit(0); })
+    } else {
+        processStreamInput(args)
+    }
+}
 
-    //TODO, check the first arg is a valud URI
-    muon.resource.command(args[0], JSON.parse(args[1]), function(event, payload) {
+function processStreamInput(args) {
+
+    var streamCompleted = false;
+
+    process.stdin.pipe(require('split')()).on('data', processLine).on("end", function() {
+        streamCompleted = true;
+    });
+
+    var commandsOutstanding = 0;
+
+    function processLine (line) {
+        if (line != null && line.length > 0) {
+            commandsOutstanding++;
+            processCommand(args[0], line, function(){}, function(){
+                commandsOutstanding--;
+                if (commandsOutstanding == 0 && streamCompleted) {
+                    process.exit(0);
+                }
+            });
+        }
+    }
+}
+
+function processCommand(url, payloadString, output, done) {
+    var json = JSON.parse(payloadString);
+    muon.resource.command(url, json, function(event, payload) {
         try {
             if (event.Status == "404") {
                 logger.error("Service returned 404 when accessing " + args[0]);
             } else {
-                console.dir(payload);
+                output(payload);
             }
         } catch (e) {
             logger.error("Failed to render the response", e);
         }
-        process.exit(0);
+        done();
     });
 }
+
 
 function getService(args) {
 
@@ -128,6 +161,7 @@ function streamService(args) {
     //TODO, check the first arg is a valid URI
     muon.stream.subscribe(args[0], function(event, payload) {
         console.log(JSON.stringify(payload));
+        console.log("\n");
     });
 }
 
