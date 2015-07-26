@@ -9,6 +9,7 @@ var cli = require('cli').enable('status'); //Enable 2 plugins
 
 var discoveryConfig;
 var discoveryConfigFile;
+var showCommandOutput;
 
 try {
     discoveryConfigFile = getUserHome() + '/.muon/discovery.json';
@@ -19,10 +20,11 @@ try {
 
 cli.parse({
     log:   ['l', 'Enable logging'],
-    discovery: ['d', 'the discovery configuration to use from the config file', 'string']
+    discovery: ['d', 'the discovery configuration to use from the config file', 'string'],
+    "suppress-output": ['s', 'suppress command output (eg, when streaming)']
 },
 {
-    "setup": "Hello TODO",
+    "setup": "Generate a default configuration",
     "discover":"Hello TODO",
     "query":"Hello TODO",
     "command":"Submit a command to a remote service. Auto detects whenn used in a unix pipe and submits one command per line of input",
@@ -38,6 +40,8 @@ cli.main(function(args, options) {
         logger.info("Default configuration has been generated at " + discoveryConfigFile);
         return;
     }
+
+    showCommandOutput = !options["suppress-output"];
 
     if (options.log) {
         //GLOBAL.logger = Logger('muon', "info", '/tmp/muon.log', true,
@@ -90,9 +94,7 @@ function setupConfig() {
 
 function postService(args) {
     if (process.stdin.isTTY) {
-        processCommand(args[0], args[1], function(output) {
-            console.dir(output);
-        }, function() { process.exit(0); })
+        processCommand(args[0], args[1], function() { process.exit(0); })
     } else {
         processStreamInput(args)
     }
@@ -111,7 +113,7 @@ function processStreamInput(args) {
     function processLine (line) {
         if (line != null && line.length > 0) {
             commandsOutstanding++;
-            processCommand(args[0], line, function(){}, function(){
+            processCommand(args[0], line, function(){
                 commandsOutstanding--;
                 if (commandsOutstanding == 0 && streamCompleted) {
                     process.exit(0);
@@ -121,14 +123,16 @@ function processStreamInput(args) {
     }
 }
 
-function processCommand(url, payloadString, output, done) {
+function processCommand(url, payloadString, done) {
     var json = JSON.parse(payloadString);
     muon.resource.command(url, json, function(event, payload) {
         try {
             if (event.Status == "404") {
                 logger.error("Service returned 404 when accessing " + args[0]);
             } else {
-                output(payload);
+                if (showCommandOutput) {
+                    console.dir(payload);
+                }
             }
         } catch (e) {
             logger.error("Failed to render the response", e);
