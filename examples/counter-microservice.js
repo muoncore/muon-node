@@ -1,7 +1,5 @@
 var _ = require("underscore");
-var sleep = require('sleep');
 var muonCore = require("../index.js");
-var sleep = require('sleep');
 var expect = require('expect.js');
 var assert = require('assert');
 
