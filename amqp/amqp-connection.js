@@ -13,7 +13,7 @@ module.exports = function(url) {
     this.connect = function (callback) {
         var connection = this.amqp.createConnection({url: this.url}, this.implOpts);
         connection.on('error', function (msg) {
-            logger.error("Getting an error in the AMQP Connection url= " + this.url, msg);
+            logger.error("Getting an error in the AMQP Connection url= '" + this.url + "'", msg);
         });
         connection.on("ready", callback);
 
