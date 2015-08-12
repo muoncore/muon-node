@@ -25,7 +25,9 @@ module.exports = function(queues) {
             return;
         }
 
-        var payload = JSON.parse(event.payload.data.toString());
+
+
+        var payload = event.payload;
 
         handler(headers, payload);
     });
@@ -48,6 +50,11 @@ module.exports = function(queues) {
             responseHandlers[requestId] = function(header, payload) {
                 callback(header, payload);
             };
+
+            if (typeof event.payload !== 'object') {
+                logger.error('event payload is not of type object. Currently muon node can only sent json object types');
+                throw ('event payload is not of type object. Currently muon node can only sent json object types');
+            }
 
             var queue = "resource-listen." + u.hostname;
 
@@ -94,9 +101,9 @@ function setupResourceHandler(handlers) {
                 var responseQueue = request.headers.RESPONSE_QUEUE;
                 var requestId = request.headers.RequestID;
 
-                var msg = message.toString();
-                
-                var payload = JSON.parse(msg);
+                var msg = message;
+                logger.debug("listener received message: ",  message);
+                var payload = msg; // JSON.parse(msg);
 
                 logger.trace("Received resource request " + key + " on " + responseQueue);
                  logger.trace('listener received request: ', request);

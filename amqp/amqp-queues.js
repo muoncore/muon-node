@@ -6,6 +6,13 @@ module.exports = function(connection) {
     return {
         send: function(queueName, event) {
             logger.debug('Emitting event on queue ' + queueName);
+            logger.trace('event: ', event);
+
+            if (typeof event.payload !== 'object') {
+                logger.error('event payload is not of type object. Currently muon node can only sent json object types');
+                logger.error('event payload: ' + event.payload);
+                throw ('event payload is not of type object. Currently muon node can only sent json object types');
+            }
 
             var waitInterval = setInterval(function() {
                 if (typeof module.exchange === 'object') {
@@ -27,12 +34,19 @@ module.exports = function(connection) {
                         headers: headers
                     };
 
-                    logger.debug('event options: ', options);
 
-                    var payload = JSON.stringify(event.payload);
+                    var payload = event.payload;
+                    //if (typeof payload === 'object' && options.headers['']) {
+                    //    payload = JSON.stringify(event.payload);
+                    //}
+
                     if (typeof payload === 'undefined') {
                         payload = "";
                     }
+
+                    logger.trace('message queue payload type: ' + (typeof payload));
+                    logger.trace('message queue payload: ', payload);
+                    logger.trace('message queue options: ', options);
 
                     module.exchange.publish(
                         queueName, payload, options, function (resp) {
