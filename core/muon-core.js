@@ -59,6 +59,9 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
             },
             emit: function (eventName, headers, payload) {
                 //var transport = module.transports[0];
+                if (headers == null) {
+                    headers = {"Content-Type":"application/json"};
+                }
                 _emit({
                     name: eventName,
                     headers: headers,

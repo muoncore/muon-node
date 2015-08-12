@@ -25,11 +25,13 @@ module.exports = function(queues) {
             return;
         }
 
-
-
-        var payload = event.payload;
-
-        handler(headers, payload);
+        try {
+            handler(headers, event.payload);
+        } catch (err) {
+            logger.warn("Unable to correctly parse the response");
+            console.dir(err);
+            handler(headers, {});
+        }
     });
 
     setupResourceHandler(resourceHandlers);
@@ -101,41 +103,60 @@ function setupResourceHandler(handlers) {
                 var responseQueue = request.headers.RESPONSE_QUEUE;
                 var requestId = request.headers.RequestID;
 
-                var msg = message;
-                logger.debug("listener received message: ",  message);
-                var payload = msg; // JSON.parse(msg);
+                var msg;
 
-                logger.trace("Received resource request " + key + " on " + responseQueue);
-                 logger.trace('listener received request: ', request);
-                logger.trace('listener received message: ', message);
-
-                var handler = function(request, message, response) {
-
-                    response({
-                        "message":"no resource with the name " + resource + " with method " + verb
-                    }, {
-                        "RequestID":requestId,
-                        "Status":"404"
-                    })
-                };
-                if (key in handlers && typeof handlers[key] !== 'undefined') {
-                    logger.trace("Found " + key + " in registered handlers");
-                    handler = handlers[key];
+                if (message.data != null) {
+                    msg = message.data.toString();
+                } else if (typeof(message) == "object") {
+                    msg = message;
+                } else {
+                    msg = message.toString();
                 }
-                handler({
-                    verb:verb,
-                    resource:resource,
-                    headers: request.headers
-                }, payload, function(response, headers) {
-                    if (typeof headers === 'undefined') {
-                        headers = {};
+
+                try {
+
+                    var payload;
+                    if (typeof(message) == "object") {
+                        payload = message;
+                    } else {
+                        payload = JSON.parse(msg);
                     }
-                    headers.RequestID=requestId;
-                    module.queues.send(responseQueue, {
-                        "headers":headers,
-                        "payload":response
+
+                    logger.trace("Received resource request " + key + " on " + responseQueue);
+                    logger.trace('listener received request: ', request);
+                    logger.trace('listener received message: ', message);
+
+                    var handler = function (request, message, response) {
+
+                        response({
+                            "message": "no resource with the name " + resource + " with method " + verb
+                        }, {
+                            "RequestID": requestId,
+                            "Status": "404"
+                        })
+                    };
+                    if (key in handlers && typeof handlers[key] !== 'undefined') {
+                        logger.trace("Found " + key + " in registered handlers");
+                        handler = handlers[key];
+                    }
+                    handler({
+                        verb: verb,
+                        resource: resource,
+                        headers: request.headers
+                    }, payload, function (response, headers) {
+                        if (typeof headers === 'undefined') {
+                            headers = {};
+                        }
+                        headers.RequestID = requestId;
+                        module.queues.send(responseQueue, {
+                            "headers": headers,
+                            "payload": response
+                        });
                     });
-                });
+                } catch (err) {
+                    logger.warn("Unable to correctly parse the Request, failing");
+                    console.dir(err);
+                }
             });
         }
     }, 100);

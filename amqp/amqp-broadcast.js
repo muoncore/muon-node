@@ -30,19 +30,21 @@ module.exports = function(connection) {
                         headers = event.headers;
                     }
 
+                    headers["Content-Type"] = "application/json";
+
                     var options = {
+                        contentType:"application/json",
                         headers: headers
                     };
 
                     _this.broadcastExchange.publish(
                         event.name,
-                        JSON.stringify(event.payload), options, function (resp) {
+                        event.payload, options, function (resp) {
                             //wat do
                         });
                 } else {
-
+                    logger.warn("The broadcast exchange is not initialised");
                 }
-
             }, 100);
         };
         this.listenOnBroadcast=function(event, callback) {
@@ -62,11 +64,36 @@ module.exports = function(connection) {
                         q.bind("muon-broadcast", event, function () {
                             logger.debug("Bound event queue " + queue);
                             q.subscribe(function (message, headers, deliveryInfo, messageObject) {
-                                //todo, headers ...
-                                callback({
-                                    headers:headers,
-                                    payload: message.data
-                                }, message.data);
+
+                                try {
+                                    var payload = message;
+
+                                    if (messageObject.contentType == null && typeof(message.data) != null) {
+                                        try {
+                                            logger.trace("Parsing broadcast message as no effective content type");
+                                            payload = JSON.parse(message.data.toString());
+                                        } catch (error) {
+                                            logger.error("Failed to understand broadcast message");
+                                            console.dir(message);
+                                        }
+                                    }
+
+                                    //todo, headers ...
+                                    try {
+                                        callback({
+                                            headers: headers,
+                                            payload: message
+                                        }, payload);
+                                    } catch (error) {
+                                        logger.error("Broadcast handler failed to process correctly for :" + event);
+                                        var stack = new Error().stack;
+                                        logger.error(stack);
+                                    }
+                                } catch (error) {
+                                    logger.error("Bombed during broadcast handling ... ");
+                                    console.dir(error);
+                                    console.dir(message);
+                                }
                             });
                         });
                     });

@@ -30,11 +30,16 @@ function startAnnouncements(scope, _this) {
         if (typeof scope.broadcast !== 'undefined') {
             clearInterval(waitInterval);
 
-            scope.broadcast.listenOnBroadcast("serviceAnnounce", function(event) {
-                var pay = JSON.parse(event.payload.toString());
-                if(scope.discoveredServiceList.indexOf(pay.identifier) < 0) {
-                    scope.discoveredServiceList.push(pay.identifier);
-                    scope.discoveredServices.push(pay);
+            scope.broadcast.listenOnBroadcast("serviceAnnounce", function(event, message) {
+                try {
+                    var pay = message;
+                    if(scope.discoveredServiceList.indexOf(pay.identifier) < 0) {
+                        scope.discoveredServiceList.push(pay.identifier);
+                        scope.discoveredServices.push(pay);
+                    }
+                } catch (err) {
+                    logger.warn("Had issues parsing ... ");
+                    console.dir(err);
                 }
             });
 
@@ -55,6 +60,6 @@ function startAnnouncements(scope, _this) {
                 });
             }, 3500);
         }
-    }, 100);
+    }, 400);
 
 }
