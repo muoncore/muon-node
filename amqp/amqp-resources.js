@@ -148,6 +148,9 @@ function setupResourceHandler(handlers) {
                             headers = {};
                         }
                         headers.RequestID = requestId;
+                        if (headers.Status == null) {
+                            headers.Status = "200";
+                        }
                         module.queues.send(responseQueue, {
                             "headers": headers,
                             "payload": response
