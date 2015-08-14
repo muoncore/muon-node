@@ -18,6 +18,7 @@
     "test": "./node_modules/.bin/mocha --recursive -R xunit-file test/"
   },
   "dependencies": {
+    "console.table" : "*",
     "split": "*",
     "underscore": "*",
     "url": "*",
@@ -27,8 +28,6 @@
     "msh": "0.1.9",
     "restify": "*",
     "expect.js": "*",
-    "socket.io": "0.9",
-    "socket.io-client": "0.9",
     "url-template": "*",
     "amqp": "*",
     "winston": "*",
@@ -38,7 +37,8 @@
     "cli": "0.6.6",
     "daemon": "*",
     "signals": "*",
-    "assert": "*"
+    "assert": "*",
+    "async-rq": "*"
   },
   "devDependencies": {
     "mocha": "*",

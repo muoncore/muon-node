@@ -4,6 +4,8 @@ var muonCore = require("./index.js");
 var _ = require("underscore");
 var uuid = require("node-uuid");
 var fs = require('fs');
+var RQ = require("async-rq");
+require("console.table");
 
 var cli = require('cli').enable('status'); //Enable 2 plugins
 
@@ -21,19 +23,27 @@ try {
 cli.parse({
     log:   ['l', 'Enable logging'],
     discovery: ['d', 'the discovery configuration to use from the config file', 'string'],
-    "suppress-output": ['s', 'suppress command output (eg, when streaming)']
+    "suppress-output": ['s', 'suppress command output (eg, when streaming)'],
+    "hide-services":  ['', 'Do not display the discovered services'],
+    "all":  ['a', 'Discover everything about a system'],
+    "streams":  ['s', 'Show discovered streams in the system'],
+    "queries":  ['q', 'Show discovered available queries'],
+    "commands":  ['c', 'Show discovered commands']
 },
 {
     "setup": "Generate a default configuration",
-    "discover":"Hello TODO",
-    "query":"Hello TODO",
-    "command":"Submit a command to a remote service. Auto detects whenn used in a unix pipe and submits one command per line of input",
+    "discover":"Allow inspection of the current system",
+    "query":"Call a query endpoint",
+    "command":"Submit a command to a remote service. Auto detects when used in a unix pipe and submits one command per line of input",
     "stream":"Tap into a remote stream exposed by a service and output to standard out"
 });
 
 var muon;
+var options;
 
-cli.main(function(args, options) {
+cli.main(function(args, opts) {
+
+    options = opts;
 
     if (cli.command === "setup") {
         setupConfig();
@@ -53,18 +63,19 @@ cli.main(function(args, options) {
 
     initialiseMuon(options);
 
-    //cli.spinner('Connecting ... ');
+    cli.spinner('Connecting ... ');
 
     muon.onReady(function () {
+        cli.spinner("", true);
         switch(cli.command) {
             case "discover":
-                discoverServices();
+                discoverServices(options);
                 break;
             case "query":
-                getService(args);
+                queryService(args);
                 break;
             case "command":
-                postService(args);
+                sendCommand(args);
                 break;
             case "stream":
                 streamService(args);
@@ -88,11 +99,10 @@ function setupConfig() {
         }
 
         logger.warn("A default configuration has been created, view it at " + discoveryConfig);
-        process.exit(0);
     });
 }
 
-function postService(args) {
+function sendCommand(args) {
     if (process.stdin.isTTY) {
         processCommand(args[0], args[1], function() { process.exit(0); })
     } else {
@@ -116,7 +126,7 @@ function processStreamInput(args) {
             processCommand(args[0], line, function(){
                 commandsOutstanding--;
                 if (commandsOutstanding == 0 && streamCompleted) {
-                    process.exit(0);
+                    exit();
                 }
             });
         }
@@ -142,7 +152,7 @@ function processCommand(url, payloadString, done) {
 }
 
 
-function getService(args) {
+function queryService(args) {
 
     //TODO, check the first arg is a valud URI
 
@@ -156,7 +166,7 @@ function getService(args) {
         } catch (e) {
             logger.error("Failed to render the response", e);
         }
-        process.exit(0);
+        exit();
     });
 }
 
@@ -169,15 +179,181 @@ function streamService(args) {
     });
 }
 
-function discoverServices() {
+function discoverServices(options) {
+
+    var workflow = RQ.sequence([
+        discoverServiceList,
+        introspectServices,
+        displayServices,
+        displayStreams,
+        displayQueries,
+        displayCommands,
+        showFooter,
+        exit
+    ]);
+
+    workflow(function() {
+        console.log("Completed workflow");
+    }, {});
+}
+
+function showFooter(callback, value) {
+    //TODO, enable this once deeper service and endpoint introspection are enabled
+    //console.log("For more information on a particular service use muon -d XXX discover muon://[servicename]");
+    //console.log("For more information on an endpoint without a servicename use muon -d XXX discover muon:///[endpoint]");
+    return callback(value);
+}
+
+function introspectServices(callback, value) {
+
+    var commandInstrospectUrls = _.collect(value.serviceList, function(serviceName) {
+        return {
+            name:serviceName,
+            uri:"muon://" + serviceName + "/muon/introspect"
+        };
+    });
+    var commandFunctions = _.collect(commandInstrospectUrls, function(serviceInfo) {
+        return function requestor(callback) {
+            muon.resource.query(serviceInfo.uri, function(val, body) {
+                if (val.Status == 200) {
+                    callback({
+                        name:serviceInfo.name,
+                        operations:body.operations
+                    });
+                } else {
+                    console.log("Service " + serviceInfo.name + " did not respond correctly to introspection, this is a bug in the service or remote Muon implementation. The following lists will be incomplete\n");
+                    callback({});
+                }
+            });
+            return function cancel(reason) { console.log("Attempted to cancel introspection, not implemented..." + reason)};
+        }
+    });
+
+    RQ.parallel(commandFunctions)(function(introspections) {
+        callback({
+            introspection:introspections,
+            serviceList:value.serviceList,
+            services:value.services
+        });
+    }, value);
+
+    return function cancel(reason) {
+        console.log("Asked to cancel?");
+    };
+}
+
+function exit() {
+    process.exit(0);
+}
+
+function displayServices(callback, value) {
+
+    if (options["hide-services"] == null) {
+        console.table("Active Services", _.collect(value.services, function(val) {
+            return {
+                name:val.identifier,
+                url:"muon://" + val.identifier,
+                tags: val.tags
+            }}));
+    }
+    return callback(value);
+}
+
+function discoverServiceList(callback) {
     muon.discoverServices(function (services) {
         var serviceList = _.collect(services, function (it) {
             return it.identifier;
         });
-        logger.info("Discovered Services", serviceList);
-        console.dir(services);
-        process.exit(0);
+        callback({
+            services:services,
+            serviceList:serviceList
+        });
     });
+    return function cancel(reason) {
+      console.log("Asked to cancel?");
+    };
+}
+
+
+function displayStreams(callback, value) {
+    if (options["streams"] == null && options["all"] == null) {
+        return callback(value);
+    }
+
+    var streamOperations = [];
+
+    _.each(value.introspection, function(serviceOperations) {
+        var serviceName = serviceOperations.name;
+
+        _.each(
+        _.filter(serviceOperations.operations, function(operation) {
+            return operation.method == "stream";
+        }), function(streamOp) {
+                streamOperations.push({
+                    serviceName:serviceName,
+                    streamName:streamOp.endpoint,
+                    url:"muon://" + serviceName + "/" + streamOp.endpoint
+                })
+            });
+    });
+
+    console.table("Reactive Streams", streamOperations);
+
+    return callback(value);
+}
+
+function displayQueries(callback, value) {
+    if (options["queries"] == null && options["all"] == null) {
+        return callback(value);
+    }
+
+    var queryOperations = [];
+
+    _.each(value.introspection, function(serviceOperations) {
+        var serviceName = serviceOperations.name;
+
+        _.each(
+            _.filter(serviceOperations.operations, function(operation) {
+                return operation.method == "query";
+            }), function(op) {
+                queryOperations.push({
+                    serviceName:serviceName,
+                    endpointName:op.endpoint,
+                    url:"muon://" + serviceName + op.endpoint
+                })
+            });
+    });
+
+    console.table("Query Endpoints", queryOperations);
+
+    return callback(value);
+}
+
+function displayCommands(callback, value) {
+    if (options["commands"] == null && options["all"] == null) {
+        return callback(value);
+    }
+
+    var commandOperations = [];
+
+    _.each(value.introspection, function(serviceOperations) {
+        var serviceName = serviceOperations.name;
+
+        _.each(
+            _.filter(serviceOperations.operations, function(operation) {
+                return operation.method == "command";
+            }), function(op) {
+                commandOperations.push({
+                    serviceName:serviceName,
+                    endpointName:op.endpoint,
+                    url:"muon://" + serviceName + op.endpoint
+                })
+            });
+    });
+
+    console.table("Command Endpoints", commandOperations);
+
+    return callback(value);
 }
 
 function initialiseMuon(options) {
@@ -206,7 +382,7 @@ function initialiseMuon(options) {
             return it.name;
         });
         logger.info("Available configurations : " + configs);
-        process.exit(1);
+        exit();
     }
 }
 
