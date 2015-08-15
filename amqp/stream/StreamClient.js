@@ -37,8 +37,9 @@ module.exports = function(queues) {
 
     this.inboundMessageReceived.add(function(data) {
         if (data.headers["TYPE"] == "data") {
+
             cl.dataReceived.dispatch(
-                data, JSON.parse(data.payload.data.toString()));
+                data, data.payload);
         } else {
             switch (data.headers.command) {
                 case "ERROR":

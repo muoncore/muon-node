@@ -63,10 +63,13 @@ cli.main(function(args, opts) {
 
     initialiseMuon(options);
 
-    cli.spinner('Connecting ... ');
-
+    if (process.stdin.isTTY) {
+        cli.spinner('Connecting ... ');
+    }
     muon.onReady(function () {
-        cli.spinner("", true);
+        if (process.stdin.isTTY) {
+            cli.spinner("", true);
+        }
         switch(cli.command) {
             case "discover":
                 discoverServices(options);
@@ -175,7 +178,6 @@ function streamService(args) {
     //TODO, check the first arg is a valid URI
     muon.stream.subscribe(args[0], function(event, payload) {
         console.log(JSON.stringify(payload));
-        console.log("\n");
     });
 }
 
