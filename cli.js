@@ -5,7 +5,9 @@ var _ = require("underscore");
 var uuid = require("node-uuid");
 var fs = require('fs');
 var RQ = require("async-rq");
+var Display;
 require("console.table");
+var introspection;
 
 var cli = require('cli').enable('status'); //Enable 2 plugins
 
@@ -40,10 +42,14 @@ cli.parse({
 
 var muon;
 var options;
+var args;
 
-cli.main(function(args, opts) {
+cli.main(function(arguments, opts) {
 
     options = opts;
+    args = arguments;
+
+    Display = require("./cli/display.js")(options);
 
     if (cli.command === "setup") {
         setupConfig();
@@ -181,16 +187,39 @@ function streamService(args) {
     });
 }
 
-function discoverServices(options) {
+function discoverServices() {
+
+    if (args[0] != null) {
+        introspection.analyseUrl(args[0], function(analysis) {
+
+            switch(analysis.type) {
+                case "service":
+                    Display.displayService(analysis);
+                    break;
+                case "query":
+                    Display.displayEndpoint(analysis);
+                    break;
+                case "command":
+                    Display.displayEndpoint(analysis);
+                    break;
+                case "stream":
+                    Display.displayEndpoint(analysis);
+                    break;
+            }
+
+            exit();
+        });
+        return;
+    }
 
     var workflow = RQ.sequence([
         discoverServiceList,
         introspectServices,
-        displayServices,
-        displayStreams,
-        displayQueries,
-        displayCommands,
-        showFooter,
+        Display.displayServices,
+        Display.displayStreams,
+        Display.displayQueries,
+        Display.displayCommands,
+        Display.showFooter,
         exit
     ]);
 
@@ -199,45 +228,17 @@ function discoverServices(options) {
     }, {});
 }
 
-function showFooter(callback, value) {
-    //TODO, enable this once deeper service and endpoint introspection are enabled
-    //console.log("For more information on a particular service use muon -d XXX discover muon://[servicename]");
-    //console.log("For more information on an endpoint without a servicename use muon -d XXX discover muon:///[endpoint]");
-    return callback(value);
-}
+
 
 function introspectServices(callback, value) {
 
-    var commandInstrospectUrls = _.collect(value.serviceList, function(serviceName) {
-        return {
-            name:serviceName,
-            uri:"muon://" + serviceName + "/muon/introspect"
-        };
-    });
-    var commandFunctions = _.collect(commandInstrospectUrls, function(serviceInfo) {
-        return function requestor(callback) {
-            muon.resource.query(serviceInfo.uri, function(val, body) {
-                if (val.Status == 200) {
-                    callback({
-                        name:serviceInfo.name,
-                        operations:body.operations
-                    });
-                } else {
-                    console.log("Service " + serviceInfo.name + " did not respond correctly to introspection, this is a bug in the service or remote Muon implementation. The following lists will be incomplete\n");
-                    callback({});
-                }
-            });
-            return function cancel(reason) { console.log("Attempted to cancel introspection, not implemented..." + reason)};
-        }
-    });
-
-    RQ.parallel(commandFunctions)(function(introspections) {
+    introspection.loadEndpoints(value.serviceList, function(introspections) {
         callback({
             introspection:introspections,
             serviceList:value.serviceList,
             services:value.services
-        });
-    }, value);
+        })
+    });
 
     return function cancel(reason) {
         console.log("Asked to cancel?");
@@ -246,19 +247,6 @@ function introspectServices(callback, value) {
 
 function exit() {
     process.exit(0);
-}
-
-function displayServices(callback, value) {
-
-    if (options["hide-services"] == null) {
-        console.table("Active Services", _.collect(value.services, function(val) {
-            return {
-                name:val.identifier,
-                url:"muon://" + val.identifier,
-                tags: val.tags
-            }}));
-    }
-    return callback(value);
 }
 
 function discoverServiceList(callback) {
@@ -276,87 +264,6 @@ function discoverServiceList(callback) {
     };
 }
 
-
-function displayStreams(callback, value) {
-    if (options["streams"] == null && options["all"] == null) {
-        return callback(value);
-    }
-
-    var streamOperations = [];
-
-    _.each(value.introspection, function(serviceOperations) {
-        var serviceName = serviceOperations.name;
-
-        _.each(
-        _.filter(serviceOperations.operations, function(operation) {
-            return operation.method == "stream";
-        }), function(streamOp) {
-                streamOperations.push({
-                    serviceName:serviceName,
-                    streamName:streamOp.endpoint,
-                    url:"muon://" + serviceName + "/" + streamOp.endpoint
-                })
-            });
-    });
-
-    console.table("Reactive Streams", streamOperations);
-
-    return callback(value);
-}
-
-function displayQueries(callback, value) {
-    if (options["queries"] == null && options["all"] == null) {
-        return callback(value);
-    }
-
-    var queryOperations = [];
-
-    _.each(value.introspection, function(serviceOperations) {
-        var serviceName = serviceOperations.name;
-
-        _.each(
-            _.filter(serviceOperations.operations, function(operation) {
-                return operation.method == "query";
-            }), function(op) {
-                queryOperations.push({
-                    serviceName:serviceName,
-                    endpointName:op.endpoint,
-                    url:"muon://" + serviceName + op.endpoint
-                })
-            });
-    });
-
-    console.table("Query Endpoints", queryOperations);
-
-    return callback(value);
-}
-
-function displayCommands(callback, value) {
-    if (options["commands"] == null && options["all"] == null) {
-        return callback(value);
-    }
-
-    var commandOperations = [];
-
-    _.each(value.introspection, function(serviceOperations) {
-        var serviceName = serviceOperations.name;
-
-        _.each(
-            _.filter(serviceOperations.operations, function(operation) {
-                return operation.method == "command";
-            }), function(op) {
-                commandOperations.push({
-                    serviceName:serviceName,
-                    endpointName:op.endpoint,
-                    url:"muon://" + serviceName + op.endpoint
-                })
-            });
-    });
-
-    console.table("Command Endpoints", commandOperations);
-
-    return callback(value);
-}
 
 function initialiseMuon(options) {
     var discovery = _.find(discoveryConfig, function(it) {
@@ -386,6 +293,8 @@ function initialiseMuon(options) {
         logger.info("Available configurations : " + configs);
         exit();
     }
+
+    introspection = require("./core/introspection.js")(muon, discovery);
 }
 
 function getUserHome() {
