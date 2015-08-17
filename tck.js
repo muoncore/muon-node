@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 
 var _ = require("underscore");
 var muonCore = require("./index.js");
