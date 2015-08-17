@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-node tck.js
+LEVEL=debug node tck.js
