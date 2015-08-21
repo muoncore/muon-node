@@ -30,12 +30,24 @@ function displayEndpoint(analysis) {
 
 function displayServices(callback, value) {
 
+    _.each(value.services, function(svc) {
+
+        var introspection = _.find(value.introspection, function(it) {
+            return it.name == svc.identifier;
+        });
+        if (introspection == null) {
+            return;
+        }
+        svc.version = introspection.version;
+    });
+
     if (options["hide-services"] == null) {
         console.table("Active Services", _.collect(value.services, function(val) {
             return {
                 name:val.identifier,
                 url:"muon://" + val.identifier,
-                tags: val.tags
+                tags: val.tags,
+                "Muon Protocol Version":val.version
             }}));
     }
     return callback(value);

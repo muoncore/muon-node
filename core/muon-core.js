@@ -2,6 +2,7 @@
 var uuid = require('node-uuid');
 var _ = require("underscore");
 var signals = require("signals");
+var IntrospectionResources = require("./introspection-resources.js");
 
 //TODO - add prioritisation feature
 
@@ -17,7 +18,6 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
     setTimeout(function() {
         module.isReady = true;
         module.ready.dispatch();
-        logger.info("Becoming ready");
     }, 4000);
 
     function generateDescriptor() {
@@ -40,6 +40,14 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
                 })
         };
     }
+
+    var readyWait = module.readyWait = function(callback) {
+        if (module.isReady) {
+            callback();
+        } else {
+            module.ready.add(callback);
+        }
+    };
 
     var scope = {
         onReady: function(callback) {
@@ -72,9 +80,11 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
         },
         resource: {
             onQuery: function (resource, doc, callback) {
-                    _listenOnResource(resource, "query", callback);
+                introspection.addQuery(resource);
+                _listenOnResource(resource, "query", callback);
             },
             onCommand: function (resource, doc, callback) {
+                introspection.addCommand(resource);
                 _listenOnResource(resource, "command", callback);
             },
             query: function (url, callback, resource) {
@@ -96,6 +106,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
         stream: {
             provideStream: function(streamName, stream) {
                 checkReady();
+                introspection.addStream(streamName);
                 //TODO, transport discovery
                 module.transports[0].stream.provideStream(streamName, stream);
             },
@@ -108,8 +119,11 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
         discoverServices: function (callback) {
             checkReady();
             module.discoveryService.discoverServices(callback);
-        }
+        },
+        readyWait: readyWait
     };
+
+    var introspection = module.introspection = new IntrospectionResources(scope);
 
     /*
     These do practically all the same thing?
@@ -166,16 +180,6 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
         }
     }
 
-    function readyWait(callback) {
-        if (module.isReady) {
-            callback();
-        } else {
-            module.ready.add(callback);
-        }
-    }
-
-
     return scope;
-
-
 };
+

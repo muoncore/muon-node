@@ -7,7 +7,8 @@ var fs = require('fs');
 var RQ = require("async-rq");
 var Display;
 require("console.table");
-var introspection;
+
+var IntrospectionClient = require("./core/introspection-client");
 
 var cli = require('cli').enable('status'); //Enable 2 plugins
 
@@ -41,6 +42,7 @@ cli.parse({
 });
 
 var muon;
+var introspectionClient;
 var options;
 var args;
 
@@ -189,28 +191,28 @@ function streamService(args) {
 
 function discoverServices() {
 
-    if (args[0] != null) {
-        introspection.analyseUrl(args[0], function(analysis) {
-
-            switch(analysis.type) {
-                case "service":
-                    Display.displayService(analysis);
-                    break;
-                case "query":
-                    Display.displayEndpoint(analysis);
-                    break;
-                case "command":
-                    Display.displayEndpoint(analysis);
-                    break;
-                case "stream":
-                    Display.displayEndpoint(analysis);
-                    break;
-            }
-
-            exit();
-        });
-        return;
-    }
+    //if (args[0] != null) {
+    //    introspection.analyseUrl(args[0], function(analysis) {
+    //
+    //        switch(analysis.type) {
+    //            case "service":
+    //                Display.displayService(analysis);
+    //                break;
+    //            case "query":
+    //                Display.displayEndpoint(analysis);
+    //                break;
+    //            case "command":
+    //                Display.displayEndpoint(analysis);
+    //                break;
+    //            case "stream":
+    //                Display.displayEndpoint(analysis);
+    //                break;
+    //        }
+    //
+    //        exit();
+    //    });
+    //    return;
+    //}
 
     var workflow = RQ.sequence([
         discoverServiceList,
@@ -232,7 +234,7 @@ function discoverServices() {
 
 function introspectServices(callback, value) {
 
-    introspection.loadEndpoints(value.serviceList, function(introspections) {
+    introspectionClient.loadEndpoints(value.serviceList, function(introspections) {
         callback({
             introspection:introspections,
             serviceList:value.serviceList,
@@ -277,7 +279,7 @@ function initialiseMuon(options) {
                 discovery = amqp.getDiscovery();
 
                 muon = muonCore.muon('cli', discovery, [
-                    []
+                    "cli"
                 ]);
 
                 muon.addTransport(amqp);
@@ -285,6 +287,7 @@ function initialiseMuon(options) {
             default:
                 logger.error("Discovery type is not supported: " + discovery.type);
         }
+        introspectionClient = new IntrospectionClient(muon, discovery);
     } else {
         logger.error("No discovery configuration with the name: " + options.discovery);
         var configs = _.collect(discoveryConfig, function(it) {
@@ -293,8 +296,6 @@ function initialiseMuon(options) {
         logger.info("Available configurations : " + configs);
         exit();
     }
-
-    introspection = require("./core/introspection.js")(muon, discovery);
 }
 
 function getUserHome() {
