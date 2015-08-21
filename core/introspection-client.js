@@ -34,6 +34,10 @@ IntrospectionClient.prototype.loadEndpoints = function(serviceList, callback) {
         }
     });
 
+    if (commandFunctions == null || commandFunctions.length == 0) {
+        return callback([]);
+    }
+
     RQ.parallel(commandFunctions)(function(introspections) {
         callback(introspections);
     }, {});

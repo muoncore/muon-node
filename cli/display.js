@@ -42,6 +42,10 @@ function displayServices(callback, value) {
     });
 
     if (options["hide-services"] == null) {
+        if (value.services == null || value.services.length == 0) {
+            console.log ("There are no active services in the system, nothing can be analysed or displayed.");
+            console.log ("Try starting a service up");
+        }
         console.table("Active Services", _.collect(value.services, function(val) {
             return {
                 name:val.identifier,
