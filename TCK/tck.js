@@ -1,12 +1,8 @@
 
 var _ = require("underscore");
-var muonCore = require("./index.js");
+var MuonConfig = require("./../core/muon-config.js");
 
-var amqp = muonCore.amqpTransport("amqp://muon:microservices@localhost");
-var muon = muonCore.muon('tck', amqp.getDiscovery(), [
-    "my-tag", "tck-service", "node-service"
-]);
-muon.addTransport(amqp);
+var muon = new MuonConfig().generateMuon();
 
 var queueEvents = [];
 

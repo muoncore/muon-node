@@ -1,0 +1,6 @@
+# TCK Endpoint
+
+This service implements the required TCK endpoints.
+
+These are exercised by the protocol tests to ensure that this library
+can correctly interoperate with other Muon implementations.
