@@ -55,5 +55,6 @@
   "preferGlobal": "true",
   "bin": {
     "muon": "cli.js"
-  }
+  },
+  "main": "./core/api/muon"
 }

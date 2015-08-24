@@ -1,6 +1,6 @@
 var _ = require("underscore");
-var AmqpConnection = require('./amqp-connection.js');
-var Broadcast = require('./amqp-broadcast.js');
+var AmqpConnection = require('../transport/amqp/amqp-connection.js');
+var Broadcast = require('../transport/amqp/amqp-broadcast.js');
 
 var AmqpDiscovery = function (url) {
 
