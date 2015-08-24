@@ -2,12 +2,11 @@
 var url = require('url');
 var AmqpConnection = require('./amqp-connection.js');
 var Broadcast = require('./amqp-broadcast.js');
-var Discovery = require("./muon-discovery-amqp.js");
 var Queues = require('./amqp-queues.js');
 var Resources = require('./amqp-resources.js');
 var Streams = require('./amqp-stream.js');
 
-var AmqpTransport = function amqpTransport(url) {
+var AmqpTransport = function (url) {
 
     var _this = this;
 
@@ -27,9 +26,6 @@ var AmqpTransport = function amqpTransport(url) {
         }, 10);
         logger.debug("AMQP Transport is ready");
     });
-};
-AmqpTransport.prototype.getDiscovery = function () {
-    return new Discovery(url);
 };
 
 AmqpTransport.prototype.setServiceIdentifier = function (serviceIdentifier) {

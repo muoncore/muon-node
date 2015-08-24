@@ -1,6 +1,10 @@
 #! /usr/bin/env node
 
-var muonCore = require("./index.js");
+require("./lib/logging/logger");
+
+var AmqpTransport = require("./core/transport/amqp/muon-transport-amqp");
+var AmqpDiscovery = require("./core/discovery/amqp/muon-discovery-amqp");
+var MuonCore = require("./core/muon-core");
 var _ = require("underscore");
 var uuid = require("node-uuid");
 var fs = require('fs');
@@ -230,8 +234,6 @@ function discoverServices() {
     }, {});
 }
 
-
-
 function introspectServices(callback, value) {
 
     introspectionClient.loadEndpoints(value.serviceList, function(introspections) {
@@ -276,12 +278,12 @@ function initialiseMuon(options) {
     if (typeof discovery !== 'undefined') {
         switch(discovery.type) {
             case "amqp":
-                var amqp = muonCore.amqpTransport(discovery.uri);
-                discovery = amqp.getDiscovery();
+                var amqp = new AmqpTransport(discovery.uri);
+                discovery = new AmqpDiscovery(discovery.uri);
 
-                muon = muonCore.muon('cli', discovery, [
-                    "cli"
-                ]);
+                muon = MuonCore("cli", discovery, [
+                    "cli", "node"
+                ]) ;
 
                 muon.addTransport(amqp);
                 break;

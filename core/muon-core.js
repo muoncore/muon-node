@@ -157,7 +157,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
             var transports = module.transports;
             for(var i=0; i<transports.length; i++) {
                 var transport = transports[i];
-                transport.resource.listenOnResource(resource, method, callback);
+                transport.resources.listenOnResource(resource, method, callback);
             }
         });
     }
@@ -168,7 +168,7 @@ module.exports = function(serviceIdentifier, discoveryService, tags) {
             var transports = module.transports;
             for(var i=0; i<transports.length; i++) {
                 var transport = transports[i];
-                transport.resource.sendAndWaitForReply(payload, callback);
+                transport.resources.sendAndWaitForReply(payload, callback);
             }
         });
     }

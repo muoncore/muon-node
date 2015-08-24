@@ -1,8 +1,8 @@
 
 var _ = require("underscore");
-var MuonConfig = require("./../core/muon-config.js");
+var muonCore = require("../muon");
 
-var muon = new MuonConfig().generateMuon();
+var muon = muonCore.generateMuon();
 
 var queueEvents = [];
 
