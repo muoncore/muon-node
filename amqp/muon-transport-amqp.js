@@ -7,6 +7,9 @@ var url = require('url');
 var AmqpConnection = require('./amqp-connection.js');
 var Broadcast = require('./amqp-broadcast.js');
 var Discovery = require("./muon-discovery-amqp.js");
+var Queues = require('./amqp-queues.js');
+var Resources = require('./amqp-resources.js');
+var Streams = require('./amqp-stream.js');
 
 module.exports = function amqpTransport(url) {
 
@@ -17,9 +20,9 @@ module.exports = function amqpTransport(url) {
 
     _this.connection.connect(function() {
         _this.broadcast = new Broadcast(_this.connection);
-        _this.queues    = require('./amqp-queues.js')(_this.connection);
-        _this.resources = require('./amqp-resources.js')(_this.queues);
-        _this.streams = require('./amqp-stream.js')(_this.queues);
+        _this.queues    = new Queues(_this.connection);
+        _this.resources = new Resources(_this.queues);
+        _this.streams = new Streams(_this.queues);
         var waitInterval = setInterval(function() {
             if (typeof _this.serviceIdentifier !== 'undefined') {
                 clearInterval(waitInterval);

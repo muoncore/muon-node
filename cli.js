@@ -235,6 +235,7 @@ function discoverServices() {
 function introspectServices(callback, value) {
 
     introspectionClient.loadEndpoints(value.serviceList, function(introspections) {
+        logger.debug("Endpoints have been loaded from the discovery system");
         callback({
             introspection:introspections,
             serviceList:value.serviceList,

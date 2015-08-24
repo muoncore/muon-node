@@ -1,25 +1,25 @@
-
 var url = require("url");
 var uuid = require("node-uuid");
 
-module.exports = function(queues) {
+var AmqpResources = function (queues) {
 
+    var _this = this;
     //module.serviceIdentifier = serviceIdentifier;
-    module.queues = queues;
+    this.queues = queues;
 
-    var replyQueue = "resource-reply." + uuid.v1();
+    this.replyQueue = "resource-reply." + uuid.v1();
 
-    var resourceHandlers = {};
-    var responseHandlers = {};
+    this.resourceHandlers = {};
+    this.responseHandlers = {};
 
-    module.queues.listen(replyQueue, function(event) {
+    this.queues.listen(this.replyQueue, function (event) {
         logger.debug("Resource response received: ", event.headers);
         var headers = event.headers;
 
         //TODO assert that it's JSON!
 
         var res = headers.RequestID;
-        var handler = responseHandlers[res];
+        var handler = _this.responseHandlers[res];
         if (typeof(handler) != 'function') {
             logger.warn("Received a response for an unregistered request");
             return;
@@ -34,68 +34,73 @@ module.exports = function(queues) {
         }
     });
 
-    setupResourceHandler(resourceHandlers);
+    this.setupResourceHandler(this.resourceHandlers);
 
-    return {
-        setServiceIdentifier: function(ident) {
-            module.serviceIdentifier = ident;
-        },
-        sendAndWaitForReply: function(event, callback) {
-            //get the url elements
+};
+AmqpResources.prototype.setServiceIdentifier = function (ident) {
+    this.serviceIdentifier = ident;
+};
+AmqpResources.prototype.sendAndWaitForReply = function (event, callback) {
+    //get the url elements
 
-            logger.debug('Dispatch resource request on ' + event.url);
+    logger.debug('Dispatch resource request on ' + event.url);
 
-            var u = url.parse(event.url, true);
-            logger.trace('resource query params: ', u.query);
-            var requestId = uuid.v1();
+    var u = url.parse(event.url, true);
+    logger.trace('resource query params: ', u.query);
+    var requestId = uuid.v1();
 
-            responseHandlers[requestId] = function(header, payload) {
-                callback(header, payload);
-            };
-
-            if (typeof event.payload !== 'object') {
-                logger.error('event payload is not of type object. Currently muon node can only sent json object types');
-                throw ('event payload is not of type object. Currently muon node can only sent json object types');
-            }
-
-            var queue = "resource-listen." + u.hostname;
-
-            var head = {
-                "Content-Type":"application/json",
-                "Accept":"application/json",
-                "verb":event.method,
-                "RESOURCE":u.pathname,
-                "RESPONSE_QUEUE":replyQueue,
-                "RequestID": requestId
-            };
-
-            var queryParams = {};
-
-            for(var k in u.query) queryParams[k]= u.query[k];
-
-            event.headers = head;
-            event.params = queryParams;
-            logger.debug('sending event ' + event.headers.RequestID);
-            module.queues.send(queue, event);
-        },
-
-        listenOnResource: function(resource, method, callback) {
-            resource = resource.replace(/^\/|\/$/g, '');
-            var key = resource + "-" + method;
-            resourceHandlers[key] = callback;
-        }
+    this.responseHandlers[requestId] = function (header, payload) {
+        callback(header, payload);
     };
+
+    if (typeof event.payload !== 'object') {
+        logger.error('event payload is not of type object. Currently muon node can only sent json object types');
+        throw ('event payload is not of type object. Currently muon node can only sent json object types');
+    }
+
+    var queue = "resource-listen." + u.hostname;
+
+    var head = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "verb": event.method,
+        "RESOURCE": u.pathname,
+        "RESPONSE_QUEUE": this.replyQueue,
+        "RequestID": requestId
+    };
+
+    var queryParams = {};
+
+    for (var k in u.query) queryParams[k] = u.query[k];
+
+    event.headers = head;
+    event.params = queryParams;
+    logger.debug('sending event ' + event.headers.RequestID);
+    this.queues.send(queue, event);
 };
 
-function setupResourceHandler(handlers) {
-    var waitInterval = setInterval(function () {
+AmqpResources.prototype.listenOnResource = function (resource, method, callback) {
+    resource = resource.replace(/^\/|\/$/g, '');
+    var key = resource + "-" + method;
+    this.resourceHandlers[key] = callback;
+};
 
-        if (typeof module.queues == 'object' && module.serviceIdentifier !== 'undefined') {
+AmqpResources.prototype.setupResourceHandler = function(handlers) {
+
+    var _this = this;
+
+    var waitInterval = setInterval(function () {
+        logger.debug("Checking if ready to accept resource requests");
+        if (typeof _this.queues == 'object' && _this.serviceIdentifier !== 'undefined') {
+            logger.debug("Ready to receive resource requests");
             clearInterval(waitInterval);
 
-            var resourceQueueName = 'resource-listen.' + module.serviceIdentifier;
+            var resourceQueueName = 'resource-listen.' + _this.serviceIdentifier;
+            logger.debug("Listening for resources requests on " + resourceQueueName);
 
-            module.queues.listen(resourceQueueName, function (request, message) {
+            _this.queues.listen(resourceQueueName, function (request, message) {
+                logger.debug("Resource request received! " + resourceQueueName);
+
                 var verb = request.headers.verb;
                 var resource = request.headers.RESOURCE;
                 resource = resource.replace(/^\/|\/$/g, '');
@@ -151,7 +156,7 @@ function setupResourceHandler(handlers) {
                         if (headers.Status == null) {
                             headers.Status = "200";
                         }
-                        module.queues.send(responseQueue, {
+                        _this.queues.send(responseQueue, {
                             "headers": headers,
                             "payload": response
                         });
@@ -163,4 +168,6 @@ function setupResourceHandler(handlers) {
             });
         }
     }, 100);
-}
+};
+
+module.exports = AmqpResources;

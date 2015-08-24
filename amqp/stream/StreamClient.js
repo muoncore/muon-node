@@ -9,9 +9,10 @@ var Url = require("url");
 var uuid = require("node-uuid");
 var signals = require("signals");
 
-module.exports = function(queues) {
+var StreamClient = function (queues) {
 
     var cl = this;
+    this.queues = queues;
 
     //signals designed for external consumption.
     cl.dataReceived = new signals.Signal();
@@ -23,19 +24,18 @@ module.exports = function(queues) {
     cl.inboundMessageReceived = new signals.Signal();
 
     cl.connection = {
-        subscriberId:null,
-        streamName:null,
-        replyQueue:null,
-        remoteCommandQueue:null
+        subscriberId: null,
+        streamName: null,
+        replyQueue: null,
+        remoteCommandQueue: null
     };
 
-    cl.subscribed.add(function(message) {
+    cl.subscribed.add(function (message) {
         cl.connection.subscriberId = message.headers["SUBSCRIPTION_STREAM_ID"];
     });
-    cl.errored.add(clearKeepAlive);
-    cl.completed.add(clearKeepAlive);
-
-    this.inboundMessageReceived.add(function(data) {
+    cl.errored.add(this.clearKeepAlive);
+    cl.completed.add(this.clearKeepAlive);
+    cl.inboundMessageReceived.add(function (data) {
         if (data.headers["TYPE"] == "data") {
 
             cl.dataReceived.dispatch(
@@ -57,71 +57,78 @@ module.exports = function(queues) {
             }
         }
     });
-
-    cl.requestData = function(count) {
-        queues.send(cl.connection.remoteCommandQueue, {
-            headers:{
-                command:"REQUEST",
-                REQUESTED_STREAM_NAME: cl.connection.streamName,
-                SUBSCRIPTION_STREAM_ID: cl.connection.subscriberId,
-                REPLY_QUEUE_NAME:cl.connection.replyQueue,
-                N:count
-            },
-            payload:{}
-        });
-    };
-
-    cl.cancel = function(){
-        clearKeepAlive();
-        queues.send(cl.connection.remoteCommandQueue, {
-            headers:{
-                command:"CANCEL",
-                SUBSCRIPTION_STREAM_ID: cl.connection.subscriberId,
-                REPLY_QUEUE_NAME:cl.connection.replyQueue
-            },
-            payload:{}
-        });
-    };
-
-    cl.subscribe = function(url) {
-        var u = Url.parse(url, true);
-
-        cl.connection.streamName = u.pathname;
-        cl.connection.remoteCommandQueue = u.hostname + "_stream_control";
-
-        cl.connection.replyQueue = "streamdata." + uuid.v1();
-
-        queues.listen(cl.connection.replyQueue, function(data, message) {
-            cl.inboundMessageReceived.dispatch(data);
-        });
-
-        var headers = {
-            command:"SUBSCRIBE",
-                REQUESTED_STREAM_NAME: cl.connection.streamName,
-            "KEEPALIVE_QUEUE_NAME":cl.connection.replyQueue,
-            "REPLY_QUEUE_NAME":cl.connection.replyQueue
-        };
-
-        for(var k in u.query) headers[k]= u.query[k];
-
-        queues.send(cl.connection.remoteCommandQueue, {
-            headers:headers,
-            payload:{}
-        });
-
-        cl.interval = setInterval(sendKeepAlive, 3500);
-    };
-
-
-    function clearKeepAlive() {
-        clearInterval(cl.interval);
-    }
-    function sendKeepAlive() {
-        queues.send(cl.connection.remoteCommandQueue, {
-            headers:{
-                command:"KEEP-ALIVE",
-                SUBSCRIPTION_STREAM_ID: cl.connection.subscriberId
-            }
-        });
-    }
 };
+
+StreamClient.prototype.requestData = function (count) {
+    var _this = this;
+    this.queues.send(this.connection.remoteCommandQueue, {
+        headers: {
+            command: "REQUEST",
+            REQUESTED_STREAM_NAME: _this.connection.streamName,
+            SUBSCRIPTION_STREAM_ID: _this.connection.subscriberId,
+            REPLY_QUEUE_NAME: _this.connection.replyQueue,
+            N: count
+        },
+        payload: {}
+    });
+};
+
+StreamClient.prototype.cancel = function () {
+    this.clearKeepAlive();
+    var _this = this;
+    this.queues.send(this.connection.remoteCommandQueue, {
+        headers: {
+            command: "CANCEL",
+            SUBSCRIPTION_STREAM_ID: _this.connection.subscriberId,
+            REPLY_QUEUE_NAME: _this.connection.replyQueue
+        },
+        payload: {}
+    });
+};
+
+StreamClient.prototype.subscribe = function (url) {
+    var _this = this;
+    var u = Url.parse(url, true);
+
+    this.connection.streamName = u.pathname;
+    this.connection.remoteCommandQueue = u.hostname + "_stream_control";
+
+    this.connection.replyQueue = "streamdata." + uuid.v1();
+
+    this.queues.listen(this.connection.replyQueue, function (data, message) {
+        _this.inboundMessageReceived.dispatch(data);
+    });
+
+    var headers = {
+        command: "SUBSCRIBE",
+        REQUESTED_STREAM_NAME: this.connection.streamName,
+        "KEEPALIVE_QUEUE_NAME": this.connection.replyQueue,
+        "REPLY_QUEUE_NAME": this.connection.replyQueue
+    };
+
+    for (var k in u.query) headers[k] = u.query[k];
+
+    this.queues.send(this.connection.remoteCommandQueue, {
+        headers: headers,
+        payload: {}
+    });
+
+    this.interval = setInterval(function() {
+        _this.sendKeepAlive();
+    }, 3500);
+};
+
+StreamClient.prototype.clearKeepAlive = function () {
+    clearInterval(this.interval);
+};
+
+StreamClient.prototype.sendKeepAlive = function () {
+    this.queues.send(this.connection.remoteCommandQueue, {
+        headers: {
+            command: "KEEP-ALIVE",
+            SUBSCRIPTION_STREAM_ID: this.connection.subscriberId
+        }
+    });
+};
+
+module.exports = StreamClient;
