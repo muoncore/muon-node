@@ -1,17 +1,12 @@
 var _ = require("underscore");
-var muonCore = require("../index.js");
 var expect = require('expect.js');
 var assert = require('assert');
 
-var amqp = muonCore.amqpTransport("amqp://muon:microservices@msg.cistechfutures.net:5672");
+var MuonConfig = require("../core/muon-config.js");
 
-var muonServer = muonCore.muon('node-service', amqp.getDiscovery(), [
-    ["my-tag", "tck-service", "node-service"]
-]);
+var muonServer = new MuonConfig().generateMuon();
 
-muonServer.addTransport(amqp);
-
-var params = {'name': 'bob', 'email': 'bob@sky.com'};
+var params = {'name': 'bob', 'email': 'bob@simple.com'};
 var serverMessage = 'muon node server';
 
 describe("Simple muon resource client/server test", function () {

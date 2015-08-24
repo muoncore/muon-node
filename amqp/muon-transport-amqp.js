@@ -4,7 +4,7 @@ var _this = this;
 
 var uuid = require('node-uuid');
 var url = require('url');
-var Connection = require('./amqp-connection.js');
+var AmqpConnection = require('./amqp-connection.js');
 var Broadcast = require('./amqp-broadcast.js');
 var Discovery = require("./muon-discovery-amqp.js");
 
@@ -12,7 +12,7 @@ module.exports = function amqpTransport(url) {
 
     var _this = this;
 
-    _this.connection = new Connection(url);
+    _this.connection = new AmqpConnection(url);
     _this.url = url;
 
     _this.connection.connect(function() {
@@ -32,7 +32,7 @@ module.exports = function amqpTransport(url) {
     return {
 
         getDiscovery: function() {
-            return new Discovery(_this);
+            return new Discovery(url);
         },
 
         setServiceIdentifier: function(serviceIdentifier) {
@@ -49,15 +49,6 @@ module.exports = function amqpTransport(url) {
             },
             listenOnBroadcast: function (event, callback) {
                 _this.broadcast.listenOnBroadcast(event, callback);
-            }
-        },
-
-        queue: {
-            send: function(queueName, event) {
-                _this.queues.send(queueName, event);
-            },
-            listen: function(queueName, callback) {
-                _this.queues.listen(queueName, callback);
             }
         },
 

@@ -60,6 +60,7 @@ muon.resource.onQuery("/event", "Get the events", function(event, data, respond)
 muon.resource.onCommand("/eventclear", "Allow post of some data", function(event, data, respond) {
     logger.info("Clearing the event data");
     events = [];
+    respond();
 });
 
 muon.resource.onCommand("/echo", "Allow post of some data", function(event, data, respond) {
@@ -75,7 +76,6 @@ muon.resource.onQuery("/echo", "Allow post of some data", function(event, data, 
         "method":"query"
     });
 });
-
 
 var requestStore = {};
 

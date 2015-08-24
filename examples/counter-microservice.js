@@ -6,7 +6,7 @@ var assert = require('assert');
 var amqp = muonCore.amqpTransport("amqp://localhost");
 
 var counterServer = muonCore.muon('counter', amqp.getDiscovery(), [
-    ["increment", "integer", "counter"]
+    "increment", "integer", "counter"
 ]);
 
 counterServer.addTransport(amqp);

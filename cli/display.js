@@ -39,6 +39,9 @@ function displayServices(callback, value) {
             return;
         }
         svc.version = introspection.version;
+        if (svc.version == null) {
+            svc.version = "UNKNOWN: ERROR";
+        }
     });
 
     if (options["hide-services"] == null) {

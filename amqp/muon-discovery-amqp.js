@@ -1,41 +1,51 @@
-
 var _ = require("underscore");
+var AmqpConnection = require('./amqp-connection.js');
+var Broadcast = require('./amqp-broadcast.js');
 
-module.exports = function (scope) {
+var AmqpDiscovery = function (url) {
 
+    this.descriptors = [];
     var _this = this;
-    _this.descriptors = [];
 
-    scope.discoveredServiceList = [];
-    scope.discoveredServices = [];
+    logger.info("AMQP Discovery is booting using URL " + url);
 
-    startAnnouncements(scope, _this);
-    logger.debug("AMQP Discovery becomes ready!");
+    _this.connection = new AmqpConnection(url);
+    _this.url = url;
 
-    this.announceService=function(serviceDescriptor) {
-        _this.descriptors.push(serviceDescriptor);
-    };
-    this.clearAnnouncements = function() {
-        _this.descriptors = [];
-    };
+    _this.connection.connect(function() {
+        logger.info("AMQP Discovery becomes ready!");
+        _this.broadcast = new Broadcast(_this.connection);
+        startAnnouncements(_this);
+    });
 
-    this.discoverServices=function(callback) {
-        callback(scope.discoveredServices);
-    };
+    this.discoveredServiceList = [];
+    this.discoveredServices = [];
+
 };
 
-function startAnnouncements(scope, _this) {
-    var waitInterval = setInterval(function() {
-        logger.debug("discovery waiting .. " + scope.broadcast);
-        if (typeof scope.broadcast !== 'undefined') {
+AmqpDiscovery.prototype.announceService = function (serviceDescriptor) {
+    this.descriptors.push(serviceDescriptor);
+};
+AmqpDiscovery.prototype.clearAnnouncements = function () {
+    this.descriptors = [];
+};
+
+AmqpDiscovery.prototype.discoverServices = function (callback) {
+    callback(this.discoveredServices);
+};
+
+function startAnnouncements(discovery) {
+    var waitInterval = setInterval(function () {
+        logger.debug("discovery waiting .. " + discovery.broadcast);
+        if (typeof discovery.broadcast !== 'undefined') {
             clearInterval(waitInterval);
 
-            scope.broadcast.listenOnBroadcast("serviceAnnounce", function(event, message) {
+            discovery.broadcast.listenOnBroadcast("serviceAnnounce", function (event, message) {
                 try {
                     var pay = message;
-                    if(scope.discoveredServiceList.indexOf(pay.identifier) < 0) {
-                        scope.discoveredServiceList.push(pay.identifier);
-                        scope.discoveredServices.push(pay);
+                    if (discovery.discoveredServiceList.indexOf(pay.identifier) < 0) {
+                        discovery.discoveredServiceList.push(pay.identifier);
+                        discovery.discoveredServices.push(pay);
                     }
                 } catch (err) {
                     logger.warn("Had issues parsing ... ");
@@ -43,19 +53,19 @@ function startAnnouncements(scope, _this) {
                 }
             });
 
-            _.each(_this.descriptors, function(it) {
-                scope.broadcast.emit(
+            _.each(discovery.descriptors, function (it) {
+                discovery.broadcast.emit(
                     {
-                        name:"serviceAnnounce",
-                        payload:it
+                        name: "serviceAnnounce",
+                        payload: it
                     });
             });
 
-            setInterval(function() {
-                _.each(_this.descriptors, function(it) {
-                    scope.broadcast.emit({
-                        name:"serviceAnnounce",
-                        payload:it
+            setInterval(function () {
+                _.each(discovery.descriptors, function (it) {
+                    discovery.broadcast.emit({
+                        name: "serviceAnnounce",
+                        payload: it
                     });
                 });
             }, 3500);
@@ -63,3 +73,5 @@ function startAnnouncements(scope, _this) {
     }, 400);
 
 }
+
+module.exports = AmqpDiscovery;
