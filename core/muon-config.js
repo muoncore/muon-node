@@ -24,7 +24,7 @@ require("../lib/logging/logger");
 
 var AmqpTransport = require("./transport/amqp/muon-transport-amqp");
 var AmqpDiscovery = require("./discovery/amqp/muon-discovery-amqp");
-var muonCore = require("./muon-core");
+var MuonCore = require("./muon-core");
 var _ = require("underscore");
 var fs = require("fs");
 var RQ = require("async-rq");
@@ -50,7 +50,7 @@ MuonConfig.prototype.generateMuon = function() {
             // TODO, use the discovery url instead
             var discovery = new AmqpDiscovery(transport.url);
             var amqp = new AmqpTransport(transport.url);
-            muon = muonCore(config.serviceName, discovery, config.tags);
+            muon = new MuonCore(config.serviceName, discovery, config.tags);
             muon.addTransport(amqp);
         }
     });

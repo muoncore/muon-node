@@ -6,7 +6,7 @@ var muon = muonCore.generateMuon();
 
 var queueEvents = [];
 
-muon.resource.onQuery("/tckQueueRes","", function(request, message, response) {
+muon.onQuery("/tckQueueRes","", function(request, message, response) {
     response(queueEvents);
 });
 
@@ -30,21 +30,21 @@ var events = [];
 //    return stream;
 //});
 
-muon.broadcast.on("echoBroadcast", function(event, payload) {
+muon.on("echoBroadcast", function(event, payload) {
     muon.broadcast.emit("echoBroadcastResponse", {}, payload);
 });
 
-muon.broadcast.on("echoBroadcastResponse", function(event) {
+muon.on("echoBroadcastResponse", function(event) {
     logger.info("Received an echoBroadcastResponse");
     //console.dir(JSON.parse(event.payload.toString()));
 });
 
-muon.broadcast.on("tckBroadcast", function(event, payload) {
+muon.on("tckBroadcast", function(event, payload) {
     logger.info("Got an event " + payload);
     events.push(payload);
 });
 
-muon.resource.onQuery("/discover", "Get the events", function(event, data, respond) {
+muon.onQuery("/discover", "Get the events", function(event, data, respond) {
     muon.discoverServices(function(services) {
         logger.info('Discovery called');
         respond(_.collect(services, function(it) {
@@ -53,24 +53,24 @@ muon.resource.onQuery("/discover", "Get the events", function(event, data, respo
     });
 });
 
-muon.resource.onQuery("/event", "Get the events", function(event, data, respond) {
+muon.onQuery("/event", "Get the events", function(event, data, respond) {
     respond(events);
 });
 
-muon.resource.onCommand("/eventclear", "Allow post of some data", function(event, data, respond) {
+muon.onCommand("/eventclear", "Allow post of some data", function(event, data, respond) {
     logger.info("Clearing the event data");
     events = [];
     respond();
 });
 
-muon.resource.onCommand("/echo", "Allow post of some data", function(event, data, respond) {
+muon.onCommand("/echo", "Allow post of some data", function(event, data, respond) {
     respond({
         "something":"awesome",
         "method":"command!"
     });
 });
 
-muon.resource.onQuery("/echo", "Allow post of some data", function(event, data, respond) {
+muon.onQuery("/echo", "Allow post of some data", function(event, data, respond) {
     respond({
         "something":"awesome",
         "method":"query"
@@ -79,9 +79,9 @@ muon.resource.onQuery("/echo", "Allow post of some data", function(event, data, 
 
 var requestStore = {};
 
-muon.resource.onQuery("/invokeresponse", "hh", function(event, data, respond) {
+muon.onQuery("/invokeresponse", "hh", function(event, data, respond) {
 
-    muon.resource.query(data.resource, function(event, payload) {
+    muon.query(data.resource, function(event, payload) {
         logger.info("We have a GET response");
         console.dir(payload);
         requestStore = payload;
@@ -89,7 +89,7 @@ muon.resource.onQuery("/invokeresponse", "hh", function(event, data, respond) {
     });
 });
 
-muon.resource.onCommand("/invokeresponse-store", "hh", function(event, data, respond) {
+muon.onCommand("/invokeresponse-store", "hh", function(event, data, respond) {
     logger.info("invokeresponse-store has been requested");
     respond(requestStore);
 });

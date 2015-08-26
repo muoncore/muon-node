@@ -2,24 +2,27 @@
 var _ = require("underscore");
 
 var IntrospectionResources = function (muon) {
-    var queries  = IntrospectionResources.prototype.queries  = [];
-    var commands = IntrospectionResources.prototype.commands = [];
-    var streams  = IntrospectionResources.prototype.streams  = [];
+    this.muon = muon;
+    this.queries  = [];
+    this.commands = [];
+    this.streams  = [];
+};
 
-    muon.readyWait(function() {
-
-        muon.resource.onQuery("/muon/introspect", "The introspection endpoint", function (event, data, respond) {
+IntrospectionResources.prototype.startup = function() {
+    var _this = this;
+    _this.muon.readyWait(function() {
+        _this.muon.onQuery("/muon/introspect", "The introspection endpoint", function (event, data, respond) {
             var operations = [];
 
-            _.each(queries, function(it) {
+            _.each(_this.queries, function(it) {
                 operations.push({endpoint: it, method: 'query'});
             });
 
-            _.each(commands, function(it) {
+            _.each(_this.commands, function(it) {
                 operations.push({endpoint: it, method: 'command'});
             });
 
-            _.each(streams, function(it) {
+            _.each(_this.streams, function(it) {
                 operations.push({endpoint: it, method: 'stream'});
             });
 

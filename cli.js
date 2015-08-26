@@ -12,7 +12,7 @@ var RQ = require("async-rq");
 var Display;
 require("console.table");
 
-var IntrospectionClient = require("./core/introspection-client");
+var IntrospectionClient = require("./core/introspection/introspection-client");
 
 var cli = require('cli').enable('status'); //Enable 2 plugins
 
@@ -150,7 +150,7 @@ function processStreamInput(args) {
 
 function processCommand(url, payloadString, done) {
     var json = JSON.parse(payloadString);
-    muon.resource.command(url, json, function(event, payload) {
+    muon.command(url, json, function(event, payload) {
         try {
             if (event.Status == "404") {
                 logger.error("Service returned 404 when accessing " + args[0]);
@@ -171,7 +171,7 @@ function queryService(args) {
 
     //TODO, check the first arg is a valud URI
 
-    muon.resource.query(args[0], function(event, payload) {
+    muon.query(args[0], function(event, payload) {
         try {
             if (event.Status == "404") {
                 logger.error("Service returned 404 when accessing " + args[0]);
@@ -188,7 +188,7 @@ function queryService(args) {
 function streamService(args) {
 
     //TODO, check the first arg is a valid URI
-    muon.stream.subscribe(args[0], function(event, payload) {
+    muon.subscribe(args[0], function(event, payload) {
         console.log(JSON.stringify(payload));
     });
 }
@@ -281,9 +281,9 @@ function initialiseMuon(options) {
                 var amqp = new AmqpTransport(discovery.uri);
                 discovery = new AmqpDiscovery(discovery.uri);
 
-                muon = MuonCore("cli", discovery, [
+                muon = new MuonCore("cli", discovery, [
                     "cli", "node"
-                ]) ;
+                ]);
 
                 muon.addTransport(amqp);
                 break;

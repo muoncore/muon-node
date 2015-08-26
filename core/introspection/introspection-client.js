@@ -13,12 +13,11 @@ IntrospectionClient.prototype.loadEndpoints = function(serviceList, callback) {
         return {
             name:serviceName,
             uri:"muon://" + serviceName + "/muon/introspect"
-
         };
     });
     var commandFunctions = _.collect(commandInstrospectUrls, function(serviceInfo) {
         return function requestor(callback) {
-            muon.resource.query(serviceInfo.uri, function(val, body) {
+            muon.query(serviceInfo.uri, function(val, body) {
                 if (val.Status == 200) {
                     callback({
                         name:serviceInfo.name,
@@ -44,6 +43,11 @@ IntrospectionClient.prototype.loadEndpoints = function(serviceList, callback) {
 };
 
 module.exports = IntrospectionClient;
+
+
+
+
+
 
 
 
