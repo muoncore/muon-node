@@ -79,7 +79,11 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
             logger.trace("Queue message received on " + queueName, message);
 
             if (_this.eventLogger != null) {
-                _this.eventLogger.logEvent(queueName, message);
+                var logEvent = {
+                    headers: headers,
+                    payload:message
+                };
+                _this.eventLogger.logEvent(queueName, logEvent);
             }
 
             callback({
