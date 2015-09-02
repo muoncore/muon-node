@@ -2,8 +2,12 @@
 var _ = require("underscore");
 var RQ = require("async-rq");
 
-var EventLogger = function (muon) {
+var EventLogger = function (muon, target) {
     this.muon = muon;
+    this.target = target;
+    if (this.target == null) {
+        console.warn("Initialised debug logging, but target is not set. Set to a fully qualified muon url, try muon://photon/events if you have a photon active");
+    }
 };
 
 EventLogger.prototype.logEvent = function(channel, event) {
@@ -14,7 +18,6 @@ EventLogger.prototype.logEvent = function(channel, event) {
         event.payload != null &&
         event.payload.correct != null
     ) { return; }
-    var endpoint = "muon://eventstore/events";
 
     event.bypasslogging=true;
 
@@ -34,7 +37,7 @@ EventLogger.prototype.logEvent = function(channel, event) {
     };
     console.dir(payload);
 
-    this.muon.command(endpoint, payload, function(event, responsepayload) {
+    this.muon.command(this.target, payload, function(event, responsepayload) {
         logger.debug("Event sent, response is " + event.Status);
     });
 };
