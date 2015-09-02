@@ -19,11 +19,11 @@ AmqpConnection.prototype.connect = function (callback) {
         logger.warn(stack);
     });
     connection.on("ready", function() {
-        logger.info("AMQP Connection becomes ready");
+        logger.debug("AMQP Connection becomes ready");
         callback();
     });
     connection.on("close", function() {
-        logger.info("AMQP Connection has CLOSED");
+        logger.debug("AMQP Connection has CLOSED");
         callback();
     });
     connection.on("blocked", function(data) {

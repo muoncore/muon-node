@@ -7,13 +7,13 @@ var AmqpDiscovery = function (url) {
     this.descriptors = [];
     var _this = this;
 
-    logger.info("AMQP Discovery is booting using URL " + url);
+    logger.debug("AMQP Discovery is booting using URL " + url);
 
     _this.connection = new AmqpConnection(url);
     _this.url = url;
 
     _this.connection.connect(function() {
-        logger.info("AMQP Discovery becomes ready!");
+        logger.debug("AMQP Discovery ready!");
         _this.broadcast = new Broadcast(_this.connection);
         startAnnouncements(_this);
     });
