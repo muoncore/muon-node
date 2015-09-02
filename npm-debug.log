@@ -1,0 +1,74 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/gawain/apps/node/bin/node',
+1 verbose cli   '/Users/gawain/apps/node/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   '-g',
+1 verbose cli   'muon-node' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.33
+4 verbose node symlink /Users/gawain/apps/node/bin/node
+5 verbose cache add [ 'muon-node', null ]
+6 verbose cache add name=undefined spec="muon-node" args=["muon-node",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: 'muon-node',
+7 verbose parsed url   path: 'muon-node',
+7 verbose parsed url   href: 'muon-node' }
+8 silly lockFile 8d0b5fa0-muon-node muon-node
+9 verbose lock muon-node /Users/gawain/.npm/8d0b5fa0-muon-node.lock
+10 silly lockFile 8d0b5fa0-muon-node muon-node
+11 silly lockFile 8d0b5fa0-muon-node muon-node
+12 verbose addNamed [ 'muon-node', '' ]
+13 verbose addNamed [ null, '*' ]
+14 silly lockFile dda6638f-muon-node muon-node@
+15 verbose lock muon-node@ /Users/gawain/.npm/dda6638f-muon-node.lock
+16 silly addNameRange { name: 'muon-node', range: '*', hasData: false }
+17 verbose request where is /muon-node
+18 verbose request registry https://registry.npmjs.org/
+19 verbose request id ccd36e85f0ea02c0
+20 verbose url raw /muon-node
+21 verbose url resolving [ 'https://registry.npmjs.org/', './muon-node' ]
+22 verbose url resolved https://registry.npmjs.org/muon-node
+23 verbose request where is https://registry.npmjs.org/muon-node
+24 info trying registry request attempt 1 at 10:09:12
+25 http GET https://registry.npmjs.org/muon-node
+26 http 404 https://registry.npmjs.org/muon-node
+27 silly registry.get cb [ 404,
+27 silly registry.get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+27 silly registry.get     etag: '"OL24YK1V9HHWM9MY1RLZWTEE"',
+27 silly registry.get     'content-type': 'application/json',
+27 silly registry.get     'cache-control': 'max-age=0',
+27 silly registry.get     'content-length': '573',
+27 silly registry.get     'accept-ranges': 'bytes',
+27 silly registry.get     date: 'Tue, 18 Aug 2015 09:09:12 GMT',
+27 silly registry.get     via: '1.1 varnish',
+27 silly registry.get     age: '0',
+27 silly registry.get     connection: 'keep-alive',
+27 silly registry.get     'x-served-by': 'cache-fra1224-FRA',
+27 silly registry.get     'x-cache': 'MISS',
+27 silly registry.get     'x-cache-hits': '0',
+27 silly registry.get     'x-timer': 'S1439888952.536807,VS0,VE406',
+27 silly registry.get     vary: 'Accept' } ]
+28 silly lockFile dda6638f-muon-node muon-node@
+29 silly lockFile dda6638f-muon-node muon-node@
+30 error 404 Not Found
+30 error 404
+30 error 404 'muon-node' is not in the npm registry.
+30 error 404 You should bug the author to publish it
+30 error 404
+30 error 404 Note that you can also install from a
+30 error 404 tarball, folder, or http url, or git url.
+31 error System Darwin 14.3.0
+32 error command "/Users/gawain/apps/node/bin/node" "/Users/gawain/apps/node/bin/npm" "install" "-g" "muon-node"
+33 error cwd /Users/gawain/dev/muon-node
+34 error node -v v0.10.33
+35 error npm -v 1.4.28
+36 error code E404
+37 verbose exit [ 1, true ]
