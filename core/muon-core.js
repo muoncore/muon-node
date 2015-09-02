@@ -1,7 +1,8 @@
 var uuid = require('node-uuid');
 var _ = require("underscore");
 var signals = require("signals");
-var IntrospectionResources = require("./introspection/introspection-resources.js");
+var EventLogger = require("./introspection/eventlogger");
+var IntrospectionResources = require("./introspection/introspection-resources");
 
 var MuonCore = function (serviceIdentifier, discoveryService, tags) {
 
@@ -13,6 +14,7 @@ var MuonCore = function (serviceIdentifier, discoveryService, tags) {
     this.ready = new signals.Signal();
     this.isReady = false;
     this.introspection = new IntrospectionResources(this);
+    this.eventLogger = new EventLogger(this);
 
     setTimeout(function () {
         _this.isReady = true;
@@ -55,10 +57,14 @@ MuonCore.prototype.onReady = function (callback) {
 MuonCore.prototype.addTransport = function (transport) {
     //todo, verify the transport.
     //var transport = module.transports[0];
+    var _this = this;
     transport.setServiceIdentifier(this.serviceIdentifier);
     this.transports.push(transport);
     this.discoveryService.clearAnnouncements();
     this.discoveryService.announceService(this.generateDescriptor());
+    this.readyWait(function() {
+        transport.setEventLogger(_this.eventLogger);
+    });
 };
 
 MuonCore.prototype.on = function (event, callback) {
