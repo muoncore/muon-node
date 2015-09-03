@@ -4,7 +4,7 @@ var assert = require('assert');
 
 var MuonConfig = require("../core/muon-config.js");
 
-var muonServer = new MuonConfig().generateMuon();
+var muonServer = new MuonConfig().generateMuon("amqp://muon:microsevrices@localhost:5762");
 
 var params = {'name': 'bob', 'email': 'bob@simple.com'};
 var serverMessage = 'muon node server';

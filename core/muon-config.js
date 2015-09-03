@@ -24,6 +24,7 @@ require("../lib/logging/logger");
 
 var AmqpTransport = require("./transport/amqp/muon-transport-amqp");
 var AmqpDiscovery = require("./discovery/amqp/muon-discovery-amqp");
+var assert = require('assert');
 var MuonCore = require("./muon-core");
 var _ = require("underscore");
 var fs = require("fs");
@@ -31,17 +32,78 @@ var RQ = require("async-rq");
 
 var MuonConfig = function () {};
 
-MuonConfig.prototype.generateMuon = function() {
+MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
     logger.debug("Initialising Muon from Environmental information, checking ...");
+     logger.debug("Configuring via function args: discoveryUrl=" + discoveryUrl + ", serviceName=" + serviceName);
 
-    logger.debug("Trying MUON_CONFIG ... ");
-    logger.debug("   MUON_CONFIG is being ignored ... ");
+    var config = {
+             "serviceName": undefined,
+             "tags" : [ "" ],
+             "discovery": {
+               "type": "amqp",
+               "url": undefined
+             },
+             "transports": [
+               { "type":"amqp", "url": undefined }
+             ]
+    }
 
-    logger.debug("Trying local muon.config ... ");
-    var configFile = './muon.config';
 
-    //needs generifying.
-    var config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    var muonConfigUrlEnv = process.env.MUON_CONFIG_URL;
+    var muonConfigServiceNameEnv = process.env.MUON_CONFIG_SVC;
+
+
+
+    if (discoveryUrl && serviceName) {
+        logger.debug("Configuring via function args: discoveryUrl=" + discoveryUrl + ", serviceName=" + serviceName);
+         config.discovery.url = discoveryUrl;
+         config.transports[0].url = discoveryUrl;
+         config.serviceName = serviceName;
+    } else if (muonConfigUrlEnv && muonConfigServiceNameEnv) {
+            logger.debug("Configuring muon via shell: $MUON_CONFIG_URL=" + envVar + ", $MUON_CONFIG_SVC=" + muonConfigServiceName);
+            config.discovery.url = muonConfigUrlEnv;
+            config.transports[0].url = muonConfigUrlEnv;
+            config.serviceName = muonConfigServiceName;
+    } else {
+        // Try a config file
+        logger.debug("Trying local file ./muon.config ... ");
+        var configFile = './muon.config';
+
+        try {
+            config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+        } catch (err) {
+            logger.error("Error opening config file: ", err);
+            throw new Error("Cannot find service config from injection via generateMuon(serviceName, discoveryUrl), $MUON_CONFIG_URL/$MUON_CONFIG_SVC or file " + configFile, err);
+        }
+
+    }
+
+    logger.debug("MuonConfig config=", config);
+
+/*
+    if (! config.discovery.url) {
+        logger.error("discovery URL missing from config");
+        throw new Error("discovery URL missing from config");
+    }
+
+    if (! config.transports[0].url) {
+        logger.error("transports[0].url missing from config");
+        throw new Error("transports[0].url missing from config");
+    }
+
+    if (! config.serviceName) {
+        logger.error("serviceName missing from config");
+        throw new Error("serviceName missing from config");
+    }
+    */
+
+
+
+
+
+
+
+
 
     var muon;
     _.each(config.transports, function(transport) {
@@ -57,5 +119,8 @@ MuonConfig.prototype.generateMuon = function() {
 
     return muon;
 };
+
+
+
 
 module.exports = MuonConfig;
