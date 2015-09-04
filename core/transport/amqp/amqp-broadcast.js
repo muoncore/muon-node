@@ -70,6 +70,7 @@ AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
                                 try {
                                     logger.trace("Parsing broadcast message as no effective content type");
                                     payload = JSON.parse(message.data.toString());
+                                    logger.trace("Broadcast payload: " + payload);
                                 } catch (error) {
                                     logger.error("Failed to understand broadcast message");
                                     console.dir(message);
