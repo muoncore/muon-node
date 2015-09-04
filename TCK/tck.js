@@ -6,7 +6,7 @@ var muon = muonCore.generateMuon();
 
 var queueEvents = [];
 
-muon.onQuery("/tckQueueRes","", function(request, message, response) {
+muon.onQuery("/tckQueueRes", function(request, message, response) {
     response(queueEvents);
 });
 
@@ -44,7 +44,7 @@ muon.on("tckBroadcast", function(event, payload) {
     events.push(payload);
 });
 
-muon.onQuery("/discover", "Get the events", function(event, data, respond) {
+muon.onQuery("/discover", function(event, data, respond) {
     muon.discoverServices(function(services) {
         logger.info('Discovery called');
         respond(_.collect(services, function(it) {
@@ -53,24 +53,24 @@ muon.onQuery("/discover", "Get the events", function(event, data, respond) {
     });
 });
 
-muon.onQuery("/event", "Get the events", function(event, data, respond) {
+muon.onQuery("/event", function(event, data, respond) {
     respond(events);
 });
 
-muon.onCommand("/eventclear", "Allow post of some data", function(event, data, respond) {
+muon.onCommand("/eventclear", function(event, data, respond) {
     logger.info("Clearing the event data");
     events = [];
     respond();
 });
 
-muon.onCommand("/echo", "Allow post of some data", function(event, data, respond) {
+muon.onCommand("/echo", function(event, data, respond) {
     respond({
         "something":"awesome",
         "method":"command!"
     });
 });
 
-muon.onQuery("/echo", "Allow post of some data", function(event, data, respond) {
+muon.onQuery("/echo", function(event, data, respond) {
     respond({
         "something":"awesome",
         "method":"query"
@@ -79,7 +79,7 @@ muon.onQuery("/echo", "Allow post of some data", function(event, data, respond) 
 
 var requestStore = {};
 
-muon.onQuery("/invokeresponse", "hh", function(event, data, respond) {
+muon.onQuery("/invokeresponse", function(event, data, respond) {
 
     muon.query(data.resource, function(event, payload) {
         logger.info("We have a GET response");
@@ -89,7 +89,7 @@ muon.onQuery("/invokeresponse", "hh", function(event, data, respond) {
     });
 });
 
-muon.onCommand("/invokeresponse-store", "hh", function(event, data, respond) {
+muon.onCommand("/invokeresponse-store", function(event, data, respond) {
     logger.info("invokeresponse-store has been requested");
     respond(requestStore);
 });
