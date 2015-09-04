@@ -11,7 +11,7 @@ var IntrospectionResources = function (muon) {
 IntrospectionResources.prototype.startup = function() {
     var _this = this;
     _this.muon.readyWait(function() {
-        _this.muon.onQuery("/muon/introspect", "The introspection endpoint", function (event, data, respond) {
+        _this.muon.onQuery("/muon/introspect", function (event, data, respond) {
             var operations = [];
 
             _.each(_this.queries, function(it) {

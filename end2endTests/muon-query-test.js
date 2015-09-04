@@ -36,7 +36,7 @@ describe("Simple muon resource client/server test", function () {
 
 function startServer() {
 
-    muonServer.resource.onQuery("/query", "Get the events", function(event, data, respond) {
+    muonServer.resource.onQuery("/query", function(event, data, respond) {
             console.log('muon node-service server onQuery("/query"): event:', event);
             respond({'message': serverMessage, 'params': event.headers.qparams});
         });

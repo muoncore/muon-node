@@ -7,7 +7,7 @@ var counterServer = muonCore.generateMuon();
 
 var counter = 1;
 
-counterServer.onQuery("/next", "Get next number", function(event, data, respond) {
+counterServer.onQuery("/next", function(event, data, respond) {
         var next = counter;
         //console.log('counter service running on onQuery("/next"): number:', next);
         counter++;
