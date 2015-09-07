@@ -10,6 +10,8 @@ var uuid = require("node-uuid");
 var fs = require('fs');
 var RQ = require("async-rq");
 var Display;
+var Discovery;
+var Actions;
 require("console.table");
 
 var IntrospectionClient = require("./core/introspection/introspection-client");
@@ -28,7 +30,6 @@ try {
 }
 
 cli.parse({
-    log:   ['l', 'Enable logging'],
     discovery: ['d', 'the discovery configuration to use from the config file', 'string'],
     "suppress-output": ['s', 'suppress command output (eg, when streaming)'],
     "hide-services":  ['', 'Do not display the discovered services'],
@@ -55,8 +56,6 @@ cli.main(function(arguments, opts) {
     options = opts;
     args = arguments;
 
-    Display = require("./cli/display.js")(options);
-
     if (cli.command === "setup") {
         setupConfig();
         logger.info("Default configuration has been generated at " + discoveryConfigFile);
@@ -65,15 +64,14 @@ cli.main(function(arguments, opts) {
 
     showCommandOutput = !options["suppress-output"];
 
-    if (options.log) {
-        //GLOBAL.logger = Logger('muon', "info", '/tmp/muon.log', true,
-        //    "console-plus");
-    } else {
-        //GLOBAL.logger = Logger('muon', "warn", '/tmp/muon.log', true,
-        //    "console-plus");
-    }
-
     initialiseMuon(options);
+
+    Display = require("./cli/display")(options);
+    Discovery = require("./cli/discovery")(
+        muon,
+        introspectionClient,
+        options);
+    Actions = require("./cli/actions")(muon, options);
 
     if (process.stdin.isTTY) {
         cli.spinner('Connecting ... ');
@@ -84,16 +82,16 @@ cli.main(function(arguments, opts) {
         }
         switch(cli.command) {
             case "discover":
-                discoverServices(options);
+                Discovery.discoverServices(options);
                 break;
             case "query":
-                queryService(args);
+                Actions.queryService(args);
                 break;
             case "command":
-                sendCommand(args);
+                Actions.sendCommand(args);
                 break;
             case "stream":
-                streamService(args);
+                Actions.streamService(args);
                 break;
             default:
         }
@@ -104,7 +102,8 @@ function setupConfig() {
     var defaultConfig = [{
         "name":"local",
         "type":"amqp",
-        "uri":"amqp://localhost"
+        "uri":"amqp://localhost",
+        "default":true
     }];
 
     fs.writeFile(discoveryConfigFile, JSON.stringify(defaultConfig), function(err) {
@@ -117,163 +116,27 @@ function setupConfig() {
     });
 }
 
-function sendCommand(args) {
-    if (process.stdin.isTTY) {
-        processCommand(args[0], args[1], function() { process.exit(0); })
-    } else {
-        processStreamInput(args)
-    }
-}
-
-function processStreamInput(args) {
-
-    var streamCompleted = false;
-
-    process.stdin.pipe(require('split')()).on('data', processLine).on("end", function() {
-        streamCompleted = true;
-    });
-
-    var commandsOutstanding = 0;
-
-    function processLine (line) {
-        if (line != null && line.length > 0) {
-            commandsOutstanding++;
-            processCommand(args[0], line, function(){
-                commandsOutstanding--;
-                if (commandsOutstanding == 0 && streamCompleted) {
-                    exit();
-                }
-            });
-        }
-    }
-}
-
-function processCommand(url, payloadString, done) {
-    var json = JSON.parse(payloadString);
-    muon.command(url, json, function(event, payload) {
-        try {
-            if (event.Status == "404") {
-                logger.error("Service returned 404 when accessing " + args[0]);
-            } else {
-                if (showCommandOutput) {
-                    console.dir(payload);
-                }
-            }
-        } catch (e) {
-            logger.error("Failed to render the response", e);
-        }
-        done();
-    });
-}
-
-
-function queryService(args) {
-
-    //TODO, check the first arg is a valud URI
-
-    muon.query(args[0], function(event, payload) {
-        try {
-            if (event.Status == "404") {
-                logger.error("Service returned 404 when accessing " + args[0]);
-            } else {
-                console.dir(payload);
-            }
-        } catch (e) {
-            logger.error("Failed to render the response", e);
-        }
-        exit();
-    });
-}
-
-function streamService(args) {
-
-    //TODO, check the first arg is a valid URI
-    muon.subscribe(args[0], function(event, payload) {
-        console.log(JSON.stringify(payload));
-    });
-}
-
-function discoverServices() {
-
-    //if (args[0] != null) {
-    //    introspection.analyseUrl(args[0], function(analysis) {
-    //
-    //        switch(analysis.type) {
-    //            case "service":
-    //                Display.displayService(analysis);
-    //                break;
-    //            case "query":
-    //                Display.displayEndpoint(analysis);
-    //                break;
-    //            case "command":
-    //                Display.displayEndpoint(analysis);
-    //                break;
-    //            case "stream":
-    //                Display.displayEndpoint(analysis);
-    //                break;
-    //        }
-    //
-    //        exit();
-    //    });
-    //    return;
-    //}
-
-    var workflow = RQ.sequence([
-        discoverServiceList,
-        introspectServices,
-        Display.displayServices,
-        Display.displayStreams,
-        Display.displayQueries,
-        Display.displayCommands,
-        Display.showFooter,
-        exit
-    ]);
-
-    workflow(function() {
-        console.log("Completed workflow");
-    }, {});
-}
-
-function introspectServices(callback, value) {
-
-    introspectionClient.loadEndpoints(value.serviceList, function(introspections) {
-        logger.debug("Endpoints have been loaded from the discovery system");
-        callback({
-            introspection:introspections,
-            serviceList:value.serviceList,
-            services:value.services
-        })
-    });
-
-    return function cancel(reason) {
-        console.log("Asked to cancel?");
-    };
-}
-
 function exit() {
     process.exit(0);
 }
-
-function discoverServiceList(callback) {
-    muon.discoverServices(function (services) {
-        var serviceList = _.collect(services, function (it) {
-            return it.identifier;
-        });
-        callback({
-            services:services,
-            serviceList:serviceList
-        });
-    });
-    return function cancel(reason) {
-      console.log("Asked to cancel?");
-    };
-}
-
 
 function initialiseMuon(options) {
     var discovery = _.find(discoveryConfig, function(it) {
         return it.name == options.discovery;
     });
+
+    if (typeof discovery === 'undefined' && discoveryConfig.length == 1) {
+        discovery = discoveryConfig[0];
+        logger.debug("Only one discovery configuration, selecting: " + discovery.name);
+    }
+    if (typeof discovery === 'undefined') {
+        discovery = _.find(discoveryConfig, function(it) {
+            return it.default == true;
+        });
+        if (discovery !== "undefined") {
+            logger.debug("Selected default discovery configuration: " + discovery.name);
+        }
+    }
 
     if (typeof discovery !== 'undefined') {
         switch(discovery.type) {
