@@ -20,7 +20,6 @@ var cli = require('cli').enable('status'); //Enable 2 plugins
 
 var discoveryConfig;
 var discoveryConfigFile;
-var showCommandOutput;
 
 try {
     discoveryConfigFile = getUserHome() + '/.muon/discovery.json';
@@ -43,6 +42,7 @@ cli.parse({
     "discover":"Allow inspection of the current system",
     "query":"Call a query endpoint",
     "command":"Submit a command to a remote service. Auto detects when used in a unix pipe and submits one command per line of input",
+    "event":"Dispatch an event to the system Event Store. Auto detects when used in a unix pipe and submits one event per line of input. A special type of command with dynamic lookup of Event Store endpoint and wrapping schema",
     "stream":"Tap into a remote stream exposed by a service and output to standard out"
 });
 
@@ -61,8 +61,6 @@ cli.main(function(arguments, opts) {
         logger.info("Default configuration has been generated at " + discoveryConfigFile);
         return;
     }
-
-    showCommandOutput = !options["suppress-output"];
 
     initialiseMuon(options);
 
@@ -92,6 +90,9 @@ cli.main(function(arguments, opts) {
                 break;
             case "stream":
                 Actions.streamService(args);
+                break;
+            case "event":
+                Actions.sendEvent(args);
                 break;
             default:
         }

@@ -1,3 +1,4 @@
+require("../lib/logging/logger");
 
 var _ = require("underscore");
 var RQ = require("async-rq");
@@ -6,7 +7,7 @@ require("console.table");
 var options;
 var Display;
 var muon;
-var introspectionClient;
+var showCommandOutput;
 
 module.exports = function(
     localmuon,
@@ -15,13 +16,37 @@ module.exports = function(
     muon = localmuon;
     options = opts;
     Display = require("./display")(opts);
+    showCommandOutput = !opts["suppress-output"];
 
     return {
         queryService:queryService,
         sendCommand:sendCommand,
+        sendEvent:sendEvent,
         streamService:streamService
     };
 };
+
+function sendEvent(args) {
+
+    //TODO, lookup the eventstore.
+    muon.discoverServices(function (services) {
+        var eventStore = _.find(services, function (it) {
+            logger.trace("Checking " + JSON.stringify(it) + ":" + _.contains(it.tags, "eventstore"));
+            return _.contains(it.tags, "eventstore");
+        });
+        if (eventStore == null || eventStore === "undefined") {
+            logger.info("No event store is available in the system, events are unable to be dispatched. Use 'muon discover' to see the " + services.length + " running services");
+            exit();//
+        } else {
+            logger.debug("Eventstore is " + eventStore.identifier);
+            if (process.stdin.isTTY) {
+                processCommand("muon://" + eventStore.identifier + "/events", args[0], function() { process.exit(0); })
+            } else {
+                processStreamInput(["muon://" + eventStore.identifier + "/events", args[0]])
+            }
+        }
+    });
+}
 
 function sendCommand(args) {
     if (process.stdin.isTTY) {
