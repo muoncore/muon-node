@@ -35,7 +35,7 @@ describe("Simple muon resource client/server test", function () {
 
      it("test2: add projection", function (done) {
 
-            var projectionName = 'photontest-projection';
+            var projectionName = 'test-projection';
 
              var filename = './end2endTests/' + projectionName + '.js';
 
@@ -58,8 +58,8 @@ describe("Simple muon resource client/server test", function () {
              logger.info("insert_projection() inserting projection via muon: " + filename);
              //callback({event: {}, payload: {}});
              muon.command('muon://photon/projections', projectionWrapper, function (event, payload) {
-                 logger.info("projection " + projectionName + " response: ", event);
-
+                 logger.info("projection " + projectionName + " event response: ", event);
+                 logger.info("projection " + projectionName + " payload response: ", payload);
                 done();
              });
 

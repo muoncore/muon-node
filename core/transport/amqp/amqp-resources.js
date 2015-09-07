@@ -49,7 +49,7 @@ AmqpResources.prototype.sendAndWaitForReply = function (event, callback) {
     //get the url elements
 
     logger.debug('Dispatch resource request on ' + event.url);
-    logger.trace('sendAndWaitForReply callback = ', callback);
+    //logger.trace('sendAndWaitForReply callback = ', callback);
     var u = url.parse(event.url, true);
     logger.trace('resource query params: ', u.query);
     var requestId = uuid.v1();
