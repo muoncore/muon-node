@@ -13,13 +13,18 @@ var AmqpResources = function (queues) {
     this.responseHandlers = {};
 
     this.queues.listen(this.replyQueue, function (event) {
+
+
         logger.debug("Resource response received: ", event.headers);
+        logger.trace("whole event: ", event);
         var headers = event.headers;
 
         //TODO assert that it's JSON!
 
         var res = headers.RequestID;
         var handler = _this.responseHandlers[res];
+         logger.trace("header id: ", res);
+        logger.trace("response hander map: ", _this.responseHandlers);
         if (typeof(handler) != 'function') {
             logger.warn("Received a response for an unregistered request");
             return;
@@ -29,8 +34,8 @@ var AmqpResources = function (queues) {
             handler(headers, event.payload);
         } catch (err) {
             logger.warn("Unable to correctly parse the response");
-            console.dir(err);
-            handler(headers, {});
+            logger.warn(err.stack);
+            handler(headers, {message: event.payload});
         }
     });
 
@@ -44,7 +49,7 @@ AmqpResources.prototype.sendAndWaitForReply = function (event, callback) {
     //get the url elements
 
     logger.debug('Dispatch resource request on ' + event.url);
-
+    logger.trace('sendAndWaitForReply callback = ', callback);
     var u = url.parse(event.url, true);
     logger.trace('resource query params: ', u.query);
     var requestId = uuid.v1();

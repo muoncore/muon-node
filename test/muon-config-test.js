@@ -8,8 +8,9 @@ var fs = require('fs');
 describe("Muon config test", function () {
 
     //this.timeout(7000);
+        this.timeout(7000);
 
-    it("accepts zero config and uses sensible defaults", function (done) {
+    it("test1: accepts zero config and uses sensible defaults", function (done) {
         var muonCore = require("../muon");
         var errThrown = false;
         try {
@@ -23,18 +24,36 @@ describe("Muon config test", function () {
 
     });
 
-    it("accepts transport URL to define config", function (done) {
+    it("test2: accepts transport URL to define config", function (done) {
         var muonCore = require("../muon");
         var amqpUrl = "amqp://muon:microservices@localhost";
         var serviceName = "muon-config-test";
 
         var muon = muonCore.generateMuon(serviceName, amqpUrl);
         assert(muon);
-        done();
+
+
+
+
+         var payload = { 'service-id': 'muon://photon/events', 'local-id': 'abc123xyz',
+                                       payload: { user: { id: '0002', first: 'Gawain', last: 'Hammond', password: 'testing', stream: 'users' } },
+                                       'stream-name': 'photontest', 'server-timestamp': 1441634631338 };
+
+        muon.command('muon://photon/events' , payload, function(event, payload) {
+                console.log('photon client: response event: ', event);
+                console.log('photon client: response payload :',payload);
+
+                    //assert.equal(payload.message, serverMessage, 'server response message');
+                    done();
+
+         });
+
+
+
 
     });
 
-    it("looks for default config file", function (done) {
+    it("test3: looks for default config file", function (done) {
         var muonCore = require("../muon");
         var file = "./muon.config";
         var config = {
