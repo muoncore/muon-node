@@ -1,19 +1,17 @@
 
 var Logger = require('../lib/logging/logger');
-var StreamClient = require("../amqp/stream/StreamClient.js");
-var queues = require("../amqp/amqp-queues.js");
-var Connection = require("../amqp/amqp-connection.js");
+var StreamClient = require("../core/transport/amqp/stream/StreamClient.js");
+var queues = require("../core/transport/amqp/amqp-queues.js");
+var Connection = require("../core/transport/amqp/amqp-connection.js");
 
 require('mocha-sinon');
 var sinon = require("sinon");
 var assert = require('assert');
 var url = require('url');
-var request = require('request');
 var _ = require('underscore');
 var q;
 var fakeQueue;
 var mockqueues;
-var clock;
 
 describe("AMQP Stream Client", function () {
 
@@ -147,42 +145,7 @@ describe("AMQP Stream Client", function () {
         mockqueues.verify();
     });
 
-    it("sends keep alive to server", function (done) {
-        this.timeout(5000);
-        //subscribe.
-        mockqueues.expects("send").once().withArgs("remote_stream_control",
-            sinon.match({
-                headers:{
-                    command:"KEEP-ALIVE",
-                    SUBSCRIPTION_STREAM_ID:sinon.match.string
-                }
-            }));
-
-        //subscribe.
-        mockqueues.expects("send").once().withArgs("remote_stream_control",
-            sinon.match({
-                headers:{
-                    command:"REQUEST"
-                }
-            }));
-
-        var client = new StreamClient(fakeQueue);
-        client.connection.streamName="something";
-        client.connection.remoteCommandQueue="remote_stream_control";
-
-        client.subscribed.dispatch({
-            headers:{
-                "command":"SUBSCRIPTION_ACK",
-                "SUBSCRIPTION_STREAM_ID":"12345"
-            }
-        });
-
-        setTimeout(function() {
-            mockqueues.verify();
-            done();
-        }, 4000);
-    });
-
+    //sends keep-alive to the server during a connection.
     //expires the connection with an ERROR if the server doesn't send keep-alive
 
 });
