@@ -3,11 +3,18 @@ var AmqpQueues = function (connection) {
     this.exchange = connection.exchange('');
 };
 
+AmqpQueues.prototype.setEventLogger = function (eventLogger) {
+    this.eventLogger = eventLogger;
+};
+
 AmqpQueues.prototype.send = function (queueName, event) {
     var _this = this;
     logger.debug('Emitting event on queue ' + queueName);
     logger.trace('event: ', event);
 
+    if (this.eventLogger != null) {
+        this.eventLogger.logEvent(queueName, event);
+    }
     //if (typeof event.payload !== 'object') {
     //    logger.error('event payload is not of type object. Currently muon node can only sent json object types');
     //    logger.error('event payload: ' + event.payload);
@@ -59,6 +66,8 @@ AmqpQueues.prototype.send = function (queueName, event) {
 AmqpQueues.prototype.listen = function (queueName, callback) {
 
     logger.debug("Creating listen queue " + queueName);
+    var _this = this;
+
     this.connection.queue(queueName, {
         durable: false,
         exclusive: false,
@@ -69,6 +78,14 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
             //todo, headers ...
             logger.trace("Queue message received on " + queueName, message);
 
+            if (_this.eventLogger != null) {
+                var logEvent = {
+                    headers: headers,
+                    payload:message
+                };
+                _this.eventLogger.logEvent(queueName, logEvent);
+            }
+
             callback({
                 "headers": headers,
                 "payload": message
@@ -78,4 +95,3 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
 };
 
 module.exports = AmqpQueues;
-

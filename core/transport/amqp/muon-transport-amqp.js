@@ -28,6 +28,10 @@ var AmqpTransport = function (url) {
     });
 };
 
+AmqpTransport.prototype.setEventLogger = function (eventLogger) {
+    this.queues.setEventLogger(eventLogger);
+};
+
 AmqpTransport.prototype.setServiceIdentifier = function (serviceIdentifier) {
     this.serviceIdentifier = serviceIdentifier;
 };

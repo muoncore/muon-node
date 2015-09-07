@@ -22,6 +22,7 @@
 
 require("../lib/logging/logger");
 
+var EventLogger = require("./introspection/eventlogger");
 var AmqpTransport = require("./transport/amqp/muon-transport-amqp");
 var AmqpDiscovery = require("./discovery/amqp/muon-discovery-amqp");
 var assert = require('assert');
@@ -112,7 +113,16 @@ MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
             // TODO, use the discovery url instead
             var discovery = new AmqpDiscovery(transport.url);
             var amqp = new AmqpTransport(transport.url);
-            muon = new MuonCore(config.serviceName, discovery, config.tags);
+            muon = new MuonCore(
+                config.serviceName,
+                discovery,
+                config.tags);
+            if (config.eventLogger != null) {
+                muon.setEventLogger(new EventLogger(
+                    muon,
+                    config.eventLogger.target
+                ));
+            }
             muon.addTransport(amqp);
         }
     });
