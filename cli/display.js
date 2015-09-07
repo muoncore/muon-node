@@ -15,6 +15,7 @@ module.exports = function(opts) {
         displayStreams: displayStreams,
         displayCommands:displayCommands,
         displayQueries: displayQueries,
+        displayCapabilities: displayCapabilities,
         showFooter: showFooter
     };
 };
@@ -27,6 +28,26 @@ function displayEndpoint(analysis) {
     console.log("Endpoint display!! not implemented yet :-(");
 }
 
+function displayCapabilities(callback, value) {
+
+    //mention service number
+    console.log("There are " + value.serviceList.length + " services currently running");
+    //is there an event store?
+    var eventStore = _.find(value.services, function(it) {
+        return _.contains(it.tags, "eventstore");
+    });
+
+    if (eventStore === "undefined") {
+        console.log("\nThere is no event store running\n");
+        console.log("\nThe muon 'event' command will not be operational\n");
+    } else {
+        console.log("\nAn eventstore is running, and calls itself \"" + eventStore.identifier + "\"");
+        console.log("\nYou can send a durable event using 'muon event'\n");
+        //how many streams etc does it have, asyn callback...?
+
+    }
+    return callback(value);
+}
 
 function displayServices(callback, value) {
 

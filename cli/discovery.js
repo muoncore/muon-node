@@ -51,6 +51,7 @@ function discoverServices() {
     var workflow = RQ.sequence([
         discoverServiceList,
         introspectServices,
+        Display.displayCapabilities,
         Display.displayServices,
         Display.displayStreams,
         Display.displayQueries,
