@@ -37,7 +37,7 @@ function displayCapabilities(callback, value) {
         return _.contains(it.tags, "eventstore");
     });
 
-    if (eventStore === "undefined") {
+    if (eventStore === "undefined" || eventStore == null) {
         console.log("\nThere is no event store running\n");
         console.log("\nThe muon 'event' command will not be operational\n");
     } else {
