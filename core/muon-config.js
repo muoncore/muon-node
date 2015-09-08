@@ -49,6 +49,14 @@ MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
              ]
     }
 
+     var muonDebug = process.env.MUON_CONFIG_DEBUG;
+    if (muonDebug) {
+            config['eventLogger'] = {
+                "target": muonDebug
+              }
+    }
+
+
 
     var muonConfigUrlEnv = process.env.MUON_CONFIG_URL;
     var muonConfigServiceNameEnv = process.env.MUON_CONFIG_SVC;
@@ -61,10 +69,10 @@ MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
          config.transports[0].url = discoveryUrl;
          config.serviceName = serviceName;
     } else if (muonConfigUrlEnv && muonConfigServiceNameEnv) {
-            logger.debug("Configuring muon via shell: $MUON_CONFIG_URL=" + envVar + ", $MUON_CONFIG_SVC=" + muonConfigServiceName);
+            logger.debug("Configuring muon via shell: $MUON_CONFIG_URL=" + muonConfigUrlEnv + ", $MUON_CONFIG_SVC=" + muonConfigServiceNameEnv);
             config.discovery.url = muonConfigUrlEnv;
             config.transports[0].url = muonConfigUrlEnv;
-            config.serviceName = muonConfigServiceName;
+            config.serviceName = muonConfigServiceNameEnv;
     } else {
         // Try a config file
         logger.debug("Trying local file ./muon.config ... ");
@@ -97,13 +105,6 @@ MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
         throw new Error("serviceName missing from config");
     }
     */
-
-
-
-
-
-
-
 
 
     var muon;
