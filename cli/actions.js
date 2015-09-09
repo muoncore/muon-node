@@ -100,8 +100,12 @@ function processCommand(url, payloadString, done) {
 
 function queryService(args) {
 
-    //TODO, check the first arg is a valud URI
+    var payload = {};
+    if (args[1]) {
+        payload = JSON.parse(args[1]);
+    }
 
+    //TODO, check the first arg is a valud URI
     muon.query(args[0], function(event, payload) {
         try {
             if (event.Status == "404") {
@@ -113,7 +117,7 @@ function queryService(args) {
             logger.error("Failed to render the response", e);
         }
         exit();
-    });
+    }, payload);
 }
 
 function streamService(args) {

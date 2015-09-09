@@ -60,6 +60,7 @@ AmqpResources.prototype.sendAndWaitForReply = function (event, callback) {
 
     if (typeof event.payload !== 'object') {
         logger.error('event payload is not of type object. Currently muon node can only sent json object types');
+        logger.error('payload is ' + JSON.stringify(event.payload));
         throw ('event payload is not of type object. Currently muon node can only sent json object types');
     }
 
@@ -74,12 +75,12 @@ AmqpResources.prototype.sendAndWaitForReply = function (event, callback) {
         "RequestID": requestId
     };
 
-    var queryParams = {};
-
-    for (var k in u.query) queryParams[k] = u.query[k];
+    for (var k in u.query) {
+        event.payload[k] = u.query[k];
+    }
 
     event.headers = head;
-    event.params = queryParams;
+
     logger.debug('sending event ' + event.headers.RequestID);
     this.queues.send(queue, event);
 };
