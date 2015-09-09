@@ -29,7 +29,8 @@ cli.parse({
     "all":  ['a', 'Discover everything about a system'],
     "streams":  ['s', 'Show discovered streams in the system'],
     "queries":  ['q', 'Show discovered available queries'],
-    "commands":  ['c', 'Show discovered commands']
+    "commands":  ['c', 'Show discovered commands'],
+    "name":  ['n', 'What should this CLI announce itself as. Default is "cli". Useful for long running streaming tasks', 'string']
 },
 {
     "setup": "Generate a default configuration",
@@ -138,8 +139,11 @@ function initialiseMuon(options) {
             case "amqp":
                 var amqp = new AmqpTransport(discovery.uri);
                 discovery = new AmqpDiscovery(discovery.uri);
-
-                muon = new MuonCore("cli", discovery, [
+                var name = "cli";
+                if (options.name) {
+                    name = options.name;
+                }
+                muon = new MuonCore(name, discovery, [
                     "cli", "node"
                 ]);
 
