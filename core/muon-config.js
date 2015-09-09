@@ -76,7 +76,7 @@ MuonConfig.prototype.generateMuon = function (serviceName, discoveryUrl) {
     } else if (muonConfigDockerEnv) {
         logger.debug("Running in a Docker environment with a link to RabbitMQ, autoconfiguring to connect for discovery");
         config.discovery.url = "amqp://muon:microservices@" + muonConfigDockerEnv;
-        config.transports[0].url = config.discovery.url = "muon://muon:microservices@" + muonConfigDockerEnv;;
+        config.transports[0].url = config.discovery.url = "amqp://muon:microservices@" + muonConfigDockerEnv;;
     } else {
         // Try a config file
         logger.debug("Trying local file ./muon.config ... ");
