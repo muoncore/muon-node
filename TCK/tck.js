@@ -2,7 +2,7 @@
 var _ = require("underscore");
 var muonCore = require("../muon");
 
-var muon = muonCore.generateMuon();
+var muon = muonCore.generateMuon("tck");
 
 var queueEvents = [];
 

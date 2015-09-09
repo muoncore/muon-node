@@ -5,6 +5,8 @@ require("./lib/logging/logger");
 var AmqpTransport = require("./core/transport/amqp/muon-transport-amqp");
 var AmqpDiscovery = require("./core/discovery/amqp/muon-discovery-amqp");
 var MuonCore = require("./core/muon-core");
+var CliConfig = require("./cli/config");
+
 var _ = require("underscore");
 var uuid = require("node-uuid");
 var fs = require('fs');
@@ -18,15 +20,7 @@ var IntrospectionClient = require("./core/introspection/introspection-client");
 
 var cli = require('cli').enable('status'); //Enable 2 plugins
 
-var discoveryConfig;
-var discoveryConfigFile;
-
-try {
-    discoveryConfigFile = getUserHome() + '/.muon/discovery.json';
-    discoveryConfig = JSON.parse(fs.readFileSync(discoveryConfigFile, 'utf8'));
-} catch(e) {
-    noConfigFile(discoveryConfigFile);
-}
+var discoveryConfig = CliConfig();
 
 cli.parse({
     discovery: ['d', 'the discovery configuration to use from the config file', 'string'],
@@ -165,11 +159,3 @@ function initialiseMuon(options) {
     }
 }
 
-function getUserHome() {
-    return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-}
-
-function noConfigFile(discoveryConfigFile) {
-    console.log("\n\nNo Discovery file found at " + discoveryConfigFile);
-    console.log("You can generate a default file by running 'muon setup'\n\n");
-}

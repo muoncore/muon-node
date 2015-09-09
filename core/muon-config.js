@@ -31,48 +31,52 @@ var _ = require("underscore");
 var fs = require("fs");
 var RQ = require("async-rq");
 
-var MuonConfig = function () {};
+var MuonConfig = function () {
+};
 
-MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
+MuonConfig.prototype.generateMuon = function (serviceName, discoveryUrl) {
     logger.debug("Initialising Muon from Environmental information, checking ...");
-     logger.debug("Configuring via function args: discoveryUrl=" + discoveryUrl + ", serviceName=" + serviceName);
+    logger.debug("Configuring via function args: discoveryUrl=" + discoveryUrl + ", serviceName=" + serviceName);
 
     var config = {
-             "serviceName": undefined,
-             "tags" : [ "" ],
-             "discovery": {
-               "type": "amqp",
-               "url": undefined
-             },
-             "transports": [
-               { "type":"amqp", "url": undefined }
-             ]
-    }
+        "serviceName": serviceName,
+        "tags": [""],
+        "discovery": {
+            "type": "amqp",
+            "url": undefined
+        },
+        "transports": [
+            {"type": "amqp", "url": undefined}
+        ]
+    };
 
-     var muonDebug = process.env.MUON_CONFIG_DEBUG;
+    var muonDebug = process.env.MUON_CONFIG_DEBUG;
     if (muonDebug) {
-            config['eventLogger'] = {
-                "target": muonDebug
-              }
+        config['eventLogger'] = {
+            "target": muonDebug
+        }
     }
-
 
 
     var muonConfigUrlEnv = process.env.MUON_CONFIG_URL;
     var muonConfigServiceNameEnv = process.env.MUON_CONFIG_SVC;
 
-
+    var muonConfigDockerEnv = process.env.RABBITMQ_PORT_5672_TCP_ADDR;
 
     if (discoveryUrl && serviceName) {
         logger.debug("Configuring via function args: discoveryUrl=" + discoveryUrl + ", serviceName=" + serviceName);
-         config.discovery.url = discoveryUrl;
-         config.transports[0].url = discoveryUrl;
-         config.serviceName = serviceName;
+        config.discovery.url = discoveryUrl;
+        config.transports[0].url = discoveryUrl;
+        config.serviceName = serviceName;
     } else if (muonConfigUrlEnv && muonConfigServiceNameEnv) {
-            logger.debug("Configuring muon via shell: $MUON_CONFIG_URL=" + muonConfigUrlEnv + ", $MUON_CONFIG_SVC=" + muonConfigServiceNameEnv);
-            config.discovery.url = muonConfigUrlEnv;
-            config.transports[0].url = muonConfigUrlEnv;
-            config.serviceName = muonConfigServiceNameEnv;
+        logger.debug("Configuring muon via shell: $MUON_CONFIG_URL=" + muonConfigUrlEnv + ", $MUON_CONFIG_SVC=" + muonConfigServiceNameEnv);
+        config.discovery.url = muonConfigUrlEnv;
+        config.transports[0].url = muonConfigUrlEnv;
+        config.serviceName = muonConfigServiceNameEnv;
+    } else if (muonConfigDockerEnv) {
+        logger.debug("Running in a Docker environment with a link to RabbitMQ, autoconfiguring to connect for discovery");
+        config.discovery.url = "muon://muon:microservices@" + muonConfigDockerEnv;
+        config.transports[0].url = config.discovery.url = "muon://muon:microservices@" + muonConfigDockerEnv;;
     } else {
         // Try a config file
         logger.debug("Trying local file ./muon.config ... ");
@@ -89,26 +93,26 @@ MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
 
     logger.debug("MuonConfig config=", config);
 
-/*
-    if (! config.discovery.url) {
-        logger.error("discovery URL missing from config");
-        throw new Error("discovery URL missing from config");
-    }
+    /*
+     if (! config.discovery.url) {
+     logger.error("discovery URL missing from config");
+     throw new Error("discovery URL missing from config");
+     }
 
-    if (! config.transports[0].url) {
-        logger.error("transports[0].url missing from config");
-        throw new Error("transports[0].url missing from config");
-    }
+     if (! config.transports[0].url) {
+     logger.error("transports[0].url missing from config");
+     throw new Error("transports[0].url missing from config");
+     }
 
-    if (! config.serviceName) {
-        logger.error("serviceName missing from config");
-        throw new Error("serviceName missing from config");
-    }
-    */
+     if (! config.serviceName) {
+     logger.error("serviceName missing from config");
+     throw new Error("serviceName missing from config");
+     }
+     */
 
 
     var muon;
-    _.each(config.transports, function(transport) {
+    _.each(config.transports, function (transport) {
         if (transport.type == "amqp") {
             logger.debug("Initialising AMQP based transport from configuration - " + transport.url);
             // TODO, use the discovery url instead
@@ -130,8 +134,6 @@ MuonConfig.prototype.generateMuon = function(serviceName, discoveryUrl) {
 
     return muon;
 };
-
-
 
 
 module.exports = MuonConfig;
