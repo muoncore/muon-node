@@ -66,11 +66,11 @@ cli.main(function(arguments, opts) {
         options);
     Actions = require("./cli/actions")(muon, options);
 
-    if (process.stdin.isTTY) {
+    if (process.stdin.isTTY && process.stdout.isTTY) {
         cli.spinner('Connecting ... ');
     }
     muon.onReady(function () {
-        if (process.stdin.isTTY) {
+        if (process.stdin.isTTY && process.stdout.isTTY) {
             cli.spinner("", true);
         }
         switch(cli.command) {
