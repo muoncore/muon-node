@@ -4,3 +4,5 @@ xunit.xml
 *.iws
 .idea/
 node_modules/
+muon.config
+test-results/
