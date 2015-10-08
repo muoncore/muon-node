@@ -40,14 +40,6 @@ AmqpTransport.prototype.getUrl = function () {
     return this.url;
 };
 
-AmqpTransport.prototype.emit = function (event) {
-    this.broadcast.emit(event);
-};
-
-AmqpTransport.prototype.listenOnBroadcast = function (event, callback) {
-    this.broadcast.listenOnBroadcast(event, callback);
-};
-
 AmqpTransport.prototype.sendAndWaitForReply = function (event, callback) {
     this.resources.sendAndWaitForReply(event, callback);
 };

@@ -123,30 +123,6 @@ MuonCore.prototype.discoverServices = function (callback) {
 };
 
 
-MuonCore.prototype._listenOnBroadcast = function (event, callback) {
-    var _this = this;
-    this.readyWait(function () {
-        var transports = _this.transports;
-
-        for (var i = 0; i < transports.length; i++) {
-            var transport = transports[i];
-            transport.broadcast.listenOnBroadcast(event, callback);
-        }
-    });
-};
-
-MuonCore.prototype._emit = function (payload) {
-    var _this = this;
-    this.readyWait(function () {
-        var transports = _this.transports;
-
-        for (var i = 0; i < transports.length; i++) {
-            var transport = transports[i];
-            transport.broadcast.emit(payload);
-        }
-    });
-};
-
 MuonCore.prototype._listenOnResource = function (resource, method, callback) {
     var _this = this;
     this.readyWait(function () {

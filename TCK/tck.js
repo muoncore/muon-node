@@ -12,38 +12,6 @@ muon.onQuery("/tckQueueRes", function(request, message, response) {
 
 var events = [];
 
-//setInterval(function() {
-//    muon.broadcast.emit("echoBroadcast", {reply: "test"}, {identifier: "Emitted Test"});
-//},3500);
-
-//muon.stream.provideStream("/something", function(subscriber) {
-//
-//    //todo, the reactive streams API here ...
-//
-//    var subscription = {
-//        //request
-//        subscribe: function() {
-//
-//        }
-//    };
-//
-//    return stream;
-//});
-
-muon.on("echoBroadcast", function(event, payload) {
-    muon.broadcast.emit("echoBroadcastResponse", {}, payload);
-});
-
-muon.on("echoBroadcastResponse", function(event) {
-    logger.info("Received an echoBroadcastResponse");
-    //console.dir(JSON.parse(event.payload.toString()));
-});
-
-muon.on("tckBroadcast", function(event, payload) {
-    logger.info("Got an event " + payload);
-    events.push(payload);
-});
-
 muon.onQuery("/discover", function(event, data, respond) {
     muon.discoverServices(function(services) {
         logger.info('Discovery called');
