@@ -15,7 +15,7 @@ mkdir $LOCALDIR/test-results
 
 sleep 10
 
-docker-compose run muon-tck
+docker-compose run muon-tck $@
 #docker run --link muonjava_rabbitmq_1:rabbitmq  -v $LOCALDIR/test-results:/app/test-results simplicityitself/muon-amqp-protocol-spec
 
 docker-compose stop --timeout 2
