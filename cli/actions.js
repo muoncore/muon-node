@@ -105,6 +105,7 @@ function queryService(args) {
         payload = JSON.parse(args[1]);
     }
 
+    //muon.query(args[0]).then(function)
     //TODO, check the first arg is a valud URI
     muon.query(args[0], function(event, payload) {
         try {
@@ -121,11 +122,19 @@ function queryService(args) {
 }
 
 function streamService(args) {
-
-    //TODO, check the first arg is a valid URI
-    muon.subscribe(args[0], function(event, payload) {
+    var onNext = function(payload){
         console.log(JSON.stringify(payload));
-    });
+    };
+    var error = function(err){
+        console.error("Stream terminated with error: " + JSON.stringify(err));
+        exit();
+    };
+    var completed = function() {
+        console.error("Stream completed");
+        exit();
+    };
+    muon.subscribe(args[0]).subscribe(onNext, error, completed);
+
 }
 
 function exit() {

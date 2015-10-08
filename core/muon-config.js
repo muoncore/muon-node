@@ -82,10 +82,13 @@ MuonConfig.prototype.generateMuon = function (serviceName, discoveryUrl) {
         logger.debug("Trying local file ./muon.config ... ");
         var configFile = './muon.config';
 
+        var txt;
         try {
-            config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+            txt = fs.readFileSync(configFile, 'utf8');
+            config = JSON.parse(txt);
         } catch (err) {
             logger.error("Error opening config file: ", err);
+            logger.error("config file contents: " + txt);
             throw new Error("Cannot find service config from injection via generateMuon(serviceName, discoveryUrl), $MUON_CONFIG_URL/$MUON_CONFIG_SVC or file " + configFile, err);
         }
 

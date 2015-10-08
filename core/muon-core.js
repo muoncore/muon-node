@@ -102,6 +102,7 @@ MuonCore.prototype.query = function (url, callback, resource) {
         method: "query"
     }, callback);
 };
+
 MuonCore.prototype.command = function (url, payload, callback) {
     this._sendAndWaitForReply({
         url: url,
@@ -109,10 +110,11 @@ MuonCore.prototype.command = function (url, payload, callback) {
         method: "command"
     }, callback);
 };
-MuonCore.prototype.subscribe = function (streamUri, callback) {
+
+MuonCore.prototype.subscribe = function (streamUri) {
     this.checkReady();
     //TODO, transport discovery
-    this.transports[0].subscribe(streamUri, callback);
+    return this.transports[0].subscribe(streamUri);
 };
 
 MuonCore.prototype.discoverServices = function (callback) {

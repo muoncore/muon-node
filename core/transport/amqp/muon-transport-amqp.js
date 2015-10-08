@@ -43,6 +43,7 @@ AmqpTransport.prototype.getUrl = function () {
 AmqpTransport.prototype.emit = function (event) {
     this.broadcast.emit(event);
 };
+
 AmqpTransport.prototype.listenOnBroadcast = function (event, callback) {
     this.broadcast.listenOnBroadcast(event, callback);
 };
@@ -55,8 +56,8 @@ AmqpTransport.prototype.listenOnResource = function (resource, method, callback)
     this.resources.listenOnResource(resource, method, callback);
 };
 
-AmqpTransport.prototype.subscribe = function (streamUri, dataCallback) {
-    this.streams.subscribe(streamUri, dataCallback);
+AmqpTransport.prototype.subscribe = function (streamUri) {
+    return this.streams.subscribe(streamUri);
 };
 
 module.exports = AmqpTransport;

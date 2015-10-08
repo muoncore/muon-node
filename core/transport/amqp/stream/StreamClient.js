@@ -37,9 +37,10 @@ var StreamClient = function (queues) {
     cl.completed.add(this.clearKeepAlive);
     cl.inboundMessageReceived.add(function (data) {
         if (data.headers["TYPE"] == "data") {
-
             cl.dataReceived.dispatch(
                 data, data.payload);
+        } else if (data.headers.TYPE == "complete") {
+            cl.completed.dispatch(data);
         } else {
             switch (data.headers.command) {
                 case "ERROR":
