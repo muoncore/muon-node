@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#  This executes the protocol specs against this client library.
+#  This must orchestrate a minimal environment, bootup the local TCK endpoint
+#  and then execute the protocol specs against it, in the form of the muon-protocol-specs task container.
+
 LOCALDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 npm install

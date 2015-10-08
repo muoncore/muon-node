@@ -5,6 +5,7 @@ var fs = require('fs');
 
 
 
+
 describe("Muon config test", function () {
 
     //this.timeout(7000);
@@ -14,12 +15,12 @@ describe("Muon config test", function () {
         var muonCore = require("../muon");
         var errThrown = false;
         try {
-            muon = muonCore.generateMuon();
+            muonCore.generateMuon();
         } catch (err) {
             errThrown = true;
             assert(err);
         }
-        assert(errThrown);
+        assert(!errThrown);
         done();
 
     });
@@ -38,7 +39,10 @@ describe("Muon config test", function () {
 
     it("test3: looks for default config file", function (done) {
         var muonCore = require("../muon");
-        var file = "./muon.config";
+        var file = "muon.config";
+        if (fs.exists(file)) {
+            fs.unlinkSync(file);
+        }
         var config = {
                  "serviceName": "muon-test-config-file",
                  "tags" : [ "" ],
@@ -49,21 +53,14 @@ describe("Muon config test", function () {
                  "transports": [
                    { "type":"amqp", "url": "amqp://muon:microservices@localhost" }
                  ]
-        }
+        };
 
         // write config file, run muon, then delete config file:
-        fs.writeFile(file, JSON.stringify(config), function(err) {
-            if(err) {
-                throw new Error('unable to write config file to disk');
-            }
-            var muon = muonCore.generateMuon();
-            assert(muon);
-            fs.unlinkSync(file);
-            done();
-        });
+        fs.writeFileSync(file, JSON.stringify(config));
 
-
-
+        var muon = muonCore.generateMuon();
+        assert(muon);
+        done();
     });
 
 
