@@ -1,7 +1,7 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "5.4.9",
+  "version": "6.0.0",
   "author": "Simplicity Itself Ltd",
   "keywords": [
     "muon",
@@ -10,7 +10,7 @@
   ],
   "private": false,
   "repository": {
-    "url": "https://github.com/muoncore/muon-node"
+    "url": "https://github.com/microserviceux/muon-node"
   },
   "scripts": {
     "start": "node tck",
