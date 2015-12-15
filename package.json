@@ -27,8 +27,6 @@
     "body-parser": "*",
     "expect.js": "*",
     "url-template": "*",
-    "amqp": "*",
-    "winston": "*",
     "colors": "*",
     "callsite": "*",
     "stack-trace": "*",

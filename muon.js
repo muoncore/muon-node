@@ -1,6 +1,16 @@
 
-var MuonConfig = require("./core/muon-config.js");
 
-module.exports.generateMuon = function(serviceName, discoveryUrl) {
-    return new MuonConfig().generateMuon(serviceName, discoveryUrl);
+var Muon = function (serviceIdentifier, discoveryService, tags) {
+
 };
+
+//API
+/**
+ *
+ * request
+ * handleRequest
+ *
+ */
+
+
+module.exports = Muon;
