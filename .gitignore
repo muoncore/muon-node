@@ -6,3 +6,4 @@ xunit.xml
 node_modules/
 muon.config
 test-results/
+tempdocumentation/
