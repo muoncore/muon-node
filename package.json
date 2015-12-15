@@ -1,7 +1,7 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "5.4.8",
+  "version": "5.4.9",
   "author": "Simplicity Itself Ltd",
   "keywords": [
     "muon",
@@ -18,7 +18,7 @@
     "test": "./node_modules/.bin/mocha --recursive -R xunit-file test/"
   },
   "dependencies": {
-    "console.table" : "*",
+    "console.table": "*",
     "split": "*",
     "underscore": "*",
     "url": "*",
@@ -45,7 +45,7 @@
     "validator": "*",
     "xunit-file": "*",
     "should": "*",
-    "mocha-sinon":"*"
+    "mocha-sinon": "*"
   },
   "engines": {
     "node": "*"
