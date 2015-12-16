@@ -1,9 +1,8 @@
-var bichannel = require('../../core/bi-channel.js');
+var bichannel = require('../../muon/channel/bi-channel.js');
 var assert = require('assert');
-require('sexylog');
 var csp = require("js-csp");
 
-describe("Bi directional Test", function () {
+describe("Bi directional csp channel test", function () {
 
     this.timeout(4000);
 
@@ -29,7 +28,6 @@ describe("Bi directional Test", function () {
          }
 
          var channel = bichannel.create("test-channel");
-         console.log("channel: " + JSON.stringify(channel));
          client1(channel.left());
          client2(channel.right());
 
@@ -38,18 +36,16 @@ describe("Bi directional Test", function () {
 
     it("channel sends and receives messages via synchronous looking calls", function (done) {
 
-         var client1 = function(connection) {
-            connection.send("sent by client 1");
+          var client1 = function(connection) {
+             connection.send("sent by client 1");
 
-            // like go routines csp lib uses go() function to execute generator functions in an apparently synchronous manner
-            csp.go(function*() {
-              var response = yield csp.take(connection.listen());
-               assert.equal(response, "sent by client 2");
-               done();
-            });
-         }
+             csp.go(function*() {
+               var response = yield csp.take(connection.listen());
+                assert.equal(response, "sent by client 2");
+                done();
+             });
+          }
 
-         // like go routines csp lib uses go() function to execute generator functions in an apparently synchronous manner
          var client2 = function(connection) {
                 csp.go(function*() {
                   var response = yield csp.take(connection.listen());
@@ -64,5 +60,7 @@ describe("Bi directional Test", function () {
 
     });
 });
+
+
 
 

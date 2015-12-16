@@ -23,6 +23,7 @@
     "underscore": "*",
     "url": "*",
     "cors": "*",
+    "js-csp": "*",
     "node-uuid": "*",
     "body-parser": "*",
     "expect.js": "*",
