@@ -24,7 +24,7 @@ function ChannelConnection(name, inbound, outbound) {
 
     return {
         send: function(msg) {
-            logger.debug(name + " ChannelConnection.send() msg=" + msg);
+            logger.debug(name + " ChannelConnection.send() msg='" + msg + "'");
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
