@@ -24,14 +24,14 @@ function ChannelConnection(name, inbound, outbound) {
 
     return {
         send: function(msg) {
-            logger.debug(name + " ChannelConnection.send() msg='" + msg + "'");
+            logger.trace(name + " ChannelConnection.send() msg='" + msg + "'");
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.debug(name + " ChannelConnection.listen() value=" + value);
+                     logger.trace(name + " ChannelConnection.listen() value=" + value);
                     if (callback) {
                         callback(value);
                     } else {

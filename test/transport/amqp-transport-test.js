@@ -5,25 +5,22 @@ require('sexylog');
 
 describe("AMQP Transport Test", function () {
 
+  before(function(done) {
+          amqp.connect('amqp://muon:microservices@localhost', function(transport) {
+               done();
+          });
+  });
+
 
     it("transport sends and receives messages ", function (done) {
 
-          var amqpClient = function(channel) {
+            amqp.openChannel("test-echo-service", function(channel) {
                  channel.send("amqp test message");
                  channel.listen(function(response) {
                          assert.equal(response, "amqp test message");
                          done();
                  });
-          }
-
-         amqp.connect('amqp://muon:microservices@localhost', function(transport) {
-            amqp.openChannel("test-service", function(channel) {
-                    amqpClient(channel);
             });
-         });
-
-
-
     });
 
 });
