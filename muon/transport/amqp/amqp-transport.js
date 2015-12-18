@@ -1,30 +1,55 @@
 var amqp = require('amqplib/callback_api');
+require('sexylog');
 
 
 
-module.exports.transport = function(url) {
+module.exports.connect = function(url, queue, cspchannel) {
+    logger.trace('create amqp connection url=' + url);
 
-
-        amqp.connect('amqp://muon:microservices@msg.cistechfutures.net', function(err, conn) {
-                if (err) {
-                     logger.error(err);
-                } else {
-                    logger.info('amqp connection created');
-                    connection = conn;
-                }
+      var connection;
+        var amqpChannel;
+         amqp.connect(url, function(err, conn) {
+            if (err) {
+                 logger.error(err);
+            } else {
+                logger.debug('amqp connection created successfully: ' + url);
+                connection = conn;
+            }
 
              connection.createChannel(function(err, ch) {
-                     var q = 'hello';
-                     ch.assertQueue(q, {durable: false});
-                     ch.sendToQueue(q, new Buffer('Hello World!'));
-                     logger.info(" [x] Sent 'Hello World!'");
-                     logger.info(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
-                     ch.consume(q, function(msg) {
-                           logger.info(" [x] Received %s", msg.content.toString());
-                            connection.close();
-                           done();
+                    logger.debug('create queue ' + queue);
+                     amqpChannel = ch;
+                     amqpChannel.assertQueue(queue, {durable: false});
+
+                     logger.debug('listening for message on csp-channel');
+                     cspchannel.listen(function(msg) {
+                          logger.debug("sending amqp message " + JSON.stringify(msg) );
+                          amqpChannel.sendToQueue(queue, new Buffer(msg));
+                     });
+
+                     amqpChannel.consume(queue, function(msg) {
+                           logger.debug("received amqp message from queue'" + queue + "': " + msg.content.toString());
+                           cspchannel.send(msg.content.toString());
                      }, {noAck: true});
                });
-        });
+          });
 
+         return {
+            close: function() {
+                cspchannel.close();
+                connection.close();
+            },
+            status: function() {
+                return "ok";
+            }
+         }
 }
+
+
+/*
+
+
+
+
+
+*/

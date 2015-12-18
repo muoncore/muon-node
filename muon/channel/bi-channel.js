@@ -1,5 +1,6 @@
 
 var csp = require("js-csp");
+require('sexylog');
 
 /**
  * Muon-node bi-directional channel
@@ -23,14 +24,14 @@ function ChannelConnection(name, inbound, outbound) {
 
     return {
         send: function(msg) {
-            console.log(name + " ChannelConnection.send() msg=" + msg);
+            logger.debug(name + " ChannelConnection.send() msg=" + msg);
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     console.log(name + " ChannelConnection.listen() value=" + value);
+                     logger.debug(name + " ChannelConnection.listen() value=" + value);
                     if (callback) {
                         callback(value);
                     } else {
@@ -40,7 +41,9 @@ function ChannelConnection(name, inbound, outbound) {
                 }
             });
         },
-        name: name
+        name: function() {
+            name
+        }
     }
 }
 

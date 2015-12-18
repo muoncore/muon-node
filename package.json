@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "console.table": "*",
+    "amqplib": "*",
     "split": "*",
     "underscore": "*",
     "url": "*",
@@ -37,6 +38,7 @@
     "daemon": "*",
     "signals": "*",
     "assert": "*",
+    "sexylog": "*",
     "async-rq": "*"
   },
   "devDependencies": {
