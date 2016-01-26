@@ -46,12 +46,23 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
     logger.debug("Creating listen queue " + queueName);
     var _this = this;
 
+    var control = {
+        shutdown:function() {
+            if (this.q != undefined) {
+                console.log("I HAVE A QUEUE, and the queue is " + this.queueName);
+                this.q.close();
+            }
+        },
+        queueName:queueName
+    };
+
     this.connection.queue(queueName, {
         durable: false,
         exclusive: false,
         ack: true,
         autoDelete: true
     }, function (q) {
+        control.q = q;
         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
             //todo, headers ...
             logger.trace("Queue message received on " + queueName, message);
@@ -70,6 +81,7 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
             }, message);
         });
     });
+    return control;
 };
 
 module.exports = AmqpQueues;

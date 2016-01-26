@@ -38,6 +38,18 @@ AmqpConnection.prototype.connect = function (callback) {
     this.connection = connection;
 };
 
+AmqpConnection.prototype.queueDelete = function(name) {
+    this.connection.queue(name, {
+        durable: false,
+        exclusive: false,
+        ack: true,
+        autoDelete: true
+    }, function (q) {
+        logger.debug("Removing queue " +name);
+       q.destroy();
+    });
+};
+
 AmqpConnection.prototype.close = function () {
     this.connection.close()
 };

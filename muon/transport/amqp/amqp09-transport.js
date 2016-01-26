@@ -30,6 +30,27 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
         },
         shutdown: function() {
             logger.info("CHANNEL POISONED");
+
+            this.send({
+                headers:{
+                    eventType:"ChannelShutdown",
+                    id:"simples",
+                    targetService:"",
+                    sourceService:"",
+                    protocol:"",
+                    "Content-Type":"application/json",
+                    sourceAvailableContentTypes:["application/json"],
+                    channelOperation:"CLOSE_CHANNEL"
+                },
+                payload:{
+                    be:"happy"
+                }
+            });
+            this.listener.shutdown();
+            transport.connection.queueDelete(this.sendQueue);
+            transport.connection.queueDelete(this.receiveQueue);
+            //transport.connection.queue(this.sendQueue).destroy();
+            //transport.connection.queue(this.receiveQueue).destroy();
         },
         send: function(msg) {
 
@@ -40,8 +61,6 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
 
             logger.info("SENDING MESSAGE!");
             console.dir(msg);
-
-
 
             transport.queues.send(this.sendQueue, amqpMessage);
         }
@@ -72,7 +91,7 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
     channelConnection.sendQueue = "node-service-send";
     channelConnection.receiveQueue = "node-service-recieve";
 
-    this.queues.listen(channelConnection.receiveQueue, function(message) {
+    channelConnection.listener = this.queues.listen(channelConnection.receiveQueue, function(message) {
         logger.info("GOT DATA ON RECEIVE QUEUE!");
         console.dir(message);
         if (channelConnection.channelOpen == false) {
