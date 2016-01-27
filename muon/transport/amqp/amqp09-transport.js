@@ -1,5 +1,5 @@
 var _ = require("underscore");
-var bichannel = require('../../channel/bi-channel');
+var bichannel = require('../../infrastructure/channel');
 
 var AmqpConnection = require("./infra/amqp-connection");
 var AmqpQueue = require("./infra/amqp-queues");
