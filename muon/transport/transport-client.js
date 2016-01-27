@@ -44,7 +44,7 @@ TransportClient.prototype.openChannel = function() {
         internalChannel.send(msg);
     });
 
-    return channelConnection.channel.leftConnection();
+    return channelConnection.channel;
 };
 
 module.exports = TransportClient;
