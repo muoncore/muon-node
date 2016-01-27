@@ -49,8 +49,6 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
             this.listener.shutdown();
             transport.connection.queueDelete(this.sendQueue);
             transport.connection.queueDelete(this.receiveQueue);
-            //transport.connection.queue(this.sendQueue).destroy();
-            //transport.connection.queue(this.receiveQueue).destroy();
         },
         send: function(msg) {
 
