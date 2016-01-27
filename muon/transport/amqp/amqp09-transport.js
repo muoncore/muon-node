@@ -66,7 +66,7 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
 
     channelConnection.channel = bichannel.create("test-channel");
 
-    channelConnection.channel.right().listen(function(msg) {
+    channelConnection.channel.rightConnection().listen(function(msg) {
         logger.info("Sending message");
         if (msg == "poison") {
             channelConnection.shutdown();
@@ -82,7 +82,7 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
 
     this.startHandshake(channelConnection);
 
-    return channelConnection.channel.left();
+    return channelConnection.channel.leftConnection();
 };
 
 Amqp09Transport.prototype.startHandshake = function(channelConnection) {
@@ -96,7 +96,7 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
             channelConnection.drainQueue();
             channelConnection.channelOpen = true;
         }
-        channelConnection.channel.right().send(message);
+        channelConnection.channel.rightConnection().send(message);
     });
 
     var serviceQueueName = "service." + channelConnection.serviceName;

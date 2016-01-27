@@ -13,7 +13,7 @@ TransportClient.prototype.openChannel = function() {
         internalChannels:{}
     };
 
-    channelConnection.channel.right().listen(function(msg) {
+    channelConnection.channel.rightConnection().listen(function(msg) {
 
         if (msg == null || msg == "poison") {
             logger.debug("Shutting down full channel, including all child channels.");
@@ -38,13 +38,13 @@ TransportClient.prototype.openChannel = function() {
             channelConnection.internalChannels[channelKey] = newChannel;
             internalChannel = newChannel;
             internalChannel.listen(function(msg) {
-                channelConnection.channel.right().send(msg);
+                channelConnection.channel.rightConnection().send(msg);
             });
         }
         internalChannel.send(msg);
     });
 
-    return channelConnection.channel.left();
+    return channelConnection.channel.leftConnection();
 };
 
 module.exports = TransportClient;
