@@ -13,19 +13,20 @@ var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
 var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
 var TransportClient = require("../../muon/transport/transport-client");
 
-var discovery = new AmqpDiscovery("amqp://muon:microservices@localhost");
-discovery.advertiseLocalService({
-    identifier:"awesome",
-    tags:["node", "awesome"],
-    codecs:["application/json"]
-});
 
-var transport = new AmqpTransport("amqp://muon:microservices@localhost");
-
-var transportClient = new TransportClient(transport);
 
 exports.create = function(config, discovery, transport) {
 
+    discovery = new AmqpDiscovery("amqp://muon:microservices@localhost");
+    discovery.advertiseLocalService({
+        identifier:"awesome",
+        tags:["node", "awesome"],
+        codecs:["application/json"]
+    });
+
+    transport = new AmqpTransport("amqp://muon:microservices@localhost");
+
+    var transportClient = new TransportClient(transport);
 
     var muonApi = {
         request: function(remoteServiceUrl, event, clientCallback) {
