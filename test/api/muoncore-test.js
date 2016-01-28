@@ -18,7 +18,7 @@ describe("Muon core test", function () {
             headers:{
                 eventType:"RequestMade",
                 id:"simples",
-                targetService:"ExampleService",
+                targetService:"awesome",
                 sourceService:"awesome",
                 protocol:"request",
                 url:"/",
@@ -32,7 +32,7 @@ describe("Muon core test", function () {
         var muon = muoncore.create();
         setTimeout(function() {
 
-            muon.request('muon://ExampleService/', event, function(response) {
+            muon.request('muon://awesome/', event, function(response) {
                         assert(response);
                         done();
                     });
