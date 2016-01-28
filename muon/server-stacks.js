@@ -7,6 +7,8 @@ var ServerStacks = function (transport) {
 
 ServerStacks.prototype.openChannel = function(protocol) {
 
+    logger.info("I AM CALLED, BE AT PEACE" + protocol);
+
 };
 
 module.exports = ServerStacks;

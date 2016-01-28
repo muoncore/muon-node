@@ -14,10 +14,6 @@ describe("AMQP Discovery", function () {
 
     });
 
-    //afterEach(function() {
-    //    clock.restore();
-    //});
-
     it("Discoveries can locate each other over the amqp broker", function (done) {
         this.timeout(25000);
 

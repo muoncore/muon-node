@@ -19,17 +19,29 @@ describe("AMQP Service Queue", function () {
     it("ServiceQueue opens a channel on ServerStacks when handshake message is received", function (done) {
         this.timeout(25000);
 
-        var data1;
-        var data2;
+        var openedProtocol;
+        var rightdata = null;
+        var leftdata = null;
 
 
         var connection = new AmqpConnection("amqp://muon:microservices@localhost");
 
         var serverStacks = {
             openChannel: function(data) {
-                data1 = data;
-                logger.info("OPEN CHANNEL CALLED");
-                return Channel.create("simples").leftConnection();
+
+                openedProtocol = data;
+                logger.info("OPEN CHANNEL CALLED " + data);
+                var channel = Channel.create("simples");
+                channel.leftConnection().listen(function(dat) {
+                   logger.info("The server channel recieved data...");
+                    console.dir(dat);
+                    if (rightdata == null) {
+                        rightdata = dat;
+                        channel.leftConnection().send({payload:{ name: "awesomes"}});
+                    }
+                });
+
+                return channel.rightConnection();
             }
         };
 
@@ -45,7 +57,21 @@ describe("AMQP Service Queue", function () {
 
             queues.listen(leftToRightQueue, function(data) {
                 //listen for the handshake reply coming back from the service queue.
-                data2 = data;
+                logger.info("Test queue received data");
+
+                console.dir(data);
+
+                if (leftdata == null || data.headers.eventType!="handshakeAccepted") {
+                    leftdata = data;
+                    queues.send(rightToLeftQueue, {
+                        headers: {
+                            PROTOCOL: "fakeProto"
+                        },
+                        payload: {
+                            "hello": "world"
+                        }
+                    });
+                }
             });
 
             queues.send("service.tombola", {
@@ -59,8 +85,8 @@ describe("AMQP Service Queue", function () {
 
         setTimeout(function() {
 
-            assert.equal(data1, "hello");
-            assert.equal(data2, "hello");
+            assert.equal(openedProtocol, "fakeProto");
+            assert.equal(leftdata.payload.name, "awesome");
 
             done();
         },3000);
