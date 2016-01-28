@@ -1,8 +1,8 @@
-var muoninit = require('../../muon/api/muon-init.js');
+var muoncore = require('../../muon/api/muoncore.js');
 var assert = require('assert');
 
 
-describe("Muon init test", function () {
+describe("Muon core test", function () {
 
     this.timeout(4000);
 
@@ -29,7 +29,7 @@ describe("Muon init test", function () {
             payload:{
                 be:"happy"
         }};
-        var muon = muoninit.create();
+        var muon = muoncore.create();
         setTimeout(function() {
 
             muon.request('muon://ExampleService/', event, function(response) {
