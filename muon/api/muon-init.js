@@ -1,6 +1,6 @@
 var url = require("url");
 require('sexylog');
-var RpcProtocol = require('../protocol/rpc-protocol.js');
+//var RpcProtocol = require('../protocol/rpc-protocol.js');
 var channel = require('../infrastructure/channel.js');
 var handler = require('../infrastructure/handler.js');
 

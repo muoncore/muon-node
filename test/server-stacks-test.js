@@ -1,4 +1,4 @@
-var ServerStacks = require('../../muon/server-stacks');
+var ServerStacks = require('../muon/server-stacks');
 var assert = require('assert');
 var csp = require("js-csp");
 

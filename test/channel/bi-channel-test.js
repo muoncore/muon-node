@@ -1,4 +1,4 @@
-var bichannel = require('../../muon/channel/bi-channel.js');
+var bichannel = require('../../muon/infrastructure/channel');
 var assert = require('assert');
 var csp = require("js-csp");
 

@@ -2,12 +2,15 @@ var _ = require("underscore");
 var bichannel = require('../../infrastructure/channel');
 
 var AmqpConnection = require("./infra/amqp-connection");
+var ServiceQueue = require("./infra/service-queue");
 var AmqpQueue = require("./infra/amqp-queues");
 
-var Amqp09Transport = function (url) {
+var Amqp09Transport = function (serviceName, serverStacks, url) {
+    this.serverStacks = serverStacks;
     this.connection = new AmqpConnection(url);
     this.connection.connect(function() {
         this.queues = new AmqpQueue(this.connection);
+        this.serviceQueue = new ServiceQueue(serviceName, serverStacks, this.connection);
     }.bind(this));
 };
 
@@ -90,7 +93,6 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
     channelConnection.receiveQueue = "node-service-recieve";
 
     channelConnection.listener = this.queues.listen(channelConnection.receiveQueue, function(message) {
-        logger.info("GOT DATA ON RECEIVE QUEUE!");
         console.dir(message);
         if (channelConnection.channelOpen == false) {
             channelConnection.drainQueue();
