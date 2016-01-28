@@ -2,7 +2,11 @@ var url = require("url");
 require('sexylog');
 //var RpcProtocol = require('../protocol/rpc-protocol.js');
 var channel = require('../infrastructure/channel.js');
-var handler = require('../infrastructure/handler.js');
+
+var RSVP = require('rsvp');
+
+
+var rpcProtocol = require('../protocol/rpc-protocol.js');
 
 
 var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
@@ -23,38 +27,47 @@ var transportClient = new TransportClient(transport);
 exports.create = function(config, discovery, transport) {
 
 
-    var muon = {
+    var muonApi = {
         request: function(remoteServiceUrl, event, clientCallback) {
 
-                //pseudo code
-                var serviceRequest = url.parse(remoteServiceUrl, true);
-                logger.trace('remote service: ', serviceRequest.hostname);
-                var queue = "resource-listen." + serviceRequest.hostname;
-
-                var transChannel = transportClient.openChannel();
-                 var clientChannel = channel.create("client-api-channel");
-                 var rpcProtocolHandler = handler.create();
-                 rpcProtocolHandler.outgoing(function(event) {
-                        logger.info("rpc protocol outgoing event id=" + event.id);
-                        return event;
-                 });
-                 rpcProtocolHandler.incoming(function(event) {
-                        logger.info("rpc protocol incoming event id=" + event.id);
-                        return event;
-                 });
 
 
-                 clientChannel.rightHandler(rpcProtocolHandler);
-                 transChannel.leftHandler(rpcProtocolHandler);
+          var serviceRequest = url.parse(remoteServiceUrl, true);
+            logger.trace('remote service: ', serviceRequest.hostname);
+            var queue = "resource-listen." + serviceRequest.hostname;
 
-                 clientChannel.leftConnection().listen(clientCallback);
+            var transChannel = transportClient.openChannel();
+             var clientChannel = channel.create("client-api-channel");
 
-                clientChannel.leftConnection().send(event); // kick off muon client/server comms
+             var rpcProtocolHandler = rpcProtocol.newHandler();
+             logger.info('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
+
+             clientChannel.rightHandler(rpcProtocolHandler);
+             transChannel.leftHandler(rpcProtocolHandler);
+
+            var promise = new RSVP.Promise(function(resolve, reject) {
+
+                    var callback = function(event) {
+
+                            if (! event || event.error) {
+                                reject(event);
+                            } else {
+                                resolve(event);
+                            }
+
+                    };
+
+                    clientChannel.leftConnection().listen(clientCallback);
+                    clientChannel.leftConnection().send(event);
+            });
+
+            return promise;
 
         },
         handle: function() {
 
         }
     };
-    return muon;
+    return muonApi;
 }
+

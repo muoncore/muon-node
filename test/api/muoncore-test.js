@@ -8,10 +8,10 @@ describe("Muon core test", function () {
 
 
       after(function() {
-            //bi-channel.closeAll();
+
       });
 
-    it("cerate request callback stack", function (done) {
+    it("create request protocol stack", function (done) {
 
 
         var event = {
@@ -32,16 +32,15 @@ describe("Muon core test", function () {
         var muon = muoncore.create();
         setTimeout(function() {
 
-            muon.request('muon://ExampleService/', event, function(response) {
-                        assert(response);
-                        done();
-                    });
+            var promise = muon.request('muon://ExampleService/', event);
+            promise.then(function(event) {
+                  logger.info("muon promise.then() asserting response...");
+                  assert(response);
+                  done();
+            });
 
 
-        }, 1000);
-
-
-
+        }, 1500);
 
     });
 });
