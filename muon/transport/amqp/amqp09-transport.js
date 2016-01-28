@@ -9,6 +9,7 @@ var Amqp09Transport = function (serviceName, serverStacks, url) {
     this.serverStacks = serverStacks;
     this.connection = new AmqpConnection(url);
     this.connection.connect(function() {
+        console.log("BE AWESOMELKJLKJLKJLKJLJKLJKJLKJLKJLKJLKJ");
         this.queues = new AmqpQueue(this.connection);
         this.serviceQueue = new ServiceQueue(serviceName, serverStacks, this.connection);
     }.bind(this));

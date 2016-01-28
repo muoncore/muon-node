@@ -10,10 +10,13 @@ var AmqpQueues = require("../../../muon/transport/amqp/infra/amqp-queues");
 var ServiceQueue = require("../../../muon/transport/amqp/infra/service-queue");
 var ServerStacks = require("../../../muon/server-stacks");
 
+var connection;
+
 describe("AMQP Service Queue", function () {
 
-    beforeEach(function() {
-
+    afterEach(function() {
+        connection.close();
+        
     });
 
     it("ServiceQueue opens a channel on ServerStacks when handshake message is received", function (done) {
@@ -23,8 +26,7 @@ describe("AMQP Service Queue", function () {
         var rightdata = null;
         var leftdata = null;
 
-
-        var connection = new AmqpConnection("amqp://muon:microservices@localhost");
+        connection = new AmqpConnection("amqp://muon:microservices@localhost");
 
         var serverStacks = {
             openChannel: function(data) {
@@ -37,7 +39,7 @@ describe("AMQP Service Queue", function () {
                     console.dir(dat);
                     if (rightdata == null) {
                         rightdata = dat;
-                        channel.leftConnection().send({payload:{ name: "awesomes"}});
+                        channel.leftConnection().send({payload:{ name: "awesome"}});
                     }
                 });
 

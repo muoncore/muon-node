@@ -7,10 +7,14 @@ var _ = require('underscore');
 var AmqpTransport = require("../../../muon/transport/amqp/amqp09-transport");
 var ServerStacks = require("../../../muon/server-stacks");
 
+var transport1;
+var transport2;
+
 describe("AMQP Transport", function () {
 
-    beforeEach(function() {
-
+    afterEach(function() {
+        transport1.close();
+        transport2.close();
     });
 
     it("Transports can exchange data over a broker", function (done) {
@@ -22,8 +26,8 @@ describe("AMQP Transport", function () {
         //serverStacks.addProtocol("fakeproto", XXX);
         //server stack should set data2 to payload.
 
-        var transport1 = new AmqpTransport("transport1", {}, "amqp://muon:microservices@localhost");
-        var transport2 = new AmqpTransport("transport2", serverStacks, "amqp://muon:microservices@localhost");
+        transport1 = new AmqpTransport("transport1", {}, "amqp://muon:microservices@localhost");
+        transport2 = new AmqpTransport("transport2", serverStacks, "amqp://muon:microservices@localhost");
 
         setTimeout(function() {
             var channel = transport1.openChannel("transport2", "fakeproto");

@@ -12,10 +12,12 @@ var rpcProtocol = require('../protocol/rpc-protocol.js');
 var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
 var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
 var TransportClient = require("../../muon/transport/transport-client");
-
+var ServerStacks = require("../../muon/server-stacks");
 
 
 exports.create = function(config, discovery, transport) {
+
+    var serverStacks = new ServerStacks();
 
     discovery = new AmqpDiscovery("amqp://muon:microservices@localhost");
     discovery.advertiseLocalService({
@@ -24,7 +26,7 @@ exports.create = function(config, discovery, transport) {
         codecs:["application/json"]
     });
 
-    transport = new AmqpTransport("amqp://muon:microservices@localhost");
+    var transport = new AmqpTransport("awesome", serverStacks, "amqp://muon:microservices@localhost");
 
     var transportClient = new TransportClient(transport);
 

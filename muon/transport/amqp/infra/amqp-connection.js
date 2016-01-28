@@ -20,6 +20,7 @@ AmqpConnection.prototype.connect = function (callback) {
     });
     connection.on("ready", function() {
         logger.debug("AMQP Connection becomes ready");
+        console.log("Callback is " + callback);
         callback();
     });
     connection.on("close", function() {
@@ -51,7 +52,7 @@ AmqpConnection.prototype.queueDelete = function(name) {
 };
 
 AmqpConnection.prototype.close = function () {
-    this.connection.close()
+    this.connection.disconnect();
 };
 
 AmqpConnection.prototype.queue = function (name, params, callback) {

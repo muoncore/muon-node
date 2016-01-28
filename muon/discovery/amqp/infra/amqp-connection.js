@@ -39,7 +39,7 @@ AmqpConnection.prototype.connect = function (callback) {
 };
 
 AmqpConnection.prototype.close = function () {
-    this.connection.close()
+    this.connection.disconnect();
 };
 
 AmqpConnection.prototype.queue = function (name, params, callback) {

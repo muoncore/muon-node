@@ -6,20 +6,26 @@ var url = require('url');
 var _ = require('underscore');
 var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
 
+var discovery1;
+var discovery2;
+var discovery3;
+
 describe("AMQP Discovery", function () {
 
     var discovery;
 
-    beforeEach(function() {
-
+    afterEach(function() {
+        discovery1.close();
+        discovery2.close();
+        discovery3.close();
     });
 
     it("Discoveries can locate each other over the amqp broker", function (done) {
         this.timeout(25000);
 
-        var discovery1 = new AmqpDiscovery("amqp://muon:microservices@localhost");
-        var discovery2 = new AmqpDiscovery("amqp://muon:microservices@localhost");
-        var discovery3 = new AmqpDiscovery("amqp://muon:microservices@localhost");
+        discovery1 = new AmqpDiscovery("amqp://muon:microservices@localhost");
+        discovery2 = new AmqpDiscovery("amqp://muon:microservices@localhost");
+        discovery3 = new AmqpDiscovery("amqp://muon:microservices@localhost");
 
         discovery1.advertiseLocalService({
             identifier:"tombola",

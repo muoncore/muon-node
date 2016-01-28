@@ -35,6 +35,12 @@ AmqpDiscovery.prototype.discoverServices = function (callback) {
     callback(this.discoveredServices);
 };
 
+AmqpDiscovery.prototype.close = function () {
+    console.log("HELLO WORLD");
+    console.dir(this.connection.close);
+    this.connection.close();
+};
+
 function startAnnouncements(discovery) {
     var waitInterval = setInterval(function () {
         if (typeof discovery.broadcast !== 'undefined') {

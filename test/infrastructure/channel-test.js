@@ -21,7 +21,7 @@ describe("Bi directional channel test", function () {
                     assert.equal(response, "sent by client 2");
                     done();
             });
-         }
+         };
 
          var client2 = function(connection) {
             connection.listen(function(response) {

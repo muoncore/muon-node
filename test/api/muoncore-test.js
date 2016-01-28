@@ -40,7 +40,7 @@ describe("Muon core test", function () {
             });
 
 
-        }, 1500);
+        }, 2500);
 
     });
 });
