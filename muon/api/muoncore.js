@@ -67,8 +67,8 @@ exports.create = function(config, discovery, transport) {
             return promise;
 
         },
-        handle: function() {
-
+        handle: function(endpoint, callback) {
+            serverStacks.register(endpoint, callback);
         }
     };
     return muonApi;

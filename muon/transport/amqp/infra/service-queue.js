@@ -15,12 +15,12 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
 
         var serverChannel = serverStacks.openChannel(protocol);
 
-        console.dir(serverStacks);
+        //console.dir(serverStacks);
 
         //open a listener on the receive queue. pass all messages into tserverStacks.openChannelhe channel
         var q = this.queues.listen(receiveQueue, function(data) {
             //transform to transport payload?
-            logger.info("Received data on the Channel Receive Queue");
+            logger.info("********* Received data on the Channel Receive Queue");
             console.dir(data);
             serverChannel.send(data);
         });
