@@ -23,6 +23,7 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
         var q = this.queues.listen(receiveQueue, function(data) {
             //transform to transport payload?
             logger.info("********* Received data on the Channel Receive Queue");
+            data['id'] = data.headers.id;
             console.dir(data);
             serverChannel.send(data);
         });

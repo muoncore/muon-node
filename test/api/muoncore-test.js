@@ -17,7 +17,8 @@ describe("Muon core test", function () {
       before(function() {
             var muon = muoncore.create("ExampleService1", config, discoveryUrl, transportUrl);
             muon.handle('muon://ExampleService1/shop', function(event, respond){
-                logger.debug('muon://ExampleService1/shop server responding to event.id' + event.id);
+                logger.info('**********************************************************************************');
+                logger.debug('muon://ExampleService1/shop server responding to event.id' + event.headers.id);
                 respond(event);
                 done();
             });
@@ -27,10 +28,9 @@ describe("Muon core test", function () {
 
 
         var event = {
-            id: "ABC123-890XYZ",
             headers:{
                 eventType:"RequestMade",
-                id:"simples",
+                id:"ABCDEFGH",
                 targetService:"ExampleService1",
                 sourceService:"ExampleService2",
                 protocol:"request",

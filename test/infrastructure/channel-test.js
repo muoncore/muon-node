@@ -107,13 +107,13 @@ describe("Bi directional channel test", function () {
 
          var reqResHandler = handler.create();
          reqResHandler.outgoing(function(event){
-                if (! event.id) {
+                if (! event.headers.id) {
                     throw new Error('reqResHandler: event is null');
                 }
                 return event;
          });
          reqResHandler.incoming(function(event){
-                 if (! event.id) {
+                 if (! event.headers.id) {
                      throw new Error('reqResHandler: event is null');
                  }
                  return event;
