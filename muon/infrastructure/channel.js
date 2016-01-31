@@ -15,6 +15,7 @@ require('sexylog');
  */
 
 module.exports.create = function(name) {
+    logger.trace('channel.create()');
     return new Channel(name);
 }
 
@@ -23,7 +24,7 @@ function LeftConnection(name, inbound, outbound) {
     name = name + '-left-connection'
     var handler;
     var listener;
-    return {
+    var connectionObject = {
         send: function(msg) {
             logger.trace(name + " ChannelConnection.send() event.id='" + msg.id + "'");
             csp.putAsync(outbound, msg);
@@ -73,6 +74,8 @@ function LeftConnection(name, inbound, outbound) {
             return name;
         }
     }
+    logger.trace('returning left connection '+ name);
+    return connectionObject;
 }
 
 
@@ -80,7 +83,7 @@ function RightConnection(name, inbound, outbound) {
     name = name + '-right-connection'
     var handler;
     var listener;
-    return {
+    var connectionObject = {
         send: function(msg) {
             logger.debug(name + " ChannelConnection.send() event.id='" + msg.id + "'");
             csp.putAsync(outbound, msg);
@@ -131,10 +134,13 @@ function RightConnection(name, inbound, outbound) {
             return name;
         }
     }
+    logger.trace('returning right connection '+ name);
+    return connectionObject;
 }
 
 
 function Channel(name) {
+    logger.trace('creating... Channel(' + name + ')');
     var name = name + '-channel' || "default-channel";
     var inbound = csp.chan();
     var outbound = csp.chan();
@@ -145,6 +151,7 @@ function Channel(name) {
     var leftConnection = new LeftConnection(name, inbound, outbound);
     var rightConnection = new RightConnection(name, outbound, inbound);
 
+    logger.trace('Created! Channel(' + name + ')');
     return {
         leftHandler: function(handler) {
             if (leftHandler) throw new Error('left handler already set on channel "' + name + '"');

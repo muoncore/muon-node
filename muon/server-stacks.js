@@ -15,8 +15,8 @@ ServerStacks.prototype.openChannel = function(protocol) {
      logger.trace("creating server stacks channels...");
      var rpcProtocolHandler = rpcProtocol.newHandler();
 
-     logger.trace("creating server stacks client side channel");
-      var clientChannel = channel.create("serverapi");
+     logger.trace("creating server stacks api channel");
+      var clientChannel = bichannel.create("serverapi");
 
        logger.trace("creating server stacks server side channel");
        var serverStackChannel = bichannel.create("serverstacks");
