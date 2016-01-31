@@ -8,7 +8,7 @@ describe("Muon core test", function () {
 
 
 
-    this.timeout(4000);
+    this.timeout(7000);
 
      var transportUrl = "amqp://muon:microservices@localhost";
         var discoveryUrl = transportUrl;
@@ -21,7 +21,6 @@ describe("Muon core test", function () {
                 logger.debug('muon://ExampleService1/shop server responding to event.id' + event.headers.id);
                 event.payload.message = "pong";
                 respond(event);
-                done();
             });
       });
 
@@ -44,17 +43,28 @@ describe("Muon core test", function () {
                 message:"ping"
         }};
         var muon = muoncore.create("ExampleService2", config, discoveryUrl, transportUrl);
+
         setTimeout(function() {
 
-            var promise = muon.request('muon://ExampleService2/shop', event);
-            promise.then(function(event) {
-                  logger.info("muon promise.then() asserting response...");
-                  assert(response);
-                  done();
+            var promise = muon.request('muon://ExampleService2/shop', event, function(event) {
+                    logger.info("muon://ExampleService2/customer server response received! event.id=" + event.headers.id);
+                      logger.info("muon promise.then() asserting response...");
+                      assert(event);
+                      done();
             });
 
+                promise.then(function(event) {
+                      logger.info("muon://ExampleService2/customer server response received! event.id=" + event.headers.id);
+                      logger.info("muon promise.then() asserting response...");
+                      assert(event);
+                      done();
+                }, function(err){
+                         logger.error("muon promise.then() error!!!!!");
+                         throw new Error('error in promise');
+                });
 
-        }, 2500);
+
+        }, 1000);
 
     });
 });

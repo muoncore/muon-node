@@ -29,7 +29,7 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
         });
 
         serverChannel.listen(function(data) {
-            logger.info("Server Stack transport channel: downstream data received, sendign to amqp queue: event=" + JSON.stringify(data));
+            logger.info("Server Stack transport channel: downstream data received, sendign to amqp queue '" + sendQueue + "' event.id=" + data.headers.id);
             console.dir(data);
             if (data == "poison") {
                 q.shutdown();

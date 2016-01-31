@@ -54,15 +54,13 @@ function LeftConnection(name, inbound, outbound) {
                     if (handler) {
                         try {
                             var result = handler.sendUpstream(value);
-                            logger.info('handler result.id=' + result.id);
+                            logger.info('handler result.id=' + result.headers.id);
                             handler.otherConnection(name).send(result);
                         } catch(err) {
                             logger.error(name + ': ' + err);
                             var reply = {status: 'error'}
                             handler.otherConnection(name).send(reply);
                         }
-                        //
-
                     } else {
                         throw new Error('handler not set');
                     }
@@ -86,11 +84,13 @@ function RightConnection(name, inbound, outbound) {
     var connectionObject = {
         send: function(msg) {
             logger.debug(name + " ChannelConnection.send() event.id='" + msg.headers.id + "'");
+            logger.debug(name + " ChannelConnection.send() listener: " + listener);
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
             if (handler) throw new Error(name + ': cannot set listener as handler already set');
             listener = callback;
+            logger.trace(name + " ChannelConnection.send() callback: " + callback);
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);

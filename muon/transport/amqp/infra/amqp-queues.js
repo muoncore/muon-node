@@ -5,8 +5,8 @@ var AmqpQueues = function (connection) {
 
 AmqpQueues.prototype.send = function (queueName, event) {
     var _this = this;
-    logger.debug('Emitting event on queue ' + queueName);
-    logger.trace('event: ' + JSON.stringify(event));
+    logger.debug('AmqpQueues.send() Emitting event on queue ' + queueName);
+    logger.trace('AmqpQueues.send() event: ' + JSON.stringify(event));
 
     var waitInterval = setInterval(function () {
         if (typeof _this.exchange === 'object') {
@@ -30,9 +30,9 @@ AmqpQueues.prototype.send = function (queueName, event) {
                 payload = "";
             }
 
-            logger.debug('send queue ' + queueName + ' payload type: ' + (typeof payload));
-            logger.debug('send queue ' + queueName + ' payload: ', JSON.stringify(payload));
-            logger.debug('send queue ' + queueName + ' options: ', JSON.stringify(options));
+            logger.trace('send queue ' + queueName + ' payload type: ' + (typeof payload));
+            logger.trace('send queue ' + queueName + ' payload: ', JSON.stringify(payload));
+            logger.trace('send queue ' + queueName + ' options: ', JSON.stringify(options));
 
             _this.exchange.publish(
                 queueName, payload, options, function (resp) {
@@ -65,7 +65,7 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
         control.q = q;
         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
             //todo, headers ...
-            logger.trace("Queue message received on " + queueName, message);
+            logger.trace("Message received on amqp queue '" + queueName + '"', message);
 
             if (_this.eventLogger != null) {
                 var logEvent = {

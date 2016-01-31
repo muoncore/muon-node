@@ -55,14 +55,18 @@ exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
                     var callback = function(event) {
 
                             if (! event || event.error) {
+                                logger.warn('promise failed check! calling promise.reject()');
                                 reject(event);
                             } else {
+                                logger.trace('promise calling promise.resolve() event.id=' + event.headers.id);
                                 resolve(event);
                             }
 
                     };
 
-                    clientChannel.leftConnection().listen(clientCallback);
+                    if (clientCallback) callback = clientCallback;
+
+                    clientChannel.leftConnection().listen(callback);
                     clientChannel.leftConnection().send(event);
             });
 
