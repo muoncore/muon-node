@@ -26,7 +26,7 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
         });
 
         serverChannel.listen(function(data) {
-            logger.info("CHANNEL SEND");
+            logger.info("SERVER STACK TRANSPORT SERVER CHANNEL: DATA RECEIVED, SENDING TO AMQP QUEUE: event=" + JSON.stringify(data));
             console.dir(data);
             if (data == "poison") {
                 q.shutdown();
@@ -47,8 +47,9 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
 ServiceQueue.prototype.onHandshake = function(callback) {
 
     //listen on queue.
-    this.queues.listen("service." + this.serviceName, function(message) {
-        logger.info("GOT DATA ON Service queue!!!");
+    var queueName = "service." + this.serviceName;
+    this.queues.listen(queueName, function(message) {
+        logger.info('DATA RECEIVED on server stack AMQP queue: "' + queueName + '");
         console.dir(message);
         callback(message)
     });
