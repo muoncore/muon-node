@@ -6,12 +6,18 @@ var muon;
 
 describe("Muon core test", function () {
 
+
+
     this.timeout(4000);
 
+     var transportUrl = "amqp://muon:microservices@localhost";
+        var discoveryUrl = transportUrl;
+        var config = {};
+
       before(function() {
-            var muon = muoncore.create();
-            muon.handle('muon://ExampleService/shop', function(event, respond){
-                logger.debug('muon://ExampleService/shop server responding to event.id' + event.id);
+            var muon = muoncore.create("ExampleService1", config, discoveryUrl, transportUrl);
+            muon.handle('muon://ExampleService1/shop', function(event, respond){
+                logger.debug('muon://ExampleService1/shop server responding to event.id' + event.id);
                 respond(event);
                 done();
             });
@@ -19,16 +25,14 @@ describe("Muon core test", function () {
 
     it("create request protocol stack", function (done) {
 
-        var transportUrl = "amqp://muon:microservices@localhost";
-        var discoveryUrl = transportUrl;
-        var config = {};
+
         var event = {
             id: "ABC123-890XYZ",
             headers:{
                 eventType:"RequestMade",
                 id:"simples",
-                targetService:"ExampleService",
-                sourceService:"ExampleService",
+                targetService:"ExampleService1",
+                sourceService:"ExampleService2",
                 protocol:"request",
                 url:"/",
                 "Content-Type":"application/json",
@@ -38,10 +42,10 @@ describe("Muon core test", function () {
             payload:{
                 be:"happy"
         }};
-        var muon = muoncore.create("ExampleService", config, discoveryUrl, transportUrl);
+        var muon = muoncore.create("ExampleService2", config, discoveryUrl, transportUrl);
         setTimeout(function() {
 
-            var promise = muon.request('muon://ExampleService/shop', event);
+            var promise = muon.request('muon://ExampleService2/shop', event);
             promise.then(function(event) {
                   logger.info("muon promise.then() asserting response...");
                   assert(response);
