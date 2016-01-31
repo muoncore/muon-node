@@ -13,8 +13,10 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
         var receiveQueue = handshake.headers.LISTEN_ON;
         var sendQueue = handshake.headers.REPLY_TO;
 
+        logger.trace('opening serverStacks channel with protocol: ' + protocol);
+        logger.trace('receiveQueue/sendQueue ' + receiveQueue + '/' + sendQueue);
         var serverChannel = serverStacks.openChannel(protocol);
-
+       logger.trace("created server stacks channel " + serverChannel.name);
         //console.dir(serverStacks);
 
         //open a listener on the receive queue. pass all messages into tserverStacks.openChannelhe channel
@@ -26,7 +28,7 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
         });
 
         serverChannel.listen(function(data) {
-            logger.info("SERVER STACK TRANSPORT SERVER CHANNEL: DATA RECEIVED, SENDING TO AMQP QUEUE: event=" + JSON.stringify(data));
+            logger.info("Server Stack transport channel: downstream data received, sendign to amqp queue: event=" + JSON.stringify(data));
             console.dir(data);
             if (data == "poison") {
                 q.shutdown();
@@ -35,7 +37,9 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
             }
         }.bind(this));
 
+        logger.debug("Sending server handshake to amqp queue: " + sendQueue);
         this.queues.send(sendQueue, {
+
             headers:{
                 eventType:"handshakeAccepted",
                 PROTOCOL:protocol
@@ -49,7 +53,7 @@ ServiceQueue.prototype.onHandshake = function(callback) {
     //listen on queue.
     var queueName = "service." + this.serviceName;
     this.queues.listen(queueName, function(message) {
-        logger.info('DATA RECEIVED on server stack AMQP queue: "' + queueName + '"');
+        logger.info('DATA RECEIVED on server stack AMQP queue: "' + queueName + '" Event:');
         console.dir(message);
         callback(message)
     });

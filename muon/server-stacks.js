@@ -11,12 +11,22 @@ var handlerMappings = {};
 
 ServerStacks.prototype.openChannel = function(protocol) {
 
+
+     logger.trace("creating server stacks channels...");
      var rpcProtocolHandler = rpcProtocol.newHandler();
-      var clientChannel = channel.create("client-serverstacks");
+
+     logger.trace("creating server stacks client side channel");
+      var clientChannel = channel.create("serverapi");
+
+       logger.trace("creating server stacks server side channel");
        var serverStackChannel = bichannel.create("serverstacks");
+
+       logger.trace("wiring in rpc protocol handler...");
      clientChannel.rightHandler(rpcProtocolHandler);
     serverStackChannel.leftHandler(rpcProtocolHandler);
 
+
+     logger.trace("server stacks channels created");
 
     var serverResponseCallback = function(serverResposne) {
         clientChannel.leftConnection().send(serverResposne);
