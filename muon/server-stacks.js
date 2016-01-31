@@ -34,12 +34,15 @@ ServerStacks.prototype.openChannel = function(protocol) {
 
     clientChannel.leftConnection().listen(function(event) {
         logger.debug('incoming event: ' + JSON.stringify(event));
-        var endpoint = event.ENDPOINT;
+        var endpoint = event.headers.url;
         var handler = handlerMappings[endpoint];
         if (! handler) {
+               logger.warn('NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id' + event.headers.id);
+               logger.warn('handlerMappings: ', handlerMappings);
             event.status = '404';
             serverStackChannel.leftConnection().send(event);
         } else {
+            logger.info('Handler found for endpoint "'+ event.headers.url + '" event.id=' + event.headers.id);
             handler(event, serverResponseCallback);
         }
 

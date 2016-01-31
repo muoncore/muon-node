@@ -22,7 +22,7 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
         //open a listener on the receive queue. pass all messages into tserverStacks.openChannelhe channel
         var q = this.queues.listen(receiveQueue, function(data) {
             //transform to transport payload?
-            logger.info("********* Received data on the Channel Receive Queue");
+            logger.info("********* Received data on server stack amqp transport queue");
             data['id'] = data.headers.id;
             console.dir(data);
             serverChannel.send(data);

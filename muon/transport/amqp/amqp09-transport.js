@@ -61,7 +61,7 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
                 payload:msg.payload
             };
 
-            logger.info("SENDING MESSAGE!");
+            logger.info("Sending message to amqp transport");
             console.dir(msg);
 
             transport.queues.send(this.sendQueue, amqpMessage);

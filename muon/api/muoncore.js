@@ -36,6 +36,8 @@ exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
 
 
           var serviceRequest = url.parse(remoteServiceUrl, true);
+         // var path = remoteServiceUrl.split('/')[3];
+         // event['headers']['path'] = path;
             logger.trace('remote service: ', serviceRequest.hostname);
             var queue = "resource-listen." + serviceRequest.hostname;
 

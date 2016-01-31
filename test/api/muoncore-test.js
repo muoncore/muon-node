@@ -17,8 +17,9 @@ describe("Muon core test", function () {
       before(function() {
             var muon = muoncore.create("ExampleService1", config, discoveryUrl, transportUrl);
             muon.handle('muon://ExampleService1/shop', function(event, respond){
-                logger.info('**********************************************************************************');
+                logger.info('*****   muoncore-test.js ************************************************************************');
                 logger.debug('muon://ExampleService1/shop server responding to event.id' + event.headers.id);
+                event.payload.message = "pong";
                 respond(event);
                 done();
             });
@@ -34,13 +35,13 @@ describe("Muon core test", function () {
                 targetService:"ExampleService1",
                 sourceService:"ExampleService2",
                 protocol:"request",
-                url:"/",
+                url:"muon://ExampleService1/shop",
                 "Content-Type":"application/json",
                 sourceAvailableContentTypes:["application/json"],
                 channelOperation:"NORMAL"
             },
             payload:{
-                be:"happy"
+                message:"ping"
         }};
         var muon = muoncore.create("ExampleService2", config, discoveryUrl, transportUrl);
         setTimeout(function() {
