@@ -15,19 +15,19 @@ var TransportClient = require("../../muon/transport/transport-client");
 var ServerStacks = require("../../muon/server-stacks");
 
 
-exports.create = function(config, discovery, transport) {
+exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
 
     var serverStacks = new ServerStacks();
 
-    discovery = new AmqpDiscovery("amqp://muon:microservices@localhost");
-    discovery.advertiseLocalService({
-        identifier:"awesome",
-        tags:["node", "awesome"],
-        codecs:["application/json"]
-    });
 
-    var transport = new AmqpTransport("awesome", serverStacks, "amqp://muon:microservices@localhost");
+    discovery = new AmqpDiscovery(discoveryUrl);
+        discovery.advertiseLocalService({
+            identifier:serviceName,
+            tags:["node", serviceName],
+            codecs:["application/json"]
+        });
 
+    var transport = new AmqpTransport(serviceName, serverStacks, transportUrl);
     var transportClient = new TransportClient(transport);
 
     var muonApi = {
@@ -40,10 +40,10 @@ exports.create = function(config, discovery, transport) {
             var queue = "resource-listen." + serviceRequest.hostname;
 
             var transChannel = transportClient.openChannel();
-             var clientChannel = channel.create("client-api-channel");
+             var clientChannel = channel.create("client-api");
 
              var rpcProtocolHandler = rpcProtocol.newHandler();
-             logger.info('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
+             //logger.trace('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
 
              clientChannel.rightHandler(rpcProtocolHandler);
              transChannel.leftHandler(rpcProtocolHandler);

@@ -21,13 +21,13 @@ module.exports.create = function() {
         sendDownstream: function(event) {
             logger.debug('sending event via handler downstream');
             var result = outgoingFunction(event);
-            logger.debug('returning handler result=' + result);
+            logger.debug('returning handler result=' + JSON.stringify(result));
             return result;
         },
         sendUpstream: function(event) {
             logger.debug('sending event via handler upstream');
             var result = incomingFunction(event);
-            logger.debug('returning handler result=' + result);
+            logger.debug('returning handler result=' + JSON.stringify(result));
             return result;
         },
         upstreamConnection: function(c) {

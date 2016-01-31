@@ -8,7 +8,7 @@ require('sexylog');
  * Each endpoint has an inbound and bound unidrectional channel to send arbitrary messages along to each other
  *
  * var bichannel = require('./bi-channel.js');
- * var channel = bichannel.create("test-channel");
+ * var channel = bichannel.create("cleint-api");
  * client1(channel.left());
  * client2(channel.right());
  *
@@ -25,7 +25,7 @@ function LeftConnection(name, inbound, outbound) {
     var listener;
     return {
         send: function(msg) {
-            logger.trace(name + " ChannelConnection.send() msg='" + msg + "'");
+            logger.trace(name + " ChannelConnection.send() event.id='" + msg.id + "'");
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
@@ -34,7 +34,7 @@ function LeftConnection(name, inbound, outbound) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.listen() value=" + value);
+                     logger.trace(name + " ChannelConnection.listen() event.id=" + value.id);
                     if (callback) {
                         callback(value);
                     } else {
@@ -49,7 +49,7 @@ function LeftConnection(name, inbound, outbound) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.handler() value=" + value);
+                     logger.trace(name + "ChannelConnection.handler() event.id=" + value.id);
                     if (handler) {
                         try {
                             var result = handler.sendUpstream(value);
@@ -82,7 +82,7 @@ function RightConnection(name, inbound, outbound) {
     var listener;
     return {
         send: function(msg) {
-            logger.trace(name + " ChannelConnection.send() msg='" + msg + "'");
+            logger.debug(name + " ChannelConnection.send() event.id='" + msg.id + "'");
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
@@ -91,7 +91,7 @@ function RightConnection(name, inbound, outbound) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.listen() value=" + value);
+                     logger.debug(name + " ChannelConnection.listen() event.id=" + value.id);
                     if (callback) {
                         callback(value);
                     } else {
@@ -107,11 +107,11 @@ function RightConnection(name, inbound, outbound) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.handler() value=" + value);
+                     logger.debug(name + " ChannelConnection.handler() event.id=" + value.id);
                     if (handler) {
                         try {
                             var result = handler.sendDownstream(value);
-                            logger.info('result' + result);
+                            //logger.trace('handler result=' + JSON.stringify(result));
                             handler.otherConnection(name).send(result);
                         } catch(err) {
                             logger.error(name + ': ' + err);

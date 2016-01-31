@@ -15,7 +15,7 @@ exports.newHandler = function() {
                 logger.info("rpc protocol incoming event id=" + event.id);
                 return event;
          });
-         logger.info('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
+         //logger.trace('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
          return rpcProtocolHandler;
 
 

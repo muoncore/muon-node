@@ -9,9 +9,9 @@ var Amqp09Transport = function (serviceName, serverStacks, url) {
     this.serverStacks = serverStacks;
     this.connection = new AmqpConnection(url);
     this.connection.connect(function() {
-        console.log("BE AWESOMELKJLKJLKJLKJLJKLJKJLKJLKJLKJLKJ");
         this.queues = new AmqpQueue(this.connection);
         this.serviceQueue = new ServiceQueue(serviceName, serverStacks, this.connection);
+        logger.info("Amqp09Transport() serviceName: " + serviceName);
     }.bind(this));
 };
 
@@ -68,7 +68,7 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
         }
     };
 
-    channelConnection.channel = bichannel.create("test-channel");
+    channelConnection.channel = bichannel.create("amqp-transport");
 
     channelConnection.channel.rightConnection().listen(function(msg) {
         logger.info("Sending message");

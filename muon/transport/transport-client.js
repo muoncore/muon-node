@@ -9,7 +9,7 @@ TransportClient.prototype.openChannel = function() {
 
     var trClient = this;
     var channelConnection = {
-        channel: bichannel.create("test-channel"),
+        channel: bichannel.create("transport-client"),
         internalChannels:{}
     };
 

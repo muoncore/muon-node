@@ -8,12 +8,10 @@ describe("Muon core test", function () {
 
     this.timeout(4000);
 
-
       before(function() {
             var muon = muoncore.create();
-
             muon.handle('muon://ExampleService/shop', function(event, respond){
-                logger.debug('muon://ExampleServer/shop server responding to event.id' + event.id);
+                logger.debug('muon://ExampleService/shop server responding to event.id' + event.id);
                 respond(event);
                 done();
             });
@@ -21,14 +19,16 @@ describe("Muon core test", function () {
 
     it("create request protocol stack", function (done) {
 
-
+        var transportUrl = "amqp://muon:microservices@localhost";
+        var discoveryUrl = transportUrl;
+        var config = {};
         var event = {
             id: "ABC123-890XYZ",
             headers:{
                 eventType:"RequestMade",
                 id:"simples",
                 targetService:"ExampleService",
-                sourceService:"awesome",
+                sourceService:"ExampleService",
                 protocol:"request",
                 url:"/",
                 "Content-Type":"application/json",
@@ -38,7 +38,7 @@ describe("Muon core test", function () {
             payload:{
                 be:"happy"
         }};
-        var muon = muoncore.create();
+        var muon = muoncore.create("ExampleService", config, discoveryUrl, transportUrl);
         setTimeout(function() {
 
             var promise = muon.request('muon://ExampleService/shop', event);

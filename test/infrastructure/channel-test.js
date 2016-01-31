@@ -29,7 +29,7 @@ describe("Bi directional channel test", function () {
             });
          }
 
-         var channel = bichannel.create("test-channel-1");
+         var channel = bichannel.create("test-1");
          console.log("channel: " + JSON.stringify(channel));
          client1(channel.leftConnection());
          client2(channel.rightConnection());
@@ -57,7 +57,7 @@ describe("Bi directional channel test", function () {
                 });
          }
 
-         var channel = bichannel.create("test-channel-2");
+         var channel = bichannel.create("test-2");
          client1(channel.leftConnection());
          client2(channel.rightConnection());
 
