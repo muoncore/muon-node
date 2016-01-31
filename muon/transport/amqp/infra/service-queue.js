@@ -49,7 +49,7 @@ ServiceQueue.prototype.onHandshake = function(callback) {
     //listen on queue.
     var queueName = "service." + this.serviceName;
     this.queues.listen(queueName, function(message) {
-        logger.info('DATA RECEIVED on server stack AMQP queue: "' + queueName + '");
+        logger.info('DATA RECEIVED on server stack AMQP queue: "' + queueName + '"');
         console.dir(message);
         callback(message)
     });
