@@ -55,7 +55,7 @@ exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
                     var callback = function(event) {
 
                             if (! event || event.error) {
-                                logger.warn('promise failed check! calling promise.reject()');
+                                logger.warn('client-api promise failed check! calling promise.reject()');
                                 reject(event);
                             } else {
                                 logger.trace('promise calling promise.resolve() event.id=' + event.headers.id);

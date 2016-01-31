@@ -46,12 +46,7 @@ describe("Muon core test", function () {
 
         setTimeout(function() {
 
-            var promise = muon.request('muon://ExampleService2/shop', event, function(event) {
-                    logger.info("muon://ExampleService2/customer server response received! event.id=" + event.headers.id);
-                      logger.info("muon promise.then() asserting response...");
-                      assert(event);
-                      done();
-            });
+            var promise = muon.request('muon://ExampleService2/shop', event);
 
                 promise.then(function(event) {
                       logger.info("muon://ExampleService2/customer server response received! event.id=" + event.headers.id);
