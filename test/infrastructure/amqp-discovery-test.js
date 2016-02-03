@@ -5,6 +5,7 @@ var assert = require('assert');
 var url = require('url');
 var _ = require('underscore');
 var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
+require('sexylog');
 
 var discovery1;
 var discovery2;

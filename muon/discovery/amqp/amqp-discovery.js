@@ -14,7 +14,6 @@ var AmqpDiscovery = function (url) {
 
     _this.connection.connect(function() {
         logger.info("AMQP Discovery is ready!!");
-        logger.debug("AMQP Discovery ready!");
         _this.broadcast = new Broadcast(_this.connection);
         startAnnouncements(_this);
     });

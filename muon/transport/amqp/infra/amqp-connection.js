@@ -23,7 +23,10 @@ AmqpConnection.prototype.connect = function (callback) {
     });
     connection.on("ready", function() {
         logger.debug("AMQP Connection becomes ready");
-        console.log("Callback is " + callback);
+        if (! callback) {
+            logger.error("Callback is undefined/null:" + callback);
+            throw new Error('Callback is undefined/null');
+        }
         callback();
     });
     connection.on("close", function() {

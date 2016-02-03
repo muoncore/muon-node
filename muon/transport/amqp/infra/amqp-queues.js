@@ -49,7 +49,7 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
     var control = {
         shutdown:function() {
             if (this.q != undefined) {
-                console.log("I HAVE A QUEUE, and the queue is " + this.queueName);
+                logger.debug("shutting down queue: " + this.queueName);
                 this.q.close();
             }
         },

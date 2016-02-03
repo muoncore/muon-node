@@ -15,7 +15,6 @@ require('sexylog');
  */
 
 module.exports.create = function(name) {
-    //logger.trace('channel.create()');
     return new Channel(name);
 }
 
@@ -90,7 +89,7 @@ function RightConnection(name, inbound, outbound) {
         listen: function(callback) {
             if (handler) throw new Error(name + ': cannot set listener as handler already set');
             listener = callback;
-            logger.trace(name + " ChannelConnection.send() callback: " + callback);
+            //logger.trace(name + " ChannelConnection.send() callback: " + callback);
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
