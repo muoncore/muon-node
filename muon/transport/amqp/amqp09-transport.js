@@ -114,6 +114,10 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
     })
 };
 
+Amqp09Transport.prototype.shutdown = function() {
+    //TODO, more shutdowns.
+};
+
 
 module.exports = Amqp09Transport;
 

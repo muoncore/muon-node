@@ -13,8 +13,8 @@ var transport2;
 describe("AMQP Transport", function () {
 
     afterEach(function() {
-        transport1.close();
-        transport2.close();
+        transport1.shutdown();
+        transport2.shutdown();
     });
 
     it("Transports can exchange data over a broker", function (done) {
@@ -34,7 +34,9 @@ describe("AMQP Transport", function () {
 
             console.dir(channel);
             channel.listen(function(data) {
-                data1 = data;
+                if (data.headers == undefined) {
+                    data1 = data;
+                }
             });
 
             setTimeout(function() {

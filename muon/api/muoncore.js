@@ -31,6 +31,9 @@ exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
     var transportClient = new TransportClient(transport);
 
     var muonApi = {
+        shutdown: function() {
+
+        },
         request: function(remoteServiceUrl, event, clientCallback) {
 
 
