@@ -31,6 +31,8 @@ ServerStacks.prototype.openChannel = function(protocol) {
                logger.warn('NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id' + event.headers.id);
                logger.warn('handlerMappings: ', handlerMappings);
             event.status = '404';
+            var handler = handlerMappings['/muon/internal/transport'];
+            handler(event);
             serverStackChannel.leftConnection().send(event);
         } else {
             logger.info('Handler found for endpoint "'+ event.headers.url + '" event.id=' + event.headers.id);

@@ -15,10 +15,9 @@ AmqpConnection.prototype.connect = function (callback) {
     logger.debug('AmqpConnection.connect() this.url=' + this.url);
     var connection = AMQP.createConnection({url: this.url}, this.implOpts);
     var url = this.url;
-    connection.on('error', function (msg, something) {
-        logger.warn("Getting an error in the AMQP Connection with url='" + url + "'", msg);
+    connection.on('error', function (err) {
+        logger.error("Getting an error in the AMQP Connection with url='" + url + "'", err);
         var stack = new Error().stack;
-        logger.warn('something=' + something);
         logger.warn(stack);
     });
     connection.on("ready", function() {

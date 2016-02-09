@@ -15,6 +15,8 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
 
         logger.trace('opening serverStacks channel with protocol: ' + protocol);
         logger.trace('receiveQueue/sendQueue ' + receiveQueue + '/' + sendQueue);
+        //logger.error('serverStacks: ');
+        console.dir(serverStacks);
         var serverChannel = serverStacks.openChannel(protocol);
        logger.trace("created server stacks channel " + serverChannel.name);
         //console.dir(serverStacks);
