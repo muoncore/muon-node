@@ -36,7 +36,7 @@ AmqpDiscovery.prototype.discoverServices = function (callback) {
 
 AmqpDiscovery.prototype.close = function () {
     logger.trace("closing connections...");
-    console.dir(this.connection.close);
+    //console.dir(this.connection.close);
     this.connection.close();
 };
 

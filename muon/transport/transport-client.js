@@ -27,7 +27,7 @@ TransportClient.prototype.openChannel = function() {
 
             return;
         }
-        console.dir(msg);
+        //console.dir(msg);
         //lookup the service/ proto combo in internal channels
         var channelKey = msg.headers.targetService + "-" + msg.headers.protocol;
         var internalChannel = channelConnection.internalChannels[channelKey];

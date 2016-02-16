@@ -29,7 +29,7 @@ function LeftConnection(name, inbound, outbound) {
             if (msg.headers !== undefined) {
                 id = msg.headers.id;
             }
-            logger.trace(name + " ChannelConnection.send() event.id='" + id + "'");
+            logger.trace("[***** CHANNEL *****] " + name + " ChannelConnection.send() event.id='" + id + "'");
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
@@ -42,7 +42,7 @@ function LeftConnection(name, inbound, outbound) {
                     if (value.headers !== undefined) {
                         id = value.headers.id;
                     }
-                    logger.trace(name + " ChannelConnection.listen() event.id=" + id);
+                    logger.trace("[***** CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
                     if (callback) {
                         callback(value);
                     } else {
@@ -61,7 +61,7 @@ function LeftConnection(name, inbound, outbound) {
                     if (value.headers !== undefined) {
                         id = value.headers.id;
                     }
-                    logger.trace(name + "ChannelConnection.handler() event.id=" + id);
+                    logger.trace("[***** CHANNEL *****] " + name + "ChannelConnection.handler() event.id=" + id);
                     if (handler) {
                         try {
                             var result = handler.sendUpstream(value);
@@ -83,7 +83,7 @@ function LeftConnection(name, inbound, outbound) {
             return name;
         }
     };
-    logger.trace('returning left connection '+ name);
+    logger.trace('[***** CHANNEL *****] returning left connection '+ name);
     return connectionObject;
 }
 
@@ -98,8 +98,8 @@ function RightConnection(name, inbound, outbound) {
             if (msg.headers !== undefined) {
                 id = msg.headers.id;
             }
-            logger.debug(name + " ChannelConnection.send() event.id='" + id + "'");
-            logger.debug(name + " ChannelConnection.send() listener: " + listener);
+            logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() event.id='" + id + "'");
+           // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
@@ -113,7 +113,7 @@ function RightConnection(name, inbound, outbound) {
                     if (value.headers !== undefined) {
                         id = value.headers.id;
                     }
-                     logger.debug(name + " ChannelConnection.listen() event.id=" + id);
+                     logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
                     if (callback) {
                         callback(value);
                     } else {
@@ -133,7 +133,7 @@ function RightConnection(name, inbound, outbound) {
                     if (value.headers !== undefined) {
                         id = value.headers.id;
                     }
-                     logger.debug(name + " ChannelConnection.handler() event.id=" + id);
+                     logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.handler() event.id=" + id);
                     if (handler) {
                         try {
                             var result = handler.sendDownstream(value);
@@ -142,7 +142,7 @@ function RightConnection(name, inbound, outbound) {
                         } catch(err) {
                             logger.error(name + ': ' + err);
                             var reply = {status: 'error'};
-                            logger.info('error: returning message back upstream');
+                            logger.info('[***** CHANNEL *****]  error: returning message back upstream');
                             csp.putAsync(outbound, reply);
                         }
 
@@ -157,7 +157,7 @@ function RightConnection(name, inbound, outbound) {
             return name;
         }
     }
-    logger.trace('returning right connection '+ name);
+    logger.trace('[***** CHANNEL *****] returning right connection '+ name);
     return connectionObject;
 }
 
@@ -174,7 +174,7 @@ function Channel(name) {
     var leftConnection = new LeftConnection(name, inbound, outbound);
     var rightConnection = new RightConnection(name, outbound, inbound);
 
-    logger.trace('Created! Channel(' + name + ')');
+    logger.trace('[***** CHANNEL *****] Created! Channel(' + name + ')');
     return {
         leftHandler: function(handler) {
             if (leftHandler) throw new Error('left handler already set on channel "' + name + '"');

@@ -11,7 +11,7 @@ var Amqp09Transport = function (serviceName, serverStacks, url) {
     this.connection.connect(function() {
         this.queues = new AmqpQueue(this.connection);
         this.serviceQueue = new ServiceQueue(serviceName, serverStacks, this.connection);
-        logger.info("Amqp09Transport() serviceName: " + serviceName);
+        logger.info("[***** TRANSPORT *****] Amqp09Transport() serviceName: " + serviceName);
     }.bind(this));
 };
 
@@ -29,11 +29,11 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
             _.each(this.outboundBuffer, function(el) {
                 this.send(el);
             }.bind(this));
-            console.info("send " + this.outboundBuffer.length + " pending messages");
+            logger.trace("[***** TRANSPORT *****] send " + this.outboundBuffer.length + " pending messages");
             this.outboundBuffer = [];
         },
         shutdown: function() {
-            logger.info("CHANNEL POISONED");
+            logger.info("[***** TRANSPORT *****] CHANNEL POISONED");
 
             this.send({
                 headers:{
@@ -61,9 +61,8 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
                 payload:msg.payload
             };
 
-            logger.info("Sending message to amqp transport");
-            console.dir(msg);
-
+            logger.info("[***** TRANSPORT *****] Sending event outbound to amqp transport");
+            //console.dir(msg);
             transport.queues.send(this.sendQueue, amqpMessage);
         }
     };
@@ -71,12 +70,12 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
     channelConnection.channel = bichannel.create("amqp-transport");
 
     channelConnection.channel.rightConnection().listen(function(msg) {
-        logger.info("Sending message");
+        logger.info("[***** TRANSPORT *****] received outbound event");
         if (msg == "poison") {
             channelConnection.shutdown();
             return;
         }
-        console.dir(msg);
+        //console.dir(msg);
         if(channelConnection.channelOpen) {
             channelConnection.send(msg);
         } else {
@@ -94,7 +93,8 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
     channelConnection.receiveQueue = "node-service-recieve";
 
     channelConnection.listener = this.queues.listen(channelConnection.receiveQueue, function(message) {
-        console.dir(message);
+        //console.dir(message);
+        logger.info('[***** TRANSPORT *****] message received: ' + JSON.stringify(message));
         if (channelConnection.channelOpen == false) {
             channelConnection.drainQueue();
             channelConnection.channelOpen = true;

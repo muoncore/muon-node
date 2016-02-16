@@ -34,11 +34,11 @@ AmqpConnection.prototype.connect = function (callback) {
     });
     connection.on("blocked", function(data) {
         logger.error("AMQP Connection is BLOCKED");
-        console.dir(data);
+        //console.dir(data);
     });
     connection.on("unblocked", function(data) {
         logger.error("AMQP Connection is UNBLOCKED");
-        console.dir(data);
+        //console.dir(data);
     });
 
     this.connection = connection;
