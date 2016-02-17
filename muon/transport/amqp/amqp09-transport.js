@@ -98,6 +98,7 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
         if (channelConnection.channelOpen == false) {
             channelConnection.drainQueue();
             channelConnection.channelOpen = true;
+            return; // we got a handshake response
         }
         channelConnection.channel.rightConnection().send(message);
     });
