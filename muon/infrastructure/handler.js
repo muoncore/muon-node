@@ -21,15 +21,15 @@ module.exports.create = function(n) {
             incomingFunction = f;
         },
         sendDownstream: function(event) {
-            logger.debug(name + ' sending event via handler downstream');
+            logger.debug('[*** CHANNEL ***] ' + name + ' sending event via handler downstream');
             var result = outgoingFunction(event);
-            logger.debug(name + ' returning handler result=' + JSON.stringify(result));
+            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler result=' + JSON.stringify(result));
             return result;
         },
         sendUpstream: function(event) {
             logger.debug(name + ' sending event via handler upstream');
             var result = incomingFunction(event);
-            logger.debug(name + ' returning handler result=' + JSON.stringify(result));
+            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler result=' + JSON.stringify(result));
             return result;
         },
         upstreamConnection: function(c) {
@@ -42,10 +42,10 @@ module.exports.create = function(n) {
             //logger.info('conn: ');
             //console.dir(conn);
             if (conn === upstreamConnection.name()) {
-                logger.trace(name + ' other connection is downstream: ' + downstreamConnection.name());
+                logger.trace('[*** CHANNEL ***]  ' + name + ' other connection is downstream: ' + downstreamConnection.name());
                 return downstreamConnection;
             } else {
-                logger.trace(name + ' other connection is upstream: ' + upstreamConnection.name());
+                logger.trace('[*** CHANNEL ***] ' + name + ' other connection is upstream: ' + upstreamConnection.name());
                 return upstreamConnection;
             }
         }

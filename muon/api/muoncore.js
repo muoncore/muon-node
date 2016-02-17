@@ -2,6 +2,7 @@ var url = require("url");
 require('sexylog');
 //var RpcProtocol = require('../protocol/rpc-protocol.js');
 var channel = require('../infrastructure/channel.js');
+var uuid = require('node-uuid');
 
 var RSVP = require('rsvp');
 
@@ -34,13 +35,32 @@ exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
         shutdown: function() {
 
         },
-        request: function(remoteServiceUrl, event, clientCallback) {
+        request: function(remoteServiceUrl, payload, clientCallback) {
 
 
+            var serviceRequest = url.parse(remoteServiceUrl, true);
+            var eventid = uuid.v4();
+             var event = {
+                        id: eventid,
+                        headers: {
+                            eventType: "RequestMade",
+                            id: eventid,
+                            targetService: serviceRequest.hostname,
+                            sourceService: serviceName,
+                            protocol: "request",
+                            url: remoteServiceUrl,
+                            "Content-Type": "application/json",
+                            sourceAvailableContentTypes: ["application/json"],
+                            channelOperation: "NORMAL"
+                        },
+                        payload: {
+                            message: payload
+                        }
+                    };
 
-          var serviceRequest = url.parse(remoteServiceUrl, true);
+
          // var path = remoteServiceUrl.split('/')[3];
-         // event['headers']['path'] = path;
+
             logger.trace('remote service: ', serviceRequest.hostname);
             var queue = "resource-listen." + serviceRequest.hostname;
 
@@ -61,7 +81,7 @@ exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
                                 logger.warn('client-api promise failed check! calling promise.reject()');
                                 reject(event);
                             } else {
-                                logger.trace('promise calling promise.resolve() event.id=' + event.headers.id);
+                                logger.trace('promise calling promise.resolve() event.id=' + event.id);
                                 resolve(event);
                             }
 

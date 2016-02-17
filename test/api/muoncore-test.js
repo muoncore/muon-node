@@ -16,10 +16,9 @@ describe("Muon core test", function () {
     before(function () {
         muon = muoncore.create("example-service", config, discoveryUrl, transportUrl);
         muon.handle('muon://example-service/tennis', function (event, respond) {
-            logger.info('*****   muoncore-test.js *************************************************');
-            logger.debug('muon://service/tennis server responding to event.id' + event.headers.id);
-            event.payload.message = "pong";
-            respond(event);
+            logger.info('*****  muon://service/tennis: muoncore-test.js *************************************************');
+            logger.debug('muon://service/tennis server responding to event.id=' + event.headers.id);
+            respond("pong");
         });
     });
 
@@ -31,30 +30,16 @@ describe("Muon core test", function () {
     it("create request protocol stack", function (done) {
 
 
-        var event = {
-            headers: {
-                eventType: "RequestMade",
-                id: "ABCDEFGH",
-                targetService: "example-service",
-                sourceService: "example-client",
-                protocol: "request",
-                url: "muon://example-service/tennis",
-                "Content-Type": "application/json",
-                sourceAvailableContentTypes: ["application/json"],
-                channelOperation: "NORMAL"
-            },
-            payload: {
-                message: "ping"
-            }
-        };
-        muon2 = muoncore.create("example-service", config, discoveryUrl, transportUrl);
+
+        muon2 = muoncore.create("example-client", config, discoveryUrl, transportUrl);
 
         setTimeout(function () {
 
-            var promise = muon2.request('muon://example-service/tennis', event);
+            var promise = muon2.request('muon://example-service/tennis', "ping");
 
             promise.then(function (event) {
                 logger.info("muon://example-client server response received! event.id=" + event.id);
+                logger.info("muon://example-client server response received! event.id=" + JSON.stringify(event));
                 logger.info("muon promise.then() asserting response...");
                 assert(event, "request event is undefined");
                 assert.equal(event.payload.message, "pong", "expected 'pong' response message from muon://example-service/tennis")
