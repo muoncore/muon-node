@@ -35,7 +35,7 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
             if (data.headers !== undefined) {
                 id = data.headers.id;
             }
-            logger.info("[***** TRANSPORT *****] Server Stack transport channel: downstream data received, sendign to amqp queue '" + sendQueue + "' event.id=" + id);
+            logger.info("[***** TRANSPORT *****] Server Stack transport channel: downstream data received, sending to amqp queue '" + sendQueue + "' event.id=" + id);
             //console.dir(data);
             if (data == "poison") {
                 q.shutdown();

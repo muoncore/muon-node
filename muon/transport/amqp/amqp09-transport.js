@@ -4,6 +4,7 @@ var bichannel = require('../../infrastructure/channel');
 var AmqpConnection = require("./infra/amqp-connection");
 var ServiceQueue = require("./infra/service-queue");
 var AmqpQueue = require("./infra/amqp-queues");
+var uuid = require('node-uuid');
 
 var Amqp09Transport = function (serviceName, serverStacks, url) {
     this.serverStacks = serverStacks;
@@ -89,8 +90,16 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
 };
 
 Amqp09Transport.prototype.startHandshake = function(channelConnection) {
-    channelConnection.sendQueue = "node-service-send";
-    channelConnection.receiveQueue = "node-service-recieve";
+
+
+    //channelConnection.sendQueue = "node-service-send";
+    //channelConnection.receiveQueue = "node-service-recieve";
+
+    handshakeId = uuid.v4();
+    var serviceQueueName = "service." + channelConnection.serviceName;
+    channelConnection.sendQueue = channelConnection.serviceName + ".send." + handshakeId;
+    channelConnection.receiveQueue = channelConnection.serviceName + ".receive." + handshakeId;
+
 
     channelConnection.listener = this.queues.listen(channelConnection.receiveQueue, function(message) {
         //console.dir(message);
@@ -103,7 +112,7 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
         channelConnection.channel.rightConnection().send(message);
     });
 
-    var serviceQueueName = "service." + channelConnection.serviceName;
+
 
     this.queues.send(serviceQueueName, {
         headers: {
