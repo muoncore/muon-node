@@ -1,5 +1,21 @@
+//handle running in browser
+logger = {
+    info:function(message) {
+        console.log(message);
+    },
+    debug:function(message) {
+        console.log(message);
+    },
+    trace:function(message) {
+        console.log(message);
+    },
+    warning:function(message) {
+        console.log(message);
+    }
+};
+
 var url = require("url");
-require('sexylog');
+
 //var RpcProtocol = require('../protocol/rpc-protocol.js');
 var channel = require('../infrastructure/channel.js');
 var uuid = require('node-uuid');
@@ -9,34 +25,52 @@ var RSVP = require('rsvp');
 
 var rpcProtocol = require('../protocol/rpc-protocol.js');
 
-
-var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
-var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
 var TransportClient = require("../../muon/transport/transport-client");
 var ServerStacks = require("../../muon/server-stacks");
 
 
-exports.create = function(serviceName, config, discoveryUrl, transportUrl) {
+exports.create = function(serviceName, config) {
 
     var serverStacks = new ServerStacks();
 
+    logger.info("Booting with transport ");
+    console.dir(config.transport);
+    logger.info("Booting with discovery ");
+    console.dir(config.discovery);
 
-    discovery = new AmqpDiscovery(discoveryUrl);
+    if (config.discovery.type == "browser") {
+        logger.info("Using BROWSER")
+        var BrowserDiscovery = require("../../muon/discovery/browser/browser-discovery");
+
+        discovery = new BrowserDiscovery(config.discovery.url);
+    } else {
+        logger.info("Using AMQP")
+        //require('sexylog');
+        var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
+
+        discovery = new AmqpDiscovery(config.discovery.url);
         discovery.advertiseLocalService({
             identifier:serviceName,
             tags:["node", serviceName],
             codecs:["application/json"]
         });
+    }
 
-    var transport = new AmqpTransport(serviceName, serverStacks, transportUrl);
+    if (config.transport.type == "browser") {
+        var BrowserTransport = require("../../muon/transport/browser/browser-transport");
+        transport = new BrowserTransport(serviceName, serverStacks, config.transport.url);
+    } else {
+        var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
+        transport = new AmqpTransport(serviceName, serverStacks, config.transport.url);
+    }
+
     var transportClient = new TransportClient(transport);
 
     var muonApi = {
         shutdown: function() {
-
+            logger.info("Shutting down!!");
         },
         request: function(remoteServiceUrl, payload, clientCallback) {
-
 
             var serviceRequest = url.parse(remoteServiceUrl, true);
             var eventid = uuid.v4();

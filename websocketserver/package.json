@@ -1,0 +1,19 @@
+{
+  "name": "node-ws-test",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heroku-examples/node-ws-test.git"
+  },
+  "dependencies": {
+    "muon": "6.0.0",
+    "express": "^4.4.5",
+    "ws": "0.4.x"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}

@@ -1,7 +1,3 @@
-require('sexylog');
-
-
-
 
 module.exports.create = function(n) {
 

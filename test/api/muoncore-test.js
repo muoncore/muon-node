@@ -9,12 +9,20 @@ describe("Muon core test", function () {
 
     this.timeout(7000);
 
-    var transportUrl = "amqp://muon:microservices@localhost";
-    var discoveryUrl = transportUrl;
-    var config = {};
+    var amqpurl = "amqp://muon:microservices@localhost";
+    var config = {
+        discovery:{
+            type:"amqp",
+            url:amqpurl
+        },
+        transport:{
+            type:"amqp",
+            url:amqpurl
+        }
+    };
 
     before(function () {
-        muon = muoncore.create("example-service", config, discoveryUrl, transportUrl);
+        muon = muoncore.create("example-service", config);
         muon.handle('muon://example-service/tennis', function (event, respond) {
             logger.info('*****  muon://service/tennis: muoncore-test.js *************************************************');
             logger.debug('muon://service/tennis server responding to event.id=' + event.headers.id);
@@ -31,7 +39,7 @@ describe("Muon core test", function () {
 
 
 
-        muon2 = muoncore.create("example-client", config, discoveryUrl, transportUrl);
+        muon2 = muoncore.create("example-client", config);
 
         setTimeout(function () {
 

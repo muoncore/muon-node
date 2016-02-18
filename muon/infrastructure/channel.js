@@ -1,5 +1,4 @@
 var csp = require("js-csp");
-require('sexylog');
 
 /**
  * Muon-node bi-directional channel

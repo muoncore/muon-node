@@ -1,16 +1,4 @@
 
 
-var Muon = function (serviceIdentifier, discoveryService, tags) {
+Muon = require("./muon/api/muoncore");
 
-};
-
-//API
-/**
- *
- * request
- * handleRequest
- *
- */
-
-
-module.exports = Muon;
