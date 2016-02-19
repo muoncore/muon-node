@@ -9,7 +9,7 @@ TransportClient.prototype.openChannel = function() {
 
     var trClient = this;
     var channelConnection = {
-        channel: bichannel.create("test-channel"),
+        channel: bichannel.create("transport-client"),
         internalChannels:{}
     };
 
@@ -27,7 +27,7 @@ TransportClient.prototype.openChannel = function() {
 
             return;
         }
-        console.dir(msg);
+        //console.dir(msg);
         //lookup the service/ proto combo in internal channels
         var channelKey = msg.headers.targetService + "-" + msg.headers.protocol;
         var internalChannel = channelConnection.internalChannels[channelKey];

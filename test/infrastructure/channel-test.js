@@ -29,8 +29,8 @@ describe("Bi directional channel test", function () {
             });
          }
 
-         var channel = bichannel.create("test-channel-1");
-         console.log("channel: " + JSON.stringify(channel));
+         var channel = bichannel.create("test-1");
+         logger.trace("channel: " + JSON.stringify(channel));
          client1(channel.leftConnection());
          client2(channel.rightConnection());
 
@@ -57,7 +57,7 @@ describe("Bi directional channel test", function () {
                 });
          }
 
-         var channel = bichannel.create("test-channel-2");
+         var channel = bichannel.create("test-2");
          client1(channel.leftConnection());
          client2(channel.rightConnection());
 
@@ -107,13 +107,13 @@ describe("Bi directional channel test", function () {
 
          var reqResHandler = handler.create();
          reqResHandler.outgoing(function(event){
-                if (! event.id) {
+                if (! event.headers.id) {
                     throw new Error('reqResHandler: event is null');
                 }
                 return event;
          });
          reqResHandler.incoming(function(event){
-                 if (! event.id) {
+                 if (! event.headers.id) {
                      throw new Error('reqResHandler: event is null');
                  }
                  return event;

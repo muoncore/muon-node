@@ -20,7 +20,7 @@ setTimeout(function() {
 
     connection.listen(function(response) {
         logger.info("The channel replied");
-        console.dir(response.payload);
+        //console.dir(response.payload);
     });
 
     connection.send({

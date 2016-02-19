@@ -1,9 +1,7 @@
-require('sexylog');
 
+module.exports.create = function(n) {
 
-
-
-module.exports.create = function() {
+    var name = n + '-handler';
 
     var outgoingFunction;
     var incomingFunction;
@@ -19,15 +17,15 @@ module.exports.create = function() {
             incomingFunction = f;
         },
         sendDownstream: function(event) {
-            logger.debug('sending event via handler downstream');
+            logger.debug('[*** CHANNEL ***] ' + name + ' sending event via handler downstream');
             var result = outgoingFunction(event);
-            logger.debug('returning handler result=' + result);
+            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler result=' + JSON.stringify(result));
             return result;
         },
         sendUpstream: function(event) {
-            logger.debug('sending event via handler upstream');
+            logger.debug(name + ' sending event via handler upstream');
             var result = incomingFunction(event);
-            logger.debug('returning handler result=' + result);
+            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler result=' + JSON.stringify(result));
             return result;
         },
         upstreamConnection: function(c) {
@@ -40,10 +38,10 @@ module.exports.create = function() {
             //logger.info('conn: ');
             //console.dir(conn);
             if (conn === upstreamConnection.name()) {
-                logger.trace('other connection is downstream: ' + downstreamConnection.name());
+                logger.trace('[*** CHANNEL ***]  ' + name + ' other connection is downstream: ' + downstreamConnection.name());
                 return downstreamConnection;
             } else {
-                logger.trace('other connection is upstream: ' + upstreamConnection.name());
+                logger.trace('[*** CHANNEL ***] ' + name + ' other connection is upstream: ' + upstreamConnection.name());
                 return upstreamConnection;
             }
         }

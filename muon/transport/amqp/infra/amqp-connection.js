@@ -8,19 +8,24 @@ var AmqpConnection = function (url) {
         reconnectBackoffStrategy: 'linear',
         reconnectBackoffTime: 500 // ms
     };
+    logger.info('AmqpConnection(url="' + url + '")');
 };
 
 AmqpConnection.prototype.connect = function (callback) {
+    logger.debug('AmqpConnection.connect() this.url=' + this.url);
     var connection = AMQP.createConnection({url: this.url}, this.implOpts);
     var url = this.url;
-    connection.on('error', function (msg, something) {
-        logger.warn("Getting an error in the AMQP Connection with url: '" + url + "'", msg);
+    connection.on('error', function (err) {
+        logger.error("Getting an error in the AMQP Connection with url='" + url + "'", err);
         var stack = new Error().stack;
         logger.warn(stack);
     });
     connection.on("ready", function() {
         logger.debug("AMQP Connection becomes ready");
-        console.log("Callback is " + callback);
+        if (! callback) {
+            logger.error("Callback is undefined/null:" + callback);
+            throw new Error('Callback is undefined/null');
+        }
         callback();
     });
     connection.on("close", function() {
@@ -29,11 +34,11 @@ AmqpConnection.prototype.connect = function (callback) {
     });
     connection.on("blocked", function(data) {
         logger.error("AMQP Connection is BLOCKED");
-        console.dir(data);
+        //console.dir(data);
     });
     connection.on("unblocked", function(data) {
         logger.error("AMQP Connection is UNBLOCKED");
-        console.dir(data);
+        //console.dir(data);
     });
 
     this.connection = connection;
@@ -70,7 +75,7 @@ AmqpConnection.prototype.exchange = function (name, callback, params) {
     }
     if (typeof name === 'undefined' || name.length == 0) name = '';
 
-    logger.debug('Setting up new exchange at ' + name);
+    logger.debug('Setting up new exchange with name="' + name + '"');
     var exch = this.connection.exchange(name, params);
     if (typeof callback === 'function') {
         callback(exch);

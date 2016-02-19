@@ -73,7 +73,7 @@ AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
                                     logger.trace("Broadcast payload: " + payload);
                                 } catch (error) {
                                     logger.error("Failed to understand broadcast message");
-                                    console.dir(message);
+                                    //console.dir(message);
                                 }
                             }
 
@@ -91,7 +91,7 @@ AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
                         } catch (error) {
                             logger.error("Bombed during broadcast handling ... ");
                             console.dir(error);
-                            console.dir(message);
+                            //console.dir(message);
                         }
                     });
                 });

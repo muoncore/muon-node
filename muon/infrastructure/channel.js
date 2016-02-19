@@ -1,5 +1,4 @@
 var csp = require("js-csp");
-require('sexylog');
 
 /**
  * Muon-node bi-directional channel
@@ -8,7 +7,7 @@ require('sexylog');
  * Each endpoint has an inbound and bound unidrectional channel to send arbitrary messages along to each other
  *
  * var bichannel = require('./bi-channel.js');
- * var channel = bichannel.create("test-channel");
+ * var channel = bichannel.create("cleint-api");
  * client1(channel.left());
  * client2(channel.right());
  *
@@ -20,12 +19,16 @@ module.exports.create = function(name) {
 
 
 function LeftConnection(name, inbound, outbound) {
-    name = name + '-left-connection'
+    name = name + '-left-connection';
     var handler;
     var listener;
-    return {
+    var connectionObject = {
         send: function(msg) {
-            logger.trace(name + " ChannelConnection.send() msg='" + msg + "'");
+            var id = "unknown";
+            if (msg.headers !== undefined) {
+                id = msg.headers.id;
+            }
+            logger.trace("[***** CHANNEL *****] " + name + " ChannelConnection.send() event.id='" + id + "'");
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
@@ -34,7 +37,11 @@ function LeftConnection(name, inbound, outbound) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.listen() value=" + value);
+                    var id = "unknown";
+                    if (value.headers !== undefined) {
+                        id = value.headers.id;
+                    }
+                    logger.trace("[***** CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
                     if (callback) {
                         callback(value);
                     } else {
@@ -49,19 +56,21 @@ function LeftConnection(name, inbound, outbound) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.handler() value=" + value);
+                    var id = "unknown";
+                    if (value.headers !== undefined) {
+                        id = value.headers.id;
+                    }
+                    logger.trace("[***** CHANNEL *****] " + name + "ChannelConnection.handler() event.id=" + id);
                     if (handler) {
                         try {
                             var result = handler.sendUpstream(value);
-                            logger.info('result' + result);
+                            logger.info('handler result.id=' + id);
                             handler.otherConnection(name).send(result);
                         } catch(err) {
                             logger.error(name + ': ' + err);
-                            var reply = {status: 'error'}
+                            var reply = {status: 'error'};
                             handler.otherConnection(name).send(reply);
                         }
-                        //
-
                     } else {
                         throw new Error('handler not set');
                     }
@@ -72,7 +81,9 @@ function LeftConnection(name, inbound, outbound) {
         name: function() {
             return name;
         }
-    }
+    };
+    logger.trace('[***** CHANNEL *****] returning left connection '+ name);
+    return connectionObject;
 }
 
 
@@ -80,18 +91,28 @@ function RightConnection(name, inbound, outbound) {
     name = name + '-right-connection'
     var handler;
     var listener;
-    return {
+    var connectionObject = {
         send: function(msg) {
-            logger.trace(name + " ChannelConnection.send() msg='" + msg + "'");
+            var id = "unknown";
+            if (msg.headers !== undefined) {
+                id = msg.headers.id;
+            }
+            logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() event.id='" + id + "'");
+           // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
             if (handler) throw new Error(name + ': cannot set listener as handler already set');
             listener = callback;
+            //logger.trace(name + " ChannelConnection.send() callback: " + callback);
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.listen() value=" + value);
+                    var id = "unknown";
+                    if (value.headers !== undefined) {
+                        id = value.headers.id;
+                    }
+                     logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
                     if (callback) {
                         callback(value);
                     } else {
@@ -107,16 +128,20 @@ function RightConnection(name, inbound, outbound) {
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
-                     logger.trace(name + " ChannelConnection.handler() value=" + value);
+                    var id = "unknown";
+                    if (value.headers !== undefined) {
+                        id = value.headers.id;
+                    }
+                     logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.handler() event.id=" + id);
                     if (handler) {
                         try {
                             var result = handler.sendDownstream(value);
-                            logger.info('result' + result);
+                            //logger.trace('handler result=' + JSON.stringify(result));
                             handler.otherConnection(name).send(result);
                         } catch(err) {
                             logger.error(name + ': ' + err);
                             var reply = {status: 'error'};
-                            logger.info('error: returning message back upstream');
+                            logger.info('[***** CHANNEL *****]  error: returning message back upstream');
                             csp.putAsync(outbound, reply);
                         }
 
@@ -131,10 +156,13 @@ function RightConnection(name, inbound, outbound) {
             return name;
         }
     }
+    logger.trace('[***** CHANNEL *****] returning right connection '+ name);
+    return connectionObject;
 }
 
 
 function Channel(name) {
+    //logger.trace('creating... Channel(' + name + ')');
     var name = name + '-channel' || "default-channel";
     var inbound = csp.chan();
     var outbound = csp.chan();
@@ -145,6 +173,7 @@ function Channel(name) {
     var leftConnection = new LeftConnection(name, inbound, outbound);
     var rightConnection = new RightConnection(name, outbound, inbound);
 
+    logger.trace('[***** CHANNEL *****] Created! Channel(' + name + ')');
     return {
         leftHandler: function(handler) {
             if (leftHandler) throw new Error('left handler already set on channel "' + name + '"');

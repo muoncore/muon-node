@@ -4,14 +4,15 @@ var bichannel = require('../../infrastructure/channel');
 var AmqpConnection = require("./infra/amqp-connection");
 var ServiceQueue = require("./infra/service-queue");
 var AmqpQueue = require("./infra/amqp-queues");
+var uuid = require('node-uuid');
 
 var Amqp09Transport = function (serviceName, serverStacks, url) {
     this.serverStacks = serverStacks;
     this.connection = new AmqpConnection(url);
     this.connection.connect(function() {
-        console.log("BE AWESOMELKJLKJLKJLKJLJKLJKJLKJLKJLKJLKJ");
         this.queues = new AmqpQueue(this.connection);
         this.serviceQueue = new ServiceQueue(serviceName, serverStacks, this.connection);
+        logger.info("[***** TRANSPORT *****] Amqp09Transport() serviceName: " + serviceName);
     }.bind(this));
 };
 
@@ -29,11 +30,11 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
             _.each(this.outboundBuffer, function(el) {
                 this.send(el);
             }.bind(this));
-            console.info("send " + this.outboundBuffer.length + " pending messages");
+            logger.trace("[***** TRANSPORT *****] send " + this.outboundBuffer.length + " pending messages");
             this.outboundBuffer = [];
         },
         shutdown: function() {
-            logger.info("CHANNEL POISONED");
+            logger.info("[***** TRANSPORT *****] CHANNEL POISONED");
 
             this.send({
                 headers:{
@@ -61,22 +62,21 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
                 payload:msg.payload
             };
 
-            logger.info("SENDING MESSAGE!");
-            console.dir(msg);
-
+            logger.info("[***** TRANSPORT *****] Sending event outbound to amqp transport");
+            //console.dir(msg);
             transport.queues.send(this.sendQueue, amqpMessage);
         }
     };
 
-    channelConnection.channel = bichannel.create("test-channel");
+    channelConnection.channel = bichannel.create("amqp-transport");
 
     channelConnection.channel.rightConnection().listen(function(msg) {
-        logger.info("Sending message");
+        logger.info("[***** TRANSPORT *****] received outbound event");
         if (msg == "poison") {
             channelConnection.shutdown();
             return;
         }
-        console.dir(msg);
+        //console.dir(msg);
         if(channelConnection.channelOpen) {
             channelConnection.send(msg);
         } else {
@@ -90,19 +90,29 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
 };
 
 Amqp09Transport.prototype.startHandshake = function(channelConnection) {
-    channelConnection.sendQueue = "node-service-send";
-    channelConnection.receiveQueue = "node-service-recieve";
+
+
+    //channelConnection.sendQueue = "node-service-send";
+    //channelConnection.receiveQueue = "node-service-recieve";
+
+    handshakeId = uuid.v4();
+    var serviceQueueName = "service." + channelConnection.serviceName;
+    channelConnection.sendQueue = channelConnection.serviceName + ".send." + handshakeId;
+    channelConnection.receiveQueue = channelConnection.serviceName + ".receive." + handshakeId;
+
 
     channelConnection.listener = this.queues.listen(channelConnection.receiveQueue, function(message) {
-        console.dir(message);
+        //console.dir(message);
+        logger.info('[***** TRANSPORT *****] message received: ' + JSON.stringify(message));
         if (channelConnection.channelOpen == false) {
             channelConnection.drainQueue();
             channelConnection.channelOpen = true;
+            return; // we got a handshake response
         }
         channelConnection.channel.rightConnection().send(message);
     });
 
-    var serviceQueueName = "service." + channelConnection.serviceName;
+
 
     this.queues.send(serviceQueueName, {
         headers: {
@@ -112,6 +122,10 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
             LISTEN_ON:channelConnection.sendQueue
         }
     })
+};
+
+Amqp09Transport.prototype.shutdown = function() {
+    //TODO, more shutdowns.
 };
 
 

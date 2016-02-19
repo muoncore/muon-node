@@ -5,8 +5,8 @@ var AmqpQueues = function (connection) {
 
 AmqpQueues.prototype.send = function (queueName, event) {
     var _this = this;
-    logger.debug('Emitting event on queue ' + queueName);
-    logger.trace('event: ', event);
+    logger.debug('[***** TRANSPORT *****] AmqpQueues.send() Emitting event on queue ' + queueName);
+    logger.trace('[***** TRANSPORT *****] AmqpQueues.send() event: ' + JSON.stringify(event));
 
     var waitInterval = setInterval(function () {
         if (typeof _this.exchange === 'object') {
@@ -30,9 +30,9 @@ AmqpQueues.prototype.send = function (queueName, event) {
                 payload = "";
             }
 
-            logger.debug('message queue payload type: ' + (typeof payload));
-            logger.debug('message queue payload: ', payload);
-            logger.debug('message queue options: ', options);
+            logger.trace('[***** TRANSPORT *****] send queue ' + queueName + ' payload type: ' + (typeof payload));
+            logger.trace('[***** TRANSPORT *****] send queue ' + queueName + ' payload: ', JSON.stringify(payload));
+            logger.trace('[***** TRANSPORT *****] send queue ' + queueName + ' options: ', JSON.stringify(options));
 
             _this.exchange.publish(
                 queueName, payload, options, function (resp) {
@@ -43,13 +43,13 @@ AmqpQueues.prototype.send = function (queueName, event) {
 };
 AmqpQueues.prototype.listen = function (queueName, callback) {
 
-    logger.debug("Creating listen queue " + queueName);
+    logger.debug("[***** TRANSPORT *****] Creating listen queue " + queueName);
     var _this = this;
 
     var control = {
         shutdown:function() {
             if (this.q != undefined) {
-                console.log("I HAVE A QUEUE, and the queue is " + this.queueName);
+                logger.debug("shutting down queue: " + this.queueName);
                 this.q.close();
             }
         },
@@ -65,7 +65,8 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
         control.q = q;
         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
             //todo, headers ...
-            logger.trace("Queue message received on " + queueName, message);
+            logger.debug("[***** TRANSPORT *****] Message received on amqp queue '" + queueName + '"' + JSON.stringify(message) );
+            logger.debug("[***** TRANSPORT *****] headers: ", headers);
 
             if (_this.eventLogger != null) {
                 var logEvent = {

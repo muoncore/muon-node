@@ -13,8 +13,7 @@ var AmqpDiscovery = function (url) {
     _this.url = url;
 
     _this.connection.connect(function() {
-        console.log("AMQP Discovery is ready!!");
-        logger.debug("AMQP Discovery ready!");
+        logger.info("AMQP Discovery is ready!!");
         _this.broadcast = new Broadcast(_this.connection);
         startAnnouncements(_this);
     });
@@ -36,8 +35,8 @@ AmqpDiscovery.prototype.discoverServices = function (callback) {
 };
 
 AmqpDiscovery.prototype.close = function () {
-    console.log("HELLO WORLD");
-    console.dir(this.connection.close);
+    logger.trace("closing connections...");
+    //console.dir(this.connection.close);
     this.connection.close();
 };
 

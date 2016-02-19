@@ -1,0 +1,21 @@
+<html>
+<head>
+    <script src="bundle.js"></script>
+</head>
+
+<h1>Hello World</h1>
+
+<script>
+    var mu = Muon.create("awesomestuff", {
+        transport: {
+            type:"browser",
+            url:"ws://localhost:5000/discover"
+        },
+        discovery: {
+            type:"browser",
+            url:"ws://localhost:5000/transport"
+        }
+    });
+    mu.request("hello world");
+</script>
+</html>

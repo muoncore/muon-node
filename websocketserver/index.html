@@ -1,0 +1,44 @@
+<html>
+<head>
+
+    <style>
+        body {
+            font-family: "Helvetica Neue", helvetica, arial;
+            padding: 15px;
+        }
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        ul li {
+            line-height: 1.4;
+        }
+    </style>
+
+    <script src="muon.js"></script>
+    <script>
+
+        var mu = Muon.create("awesomestuff", {
+            transport: {
+                type:"browser",
+                url:"ws://localhost:5000/transport"
+            },
+            discovery: {
+                type:"browser",
+                url:"ws://localhost:5000/discover"
+            }
+        });
+        mu.request("request://exampleservice/", {}, function(data) {
+            console.log("GOT THE DATA FROM REMOTE!!");
+            console.dir(data);
+        });
+    </script>
+</head>
+<body>
+<h1>Pings</h1>
+<ul id='pings'></ul>
+</body>
+</html>
