@@ -56,8 +56,6 @@
     "node": "*"
   },
   "preferGlobal": "true",
-  "bin": {
-    "muon": "cli.js"
-  },
+
   "main": "./muon/api/muoncore"
 }

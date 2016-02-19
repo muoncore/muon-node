@@ -5,11 +5,19 @@ var uuid = require("node-uuid");
 var BrowserTransport = function (serviceName, serverStacks, url) {
     this.ws = new WebSocket(url, "protocolOne");
 
-    this.channelConnections = [];
+    this.channelConnections = {};
+    var transport = this;
 
     this.ws.onmessage = function (event) {
         //TODO, lookup the channelconnection based on the channelId
-        console.log("MESSAGE RECEIVED FROM SERVER");
+        console.log("MESSAGE RECEIVED FROM SERVER: " + JSON.stringify(event.data));
+
+        var data = JSON.parse(event.data);
+        var channelId = data.headers.channelId;
+
+        var connection = transport.channelConnections[channelId];
+
+        connection.channel.rightConnection().send(data);
     };
 
     //todo, on close, open the websocket connection again.
@@ -29,11 +37,13 @@ BrowserTransport.prototype.openChannel = function(serviceName, protocolName) {
 
     var transport = this;
 
+    //TODO, do we need a queue?
+
     var channelConnection = {
         channelId:uuid.v1(),
         serviceName: serviceName,
         protocolName: protocolName,
-        channelOpen:false,
+        channelOpen:true,
         outboundBuffer:[],
         drainQueue: function() {
 
@@ -63,25 +73,30 @@ BrowserTransport.prototype.openChannel = function(serviceName, protocolName) {
             });
         },
         send: function(msg) {
+            console.log("Sending!!!!!!!!!")
+            try {
+                msg.headers.targetService = channelConnection.serviceName;
+                msg.headers.channelId = channelConnection.channelId;
+                msg.headers.PROTOCOL = channelConnection.protocolName;
 
-            var message = {
-                headers: msg.headers,
-                payload:msg.payload
-            };
+                var message = {
+                    headers: msg.headers,
+                    payload: msg.payload
+                };
 
-            logger.info("[***** TRANSPORT *****] Sending event outbound to browser transport");
-            //console.dir(msg);
-            transport.ws.send({
-                headers: {
-                    targetService: channelConnection.serviceName,
-                    channelId:channelConnection.channelId,
-                    PROTOCOL:channelConnection.protocolName,
-                    SOURCE_SERVICE:""
-                }
-            });
+                var out = JSON.stringify(message);
 
+                logger.info("[***** TRANSPORT *****] Sending event outbound to browser transport " + out);
+                console.dir(msg);
+                transport.ws.send(out);
+            } catch (err) {
+                console.log("ERROROROR");
+                console.dir(err);
+            }
         }
     };
+
+    this.channelConnections[channelConnection.channelId] = channelConnection;
 
     channelConnection.channel = bichannel.create("browser-transport");
 
@@ -99,25 +114,9 @@ BrowserTransport.prototype.openChannel = function(serviceName, protocolName) {
         }
     }.bind(channelConnection));
 
-    this.startHandshake(channelConnection);
-
     return channelConnection.channel.leftConnection();
 };
 
-BrowserTransport.prototype.startHandshake = function(channelConnection) {
-
-    this.ws.onopen(function() {
-        this.ws.send({
-            headers: {
-                targetService: channelConnection.serviceName,
-                channelId:channelConnection.channelId,
-                PROTOCOL:channelConnection.protocolName,
-                SOURCE_SERVICE:""
-            }
-        });
-    });
-
-};
 
 BrowserTransport.prototype.shutdown = function() {
     //TODO, more shutdowns.

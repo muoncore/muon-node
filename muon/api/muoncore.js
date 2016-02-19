@@ -3,6 +3,9 @@ logger = {
     info:function(message) {
         console.log(message);
     },
+    error:function(message) {
+        console.log(message);
+    },
     debug:function(message) {
         console.log(message);
     },
@@ -44,8 +47,8 @@ exports.create = function(serviceName, config) {
 
         discovery = new BrowserDiscovery(config.discovery.url);
     } else {
-        logger.info("Using AMQP")
-        //require('sexylog');
+        require('sexylog');
+        logger.info("Using AMQP");
         var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
 
         discovery = new AmqpDiscovery(config.discovery.url);
@@ -67,6 +70,7 @@ exports.create = function(serviceName, config) {
     var transportClient = new TransportClient(transport);
 
     var muonApi = {
+        getTransportClient: function() { return transportClient },
         shutdown: function() {
             logger.info("Shutting down!!");
         },

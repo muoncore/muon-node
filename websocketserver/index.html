@@ -1,5 +1,6 @@
 <html>
 <head>
+
     <style>
         body {
             font-family: "Helvetica Neue", helvetica, arial;
@@ -17,14 +18,23 @@
         }
     </style>
 
+    <script src="muon.js"></script>
     <script>
-        var host = location.origin.replace(/^http/, 'ws')
-        var ws = new WebSocket(host);
-        ws.onmessage = function (event) {
-            var li = document.createElement('li');
-            li.innerHTML = JSON.parse(event.data);
-            document.querySelector('#pings').appendChild(li);
-        };
+
+        var mu = Muon.create("awesomestuff", {
+            transport: {
+                type:"browser",
+                url:"ws://localhost:5000/transport"
+            },
+            discovery: {
+                type:"browser",
+                url:"ws://localhost:5000/discover"
+            }
+        });
+        mu.request("request://exampleservice/", {}, function(data) {
+            console.log("GOT THE DATA FROM REMOTE!!");
+            console.dir(data);
+        });
     </script>
 </head>
 <body>
