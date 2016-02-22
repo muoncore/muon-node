@@ -1,31 +1,10 @@
-//handle running in browser
-logger = {
-    info:function(message) {
-        console.log(message);
-    },
-    error:function(message) {
-        console.log(message);
-    },
-    debug:function(message) {
-        console.log(message);
-    },
-    trace:function(message) {
-        console.log(message);
-    },
-    warning:function(message) {
-        console.log(message);
-    }
-};
 
 var url = require("url");
-
 //var RpcProtocol = require('../protocol/rpc-protocol.js');
 var channel = require('../infrastructure/channel.js');
 var uuid = require('node-uuid');
-
 var RSVP = require('rsvp');
-
-
+require('sexylog');
 var rpcProtocol = require('../protocol/rpc-protocol.js');
 
 var TransportClient = require("../../muon/transport/transport-client");
