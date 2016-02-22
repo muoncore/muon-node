@@ -126,6 +126,7 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
 
 Amqp09Transport.prototype.shutdown = function() {
     //TODO, more shutdowns.
+    logger.info("shutting down transport");
 };
 
 
