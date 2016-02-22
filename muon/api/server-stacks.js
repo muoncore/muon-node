@@ -1,6 +1,6 @@
 var _ = require("underscore");
-var bichannel = require('./infrastructure/channel');
-var rpcProtocol = require('./protocol/rpc-protocol.js');
+var bichannel = require('../infrastructure/channel');
+var rpcProtocol = require('../protocol/rpc-protocol.js');
 var uuid = require('node-uuid');
 
 
@@ -56,9 +56,12 @@ ServerStacks.prototype.openChannel = function(protocol) {
         var endpoint = event.headers.url;
         var handler = handlerMappings[endpoint];
         if (! handler) {
-               logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id' + event.headers.id);
-               logger.warn('handlerMappings: ', handlerMappings);
+
+               logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + event.id);
+               //logger.warn('handlerMappings: ', handlerMappings);
             event.status = '404';
+            handler = handlerMappings['/muon/internal/error'];
+            handler(event, serverResponseCallback);
             serverStackChannel.leftConnection().send(event);
         } else {
             logger.info('[*** API ***] Handler found for endpoint "'+ event.headers.url + '" event.id=' + event.headers.id);

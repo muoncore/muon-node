@@ -8,7 +8,7 @@ var Channel = require("../../../muon/infrastructure/channel");
 var AmqpConnection = require("../../../muon/transport/amqp/infra/amqp-connection");
 var AmqpQueues = require("../../../muon/transport/amqp/infra/amqp-queues");
 var ServiceQueue = require("../../../muon/transport/amqp/infra/service-queue");
-var ServerStacks = require("../../../muon/server-stacks");
+var ServerStacks = require("../../../muon/api/server-stacks");
 
 var connection;
 

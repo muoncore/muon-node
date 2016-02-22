@@ -3,7 +3,7 @@ var bichannel = require('../../../infrastructure/channel');
 
 var AmqpQueue = require("./amqp-queues");
 
-var ServiceQueue = function (serviceName, serverStacks, connection) {
+var ServiceQueue = function (serviceName, serverChannel, connection) {
     this.serviceName = serviceName;
     this.connection = connection;
     this.queues = new AmqpQueue(this.connection);
@@ -17,7 +17,6 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
         logger.trace('[***** TRANSPORT *****] receiveQueue/sendQueue ' + receiveQueue + '/' + sendQueue);
         //logger.error('serverStacks: ');
         //console.dir(serverStacks);
-        var serverChannel = serverStacks.openChannel(protocol);
        logger.trace("[***** TRANSPORT *****] created server stacks channel " + serverChannel.name);
         //console.dir(serverStacks);
 
