@@ -58,7 +58,7 @@ ServerStacks.prototype.openChannel = function(protocol) {
         if (! handler) {
 
                logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + event.id);
-               logger.warn('handlerMappings: ', handlerMappings);
+               //logger.warn('handlerMappings: ', handlerMappings);
             event.status = '404';
             handler = handlerMappings['/muon/internal/error'];
             handler(event, serverResponseCallback);

@@ -16,9 +16,9 @@ exports.create = function(serviceName, config) {
     var serverStacks = new ServerStacks();
 
     logger.info("Booting with transport ");
-    console.dir(config.transport);
+    //console.dir(config.transport);
     logger.info("Booting with discovery ");
-    console.dir(config.discovery);
+    //console.dir(config.discovery);
 
     if (config.discovery.type == "browser") {
         logger.info("Using BROWSER")
@@ -26,7 +26,6 @@ exports.create = function(serviceName, config) {
 
         discovery = new BrowserDiscovery(config.discovery.url);
     } else {
-        require('sexylog');
         logger.info("Using AMQP");
         var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
 
@@ -43,7 +42,7 @@ exports.create = function(serviceName, config) {
         transport = new BrowserTransport(serviceName, serverStacks, config.transport.url);
     } else {
         var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
-        transport = new AmqpTransport(serviceName, serverStacks, config.transport.url);
+        transport = new AmqpTransport(serviceName, serverStacks.openChannel(), config.transport.url);
     }
 
     var transportClient = new TransportClient(transport);

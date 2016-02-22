@@ -6,12 +6,11 @@ var ServiceQueue = require("./infra/service-queue");
 var AmqpQueue = require("./infra/amqp-queues");
 var uuid = require('node-uuid');
 
-var Amqp09Transport = function (serviceName, serverStacks, url) {
-    this.serverStacks = serverStacks;
+var Amqp09Transport = function (serviceName, connection, url) {
     this.connection = new AmqpConnection(url);
     this.connection.connect(function() {
         this.queues = new AmqpQueue(this.connection);
-        this.serviceQueue = new ServiceQueue(serviceName, serverStacks, this.connection);
+        this.serviceQueue = new ServiceQueue(serviceName, connection, this.connection);
         logger.info("[***** TRANSPORT *****] Amqp09Transport() serviceName: " + serviceName);
     }.bind(this));
 };
