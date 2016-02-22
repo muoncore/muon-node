@@ -135,6 +135,47 @@ describe("Bi directional channel test", function () {
          var event = {};
          channelA.leftConnection().send(event);
     });
+
+
+
+        it("test right channel connection endpoint adapter for io", function (done) {
+
+                var channel = bichannel.create('test');
+
+                var object =  {
+                    send: function(o, f) {
+                            f('PONG');
+                    }
+                }
+
+                channel.rightEndpoint(object, 'send');
+                channel.leftConnection().send('PING');
+
+                channel.leftConnection().listen(function(reply) {
+                    assert.equal('PONG', reply);
+                    done();
+                });
+        });
+
+
+        it("test left channel connection endpoint adapter for io", function (done) {
+
+                var channel = bichannel.create('test');
+
+                var object =  {
+                    send: function(o, f) {
+                            f('PONG');
+                    }
+                }
+
+                channel.leftEndpoint(object, 'send');
+                channel.rightConnection().send('PING');
+
+                channel.rightConnection().listen(function(reply) {
+                    assert.equal('PONG', reply);
+                    done();
+                });
+        });
 });
 
 

@@ -1,4 +1,5 @@
 var csp = require("js-csp");
+require('sexylog');
 
 /**
  * Muon-node bi-directional channel
@@ -175,6 +176,24 @@ function Channel(name) {
 
     logger.trace('[***** CHANNEL *****] Created! Channel(' + name + ')');
     return {
+        leftEndpoint: function(object, ioFunctionName) {
+            leftConnection.listen(function(args) {
+                    var ioFunction = object[ioFunctionName];
+                    var callback = function(reply) {
+                        leftConnection.send(reply);
+                    }
+                    ioFunction(args, callback);
+            });
+        },
+        rightEndpoint: function(object, ioFunctionName) {
+               rightConnection.listen(function(args) {
+                       var ioFunction = object[ioFunctionName];
+                       var callback = function(reply) {
+                           rightConnection.send(reply);
+                       }
+                       ioFunction(args, callback);
+               });
+           },
         leftHandler: function(handler) {
             if (leftHandler) throw new Error('left handler already set on channel "' + name + '"');
             leftConnection.handler(handler);
