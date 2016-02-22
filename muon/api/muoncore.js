@@ -34,6 +34,8 @@ var ServerStacks = require("../../muon/server-stacks");
 
 exports.create = function(serviceName, config) {
 
+    var muon = this;
+
     var serverStacks = new ServerStacks();
 
     logger.info("Booting with transport ");
@@ -70,6 +72,7 @@ exports.create = function(serviceName, config) {
     var transportClient = new TransportClient(transport);
 
     var muonApi = {
+        getDiscovery: function() { return muon.discovery },
         getTransportClient: function() { return transportClient },
         shutdown: function() {
             logger.info("Shutting down!!");

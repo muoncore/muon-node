@@ -39,6 +39,10 @@ wss.on("connection", function(ws) {
     //todo,enable filtering of which services are propogated.
 
     var interval = setInterval(function() {
+
+
+
+
         ws.send(JSON.stringify({
             identifier:"simples"
         }), function() {  })
