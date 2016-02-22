@@ -1,6 +1,6 @@
 var _ = require("underscore");
-var bichannel = require('./infrastructure/channel');
-var rpcProtocol = require('./protocol/rpc-protocol.js');
+var bichannel = require('../infrastructure/channel');
+var rpcProtocol = require('../protocol/rpc-protocol.js');
 var uuid = require('node-uuid');
 
 

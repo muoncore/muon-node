@@ -29,7 +29,7 @@ var RSVP = require('rsvp');
 var rpcProtocol = require('../protocol/rpc-protocol.js');
 
 var TransportClient = require("../../muon/transport/transport-client");
-var ServerStacks = require("../../muon/server-stacks");
+var ServerStacks = require("../../muon/api/server-stacks");
 
 
 exports.create = function(serviceName, config) {

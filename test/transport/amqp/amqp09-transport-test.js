@@ -5,7 +5,7 @@ var assert = require('assert');
 var url = require('url');
 var _ = require('underscore');
 var AmqpTransport = require("../../../muon/transport/amqp/amqp09-transport");
-var ServerStacks = require("../../../muon/server-stacks");
+var ServerStacks = require("../../../muon/api/server-stacks");
 var logger = require('sexylog');
 
 
