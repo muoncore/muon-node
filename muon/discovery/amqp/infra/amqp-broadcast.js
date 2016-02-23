@@ -90,8 +90,7 @@ AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
                             }
                         } catch (error) {
                             logger.error("Bombed during broadcast handling ... ");
-                            console.dir(error);
-                            //console.dir(message);
+                            logger.error(error);
                         }
                     });
                 });
