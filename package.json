@@ -40,6 +40,7 @@
     "daemon": "*",
     "signals": "*",
     "assert": "*",
+    "joi": "*",
     "sexylog": "*",
     "async-rq": "*"
   },

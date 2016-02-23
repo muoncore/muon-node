@@ -62,7 +62,6 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
             };
 
             logger.info("[***** TRANSPORT *****] Sending event outbound to amqp transport");
-            //console.dir(msg);
             transport.queues.send(this.sendQueue, amqpMessage);
         }
     };
@@ -75,7 +74,6 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
             channelConnection.shutdown();
             return;
         }
-        //console.dir(msg);
         if(channelConnection.channelOpen) {
             channelConnection.send(msg);
         } else {
@@ -101,7 +99,6 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
 
 
     channelConnection.listener = this.queues.listen(channelConnection.receiveQueue, function(message) {
-        //console.dir(message);
         logger.info('[***** TRANSPORT *****] message received: ' + JSON.stringify(message));
         if (channelConnection.channelOpen == false) {
             channelConnection.drainQueue();

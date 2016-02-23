@@ -17,8 +17,7 @@ AmqpConnection.prototype.connect = function (callback) {
     var url = this.url;
     connection.on('error', function (err) {
         logger.error("Getting an error in the AMQP Connection with url='" + url + "'", err);
-        var stack = new Error().stack;
-        logger.warn(stack);
+        logger.warn(err.stack);
     });
     connection.on("ready", function() {
         logger.debug("AMQP Connection becomes ready");
@@ -34,11 +33,9 @@ AmqpConnection.prototype.connect = function (callback) {
     });
     connection.on("blocked", function(data) {
         logger.error("AMQP Connection is BLOCKED");
-        //console.dir(data);
     });
     connection.on("unblocked", function(data) {
         logger.error("AMQP Connection is UNBLOCKED");
-        //console.dir(data);
     });
 
     this.connection = connection;

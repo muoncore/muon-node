@@ -65,18 +65,13 @@ AmqpQueues.prototype.listen = function (queueName, callback) {
         control.q = q;
         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
             //todo, headers ...
-            logger.debug("[***** TRANSPORT *****] Message received on amqp queue '" + queueName + '"' + JSON.stringify(message) );
-            logger.debug("[***** TRANSPORT *****] headers: ", headers);
+            message.id = headers.id;
+            logger.debug("[***** TRANSPORT *****] Message received on amqp queue '" + queueName + '" ' + JSON.stringify(message) );
+            logger.debug("[***** TRANSPORT *****] headers: " +  JSON.stringify(headers));
 
-            if (_this.eventLogger != null) {
-                var logEvent = {
-                    headers: headers,
-                    payload:message
-                };
-                _this.eventLogger.logEvent(queueName, logEvent);
-            }
 
             callback({
+                id: headers.id,
                 "headers": headers,
                 "payload": message
             }, message);

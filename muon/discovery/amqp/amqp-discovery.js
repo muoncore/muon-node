@@ -36,7 +36,6 @@ AmqpDiscovery.prototype.discoverServices = function (callback) {
 
 AmqpDiscovery.prototype.close = function () {
     logger.trace("closing connections...");
-    //console.dir(this.connection.close);
     this.connection.close();
 };
 
@@ -54,7 +53,7 @@ function startAnnouncements(discovery) {
                     }
                 } catch (err) {
                     logger.warn("Had issues parsing ... ");
-                    console.dir(err);
+                    logger.warn(err);
                 }
             });
 

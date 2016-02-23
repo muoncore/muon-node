@@ -25,7 +25,7 @@ describe("Muon core test", function () {
         muon = muoncore.create("example-service", config);
         muon.handle('muon://example-service/tennis', function (event, respond) {
             logger.info('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.debug('muon://service/tennis server responding to event.id=' + event.headers.id);
+            logger.debug('muon://service/tennis server responding to event.id=' + event.id);
             respond("pong");
         });
     });
@@ -37,8 +37,6 @@ describe("Muon core test", function () {
 
     it("create request protocol stack", function (done) {
 
-
-
         muon2 = muoncore.create("example-client", config);
 
         setTimeout(function () {
@@ -47,17 +45,23 @@ describe("Muon core test", function () {
 
             promise.then(function (event) {
                 logger.info("muon://example-client server response received! event.id=" + event.id);
-                logger.info("muon://example-client server response received! event.id=" + JSON.stringify(event));
+                logger.info("muon://example-client server response received! event=" + JSON.stringify(event));
                 logger.info("muon promise.then() asserting response...");
                 assert(event, "request event is undefined");
-                assert.equal(event.payload.message, "pong", "expected 'pong' response message from muon://example-service/tennis")
+                assert.equal(event.payload.data, "pong", "expected 'pong' response message from muon://example-service/tennis")
                 done();
             }, function (err) {
                 logger.error("muon promise.then() error!!!!!");
-                throw new Error('error in promise');
-            });
+                throw new Error('error in return muon promise');
+            }).catch(function(error) {
+                logger.error("muoncore-test.js promise.then() error!!!!!: " + error);
+                throw new Error('error in return muon promise in muoncore-test.js', error);
+                 done();
+            }).finally(function(){
 
-        }, 1000);
+              });
+
+        }, 1500);
 
     });
 });

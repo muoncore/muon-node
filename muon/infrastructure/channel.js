@@ -42,7 +42,8 @@ function LeftConnection(name, inbound, outbound) {
                     if (value.headers !== undefined) {
                         id = value.headers.id;
                     }
-                    logger.trace("[***** CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
+                       logger.trace("[***** CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
+                     logger.trace("[***** CHANNEL *****] " + name + " ChannelConnection.listen() callback=" + JSON.stringify(callback));
                     if (callback) {
                         callback(value);
                     } else {

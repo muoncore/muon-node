@@ -28,11 +28,9 @@ AmqpConnection.prototype.connect = function (callback) {
     });
     connection.on("blocked", function(data) {
         logger.error("AMQP Connection is BLOCKED");
-        //console.dir(data);
     });
     connection.on("unblocked", function(data) {
         logger.error("AMQP Connection is UNBLOCKED");
-        //console.dir(data);
     });
 
     this.connection = connection;
@@ -97,7 +95,7 @@ AmqpConnection.prototype.send = function (qObj, event, callback) {
         contentType: "text/plain"
     };
 
-    if ('headers' in event) options.headers = event.headers;
+    if ('muon_headers' in event) options.muon_headers = event.muon_headers;
 
     this.connection.on('ready', function () {
         logger.debug('Connection is ready to send on ' + queue);
@@ -144,7 +142,7 @@ AmqpConnection.prototype.listen = function (qObj, callback) {
 
                 q.bind(queue, function () {
                     logger.debug("Bound queue " + queue + " to route " + route);
-                    q.subscribe(function (message, headers, deliveryInfo, messageObject) {
+                    q.subscribe(function (message, muon_headers, deliveryInfo, messageObject) {
                         logger.trace("Got a message ", messageObject);
                         callback({
                             payload: message.data
