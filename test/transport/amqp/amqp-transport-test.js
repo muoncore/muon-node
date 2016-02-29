@@ -4,7 +4,7 @@ var sinon = require("sinon");
 var assert = require('assert');
 var url = require('url');
 var _ = require('underscore');
-var AmqpTransport = require("../../../muon/transport/amqp.old/amqp09-transport");
+var AmqpTransport = require("../../../muon/transport/amqp/amqp-transport");
 var logger = require('sexylog');
 var channel = require('../../../muon/infrastructure/channel.js');
 require('sexylog');
