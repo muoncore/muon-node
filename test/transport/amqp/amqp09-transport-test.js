@@ -7,6 +7,7 @@ var _ = require('underscore');
 var AmqpTransport = require("../../../muon/transport/amqp/amqp09-transport");
 var logger = require('sexylog');
 var channel = require('../../../muon/infrastructure/channel.js');
+require('sexylog');
 
 
 describe("AMQP Transport", function () {
@@ -41,6 +42,7 @@ describe("AMQP Transport", function () {
 
 
             channel2.leftConnection().listen(function(event) {
+                console.log('event=' + JSON.stringify(event));
                 if (event.headers.eventType != 'handshakeAccepted') {
                     assert.equal(event.payload.data.toString(), data1);
                     done();

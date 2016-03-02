@@ -1,6 +1,7 @@
 
 module.exports.create = function(n) {
 
+    if (! n) n = 'default';
     var name = n + '-handler';
 
     var outgoingFunction;
@@ -17,15 +18,15 @@ module.exports.create = function(n) {
             incomingFunction = f;
         },
         sendDownstream: function(event) {
-            logger.debug('[*** CHANNEL ***] ' + name + ' sending event via handler downstream');
+            logger.debug('[*** CHANNEL ***] ' + name + ' sending event  via handler downstream');
             var result = outgoingFunction(event);
-            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler result=' + JSON.stringify(result));
+            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler downstream result=' + JSON.stringify(result));
             return result;
         },
         sendUpstream: function(event) {
-            logger.debug(name + ' sending event via handler upstream');
+            logger.debug('[*** CHANNEL ***] ' + name + ' sending event via handler upstream' + JSON.stringify(event));
             var result = incomingFunction(event);
-            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler result=' + JSON.stringify(result));
+            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler upstream result=' + JSON.stringify(result));
             return result;
         },
         upstreamConnection: function(c) {
@@ -35,8 +36,6 @@ module.exports.create = function(n) {
             downstreamConnection = c;
         },
         otherConnection(conn) {
-            //logger.info('conn: ');
-            //console.dir(conn);
             if (conn === upstreamConnection.name()) {
                 logger.trace('[*** CHANNEL ***]  ' + name + ' other connection is downstream: ' + downstreamConnection.name());
                 return downstreamConnection;
