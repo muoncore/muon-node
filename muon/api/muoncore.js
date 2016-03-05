@@ -10,28 +10,27 @@ var events = require('../domain/events.js');
 
 var TransportClient = require("../../muon/transport/transport-client");
 var ServerStacks = require("../../muon/api/server-stacks");
-var BrowserTransport = require("../../muon/transport/browser/browser-transport");
-var BrowserDiscovery = require("../../muon/discovery/browser/browser-discovery");
-var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
- var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
 
 
 exports.create = function(serviceName, config) {
 
     var serverStacks = new ServerStacks();
 
-    if (config.type == "browser") {
+    if (config.hasOwnProperty("type")) {
+        config.discovery.type = config.type;
+        config.transport.type = config.type;
+    }
+
+    if (config.discovery.type == "browser") {
         logger.info("Using BROWSER")
         var BrowserDiscovery = require("../../muon/discovery/browser/browser-discovery");
 
         discovery = new BrowserDiscovery(config.discovery.url);
-         transport = new BrowserTransport(serviceName, serverStacks, config.transport.url);
     } else {
         logger.info("Using AMQP");
         var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
 
         discovery = new AmqpDiscovery(config.discovery.url);
-        transport = new AmqpTransport(serviceName, serverStacks.openChannel(), config.transport.url);
         discovery.advertiseLocalService({
             identifier:serviceName,
             tags:["node", serviceName],
