@@ -56,6 +56,7 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
         },
         send: function(msg) {
 
+            msg.headers.sourceAvailableContentTypes=["application/json"]
             var amqpMessage = {
                 headers: msg.headers,
                 payload:msg.payload
@@ -88,11 +89,7 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
 
 Amqp09Transport.prototype.startHandshake = function(channelConnection) {
 
-
-    //channelConnection.sendQueue = "node-service-send";
-    //channelConnection.receiveQueue = "node-service-recieve";
-
-    handshakeId = uuid.v4();
+    var handshakeId = uuid.v4();
     var serviceQueueName = "service." + channelConnection.serviceName;
     channelConnection.sendQueue = channelConnection.serviceName + ".send." + handshakeId;
     channelConnection.receiveQueue = channelConnection.serviceName + ".receive." + handshakeId;
