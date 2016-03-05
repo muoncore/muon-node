@@ -5,59 +5,28 @@ var channel = require('../infrastructure/channel.js');
 var uuid = require('node-uuid');
 var RSVP = require('rsvp');
 require('sexylog');
-var rpcProtocol = require('../protocol/rpc-protocol.js');
+var rpcProtocol = require('../protocol/rpc-protocol');
+var rpcServerProtocol = require('../protocol/rpc-server-protocol');
 var events = require('../domain/events.js');
-
-var TransportClient = require("../../muon/transport/transport-client");
-var ServerStacks = require("../../muon/api/server-stacks");
+var MuonBuilder = require("../infrastructure/builder")
 
 
-exports.create = function(serviceName, config) {
+exports.create = function(serviceName, configuration) {
 
-    var serverStacks = new ServerStacks();
+    configuration.serviceName = serviceName;
 
-    if (config.hasOwnProperty("type")) {
-        config.discovery.type = config.type;
-        config.transport.type = config.type;
-    }
-
-    if (config.discovery.type == "browser") {
-        logger.info("Using BROWSER")
-        var BrowserDiscovery = require("../../muon/discovery/browser/browser-discovery");
-
-        discovery = new BrowserDiscovery(config.discovery.url);
-    } else {
-        logger.info("Using AMQP");
-        var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
-
-        discovery = new AmqpDiscovery(config.discovery.url);
-        discovery.advertiseLocalService({
-            identifier:serviceName,
-            tags:["node", serviceName],
-            codecs:["application/json"]
-        });
-    }
-
-    if (config.transport.type == "browser") {
-        var BrowserTransport = require("../../muon/transport/browser/browser-transport");
-        transport = new BrowserTransport(serviceName, serverStacks, config.transport.url);
-    } else {
-        var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
-        transport = new AmqpTransport(serviceName, serverStacks.openChannel(), config.transport.url);
-    }
-
-    var transportClient = new TransportClient(transport);
+    var infrastructure = new MuonBuilder(configuration);
 
     var muonApi = {
-        getDiscovery: function() { return muon.discovery },
-        getTransportClient: function() { return transportClient },
+        getDiscovery: function() { return infrastructure.discovery },
+        getTransportClient: function() { return infrastructure.transportClient },
         shutdown: function() {
             logger.info("Shutting down!!");
         },
         request: function(remoteServiceUrl, payload, clientCallback) {
 
            var event = events.rpcEvent(payload, serviceName, remoteServiceUrl, 'application/json');
-           var transChannel = transportClient.openChannel();
+           var transChannel = infrastructure.transportClient.openChannel();
            var clientChannel = channel.create("client-api");
            var rpcProtocolHandler = rpcProtocol.newHandler();
            clientChannel.rightHandler(rpcProtocolHandler);
@@ -82,7 +51,7 @@ exports.create = function(serviceName, config) {
 
         },
         handle: function(endpoint, callback) {
-            serverStacks.register(endpoint, callback);
+            infrastructure.serverStacks.register(endpoint, callback);
         }
     };
     return muonApi;
