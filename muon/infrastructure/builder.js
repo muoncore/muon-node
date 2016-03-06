@@ -10,6 +10,8 @@ module.exports = function(config) {
     if (config.hasOwnProperty("type")) {
         config.discovery.type = config.type;
         config.transport.type = config.type;
+        config.discovery.url = config.url;
+        config.transport.url = config.url;
     }
 
     if (config.discovery.type == "browser") {
