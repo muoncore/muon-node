@@ -3,7 +3,7 @@ var RSVP = require('rsvp');
 require('sexylog');
 
 exports.connect = function(serviceName, clientChannel, url) {
-
+    logger.debug("[*** TRANSPORT:CLIENT:MUON-CONNECT ***] client conecting to remote muon service '" + serviceName + "'");
     amqp.connect(url, function(err, amqpConnection) {
         amqpConnection.createChannel(function(err, amqpChannel) {
             var msg = {
@@ -32,7 +32,7 @@ var sendHandshake = function(serviceQueueName, msg, amqpChannel) {
      var promise = new RSVP.Promise(function(resolve, reject) {
         amqpChannel.assertQueue(serviceQueueName, {durable: true});
         amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(msg)), {persistent: true});
-        logger.info(" [*] Client Sent handshake message");
+        logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent");
         resolve();
      });
      return promise;
@@ -41,11 +41,11 @@ var sendHandshake = function(serviceQueueName, msg, amqpChannel) {
 
 var listenForHandshakeResponse = function(recvQueueName, amqpChannel, clientChannel) {
     var promise = new RSVP.Promise(function(resolve, reject) {
-        logger.info(" [*] Client listen on " + recvQueueName);
+        logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***] waiting for handshake accept on queue " + recvQueueName);
         amqpChannel.assertQueue(recvQueueName, {durable: false});
         amqpChannel.consume(recvQueueName, function(msg) {
-           logger.info(" [*] Cleint Received Negotiation Response Message %s", msg.content.toString());
-            logger.info(" [*] Cleint/Server Handshake Done");
+           logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg.content.toString());
+            logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol complete");
             amqpChannel.ack(msg);
             clientChannel.send(msg);
             resolve();
@@ -57,9 +57,9 @@ var listenForHandshakeResponse = function(recvQueueName, amqpChannel, clientChan
 
 var createSendQueue = function(sendQueueName, amqpChannel) {
     var promise = new RSVP.Promise(function(resolve, reject) {
-            logger.info('createSendQueue ' + sendQueueName);
+            logger.trace('[*** TRANSPORT:CLIENT:MUON-CONNECT ***] creating temp send queue ' + sendQueueName);
             amqpChannel.assertQueue(sendQueueName, {durable: false}, function(err, other) {
-                logger.info('createSendQueue ' + sendQueueName + ' asserted');
+                logger.trace('[*** TRANSPORT:CLIENT:MUON-CONNECT ***] queue "' + sendQueueName + '" asserted');
                 if (err) {
                     reject();
                 } else {
@@ -73,9 +73,9 @@ var createSendQueue = function(sendQueueName, amqpChannel) {
 
 var createRecvQueue = function(recvQueueName, amqpChannel) {
     var promise = new RSVP.Promise(function(resolve, reject) {
-          logger.info('createRecvQueue ' + recvQueueName);
+          logger.trace('[*** TRANSPORT:CLIENT:MUON-CONNECT ***] create recv queue ' + recvQueueName);
           amqpChannel.assertQueue(recvQueueName, {durable: false}, function(err, other) {
-              logger.info('createRecvQueue ' + recvQueueName + ' asserted');
+              logger.trace('[*** TRANSPORT:CLIENT:MUON-CONNECT ***] recv queue "' + recvQueueName + '" asserted');
               if (err) {
                   reject();
               } else {

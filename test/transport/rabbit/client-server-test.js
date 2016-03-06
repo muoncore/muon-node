@@ -5,17 +5,13 @@ var bichannel = require('../../../muon/infrastructure/channel.js');
 var assert = require('assert');
 var expect = require('expect.js');
 
-describe("Bi directional channel test", function () {
+describe("muon client/server transport test", function () {
 
     this.timeout(4000);
-
 
       after(function() {
             //bi-channel.closeAll();
       });
-
-
-
 
     it("client server negotiate handshake", function (done) {
             var url = "amqp://muon:microservices@localhost";
