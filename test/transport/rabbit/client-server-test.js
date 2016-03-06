@@ -1,6 +1,7 @@
-client = require('../../../muon/transport/rabbit/client-queue.js');
-server = require('../../../muon/transport/rabbit/server-queue.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
+client = require('../../../muon/transport/rabbit/client.js');
+server = require('../../../muon/transport/rabbit/server.js');
+
 
 var assert = require('assert');
 var expect = require('expect.js');
@@ -14,20 +15,34 @@ describe("muon client/server transport test", function () {
       });
 
     it("client server negotiate handshake", function (done) {
+            var serverName = 'server1';
+            var clientName = 'client1';
             var url = "amqp://muon:microservices@localhost";
 
-            var clientChannel = bichannel.create("cleint");
-            var muonClient = client.connect('server', clientChannel.rightConnection(), url);
+            var serverChannel = bichannel.create("server-amqp-transport-server");
 
-            var serverChannel = bichannel.create("server");
-            var muonServer = server.connect('server', serverChannel.rightConnection(), url);
 
-            clientChannel.leftConnection().listen(function(msg){
-                var event = JSON.parse(msg.content);
-                console.log('client_server-test.js clientChannel msg recv');
-                assert.equal(event.payload, 'handshake_accepted');
+
+            serverChannel.leftConnection().listen(function(event) {
+                    console.log('********** client_server-test.js serverChannel.leftConnection().listen() event=' + JSON.stringify(event));
+                    console.log('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
+                    event.payload = 'PONG';
+                    serverChannel.leftConnection().send(event);
+            });
+
+            server.connect(serverName, serverChannel.rightConnection(), url);
+
+            var muonClientChannel = client.connect(serverName, url);
+
+            muonClientChannel.listen(function(event){
+
+                console.log('********** client_server-test.js muonClientChannel.listen() event received ' + JSON.stringify(event));
+                assert.equal(event.payload, 'PONG');
                 done();
             });
+
+
+            muonClientChannel.send({id: "1", payload: "PING"});
 
     });
 

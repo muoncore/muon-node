@@ -6,7 +6,7 @@ var uuid = require('node-uuid');
 var RSVP = require('rsvp');
 require('sexylog');
 var rpcProtocol = require('../protocol/rpc-protocol');
-var rpcServerProtocol = require('../protocol/rpc-server-protocol');
+var rpcServerProtocol = require('../protocol/rpc-protocol');
 var events = require('../domain/events.js');
 var MuonBuilder = require("../infrastructure/builder")
 
