@@ -1,8 +1,6 @@
 var bichannel = require('../../../muon/infrastructure/channel.js');
-client = require('../../../muon/transport/rabbit/client.js');
-server = require('../../../muon/transport/rabbit/server.js');
-
-
+var client = require('../../../muon/transport/rabbit/client.js');
+var server = require('../../../muon/transport/rabbit/server.js');
 var assert = require('assert');
 var expect = require('expect.js');
 

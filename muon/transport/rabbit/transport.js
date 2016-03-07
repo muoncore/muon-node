@@ -1,50 +1,20 @@
-var client = require('./transport-client.js');
-var transport = require('./transport-server.js');
-var bichannel = require('../../infrastructure/channel');
+var client = require('./client.js');
+var server = require('./server.js');
+var bichannel = require('../../infrastructure/channel.js');
 
 
 
 
-function newChannel(serviceName, protocolName) {
-
-
-
-    /*
-
-    channelConnection.channel.rightConnection().listen(function(msg) {
-            logger.info("[***** TRANSPORT *****] received outbound event");
-            if (msg == "poison") {
-                channelConnection.shutdown();
-                return;
-            }
-            if(channelConnection.channelOpen) {
-                channelConnection.send(msg);
-            } else {
-                channelConnection.outboundBuffer.push(msg);
-            }
-        }.bind(channelConnection));
-
-        this.startHandshake(channelConnection);
-
-        return channelConnection.channel.leftConnection();
-
-    */
-
-
-}
-
-
-
-
-exports.create = function (serviceName, serverStacks, url) {
-
+exports.create = function (localServiceName, serverStacks, url) {
+    logger.info('[*** TRANSPORT:BOOTSTRAP ***] creating new MUON AMQP Transport connection with url=' + url);
+    var protocolName = 'no-protocol-defined-yet';
     var serverStacksChannel = serverStacks.openChannel(protocolName);
-    server.connect(serviceName, serverStacksChannel, url);
+    server.connect(localServiceName, serverStacksChannel, url);
 
     var transport = {
-        openChannel: function(serviceName, protocolName) {
-            logger.debug('[*** ***]');
-            var transportClientChannel = client.connect(serviceName, url);
+        openChannel: function(remoteServiceName, protocolName) {
+            logger.debug('[*** TRANSPORT:OPEN-CONNECTION ***] opening muon connect to remote service ' + remoteServiceName);
+            var transportClientChannel = client.connect(remoteServiceName, url);
             return transportClientChannel;
         }
     }

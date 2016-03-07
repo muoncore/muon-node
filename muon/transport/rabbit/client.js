@@ -21,7 +21,6 @@ exports.connect = function(serviceName, url) {
 
             createSendQueue(msg.socket_send_q, amqpChannel)
             .then(createRecvQueue(msg.socket_recv_q, amqpChannel))
-            //.then(listenForHandshakeResponse(msg.socket_recv_q, amqpChannel, clientChannel.rightConnection()))
             .then(readyInboundSocket(msg.socket_recv_q, amqpChannel, clientChannel.rightConnection()))
             .then(sendHandshake(serviceName, msg, amqpChannel))
             .then(readyOutboundSocket(msg.socket_send_q, amqpChannel, clientChannel.rightConnection()));
