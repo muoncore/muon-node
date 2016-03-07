@@ -14,24 +14,19 @@ describe("muon client/server transport test", function () {
       });
 
     it("client server negotiate handshake", function (done) {
-            var server = 'tranbsport-test-server';
+            var server = 'transport-test-server';
             var url = "amqp://muon:microservices@localhost";
-            var fakeServerStackChannel = bichannel.create("fake-server-stacks-csp-channel");
-            var serverStacks = {
+             var event = eventTemplate.rpcEvent("PING", 'testclient', 'muon://' + server + '/ping', 'application/json');
+
+            var fakeServerStackChannel = bichannel.create("fake-serverstacks");
+            var fakeServerStacks = {
                 openChannel: function() {
                     return fakeServerStackChannel.rightConnection();
                 }
             }
-
-            console.log('init amqp transport');
-            var muonTransport  = amqpTransport.create(server, serverStacks, url);
-
-            console.log('open new muon channel connection to remote service ' + server);
+            var muonTransport  = amqpTransport.create(server, fakeServerStacks, url);
             var transportChannel = muonTransport.openChannel(server, 'test-rpc-protocol-(totally made up, not yet implemented)');
 
-            console.log('send event to remote service ' + server);
-
-            var event = eventTemplate.rpcEvent("PING", 'testclient', 'muon://' + server + '/ping', 'application/json');
             transportChannel.send(event);
 
              console.log('wait for response from remote service ' + server);

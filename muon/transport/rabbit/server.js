@@ -1,20 +1,23 @@
 var amqp = require('amqplib/callback_api');
 var RSVP = require('rsvp');
 var bichannel = require('../../../muon/infrastructure/channel.js');
+var helper = require('./transport-helper.js');
 require('sexylog');
 
 
 exports.connect = function(serviceName, serverStackChannel, url) {
 
-    logger.debug("[*** TRANSPORT:SERVER:MUON-CONNECT ***] " + serviceName + "' connecting to muon");
+    logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] " + serviceName + "' connecting to muon");
+      var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
     amqp.connect(url, function(err, conn) {
-      logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceName);
+      logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceQueueName);
       conn.createChannel(function(err, ch) {
-        ch.assertQueue(serviceName, {durable: false});
-        ch.prefetch(1);
-        logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] Server created amqp negotiation queue '%s'", serviceName);
 
-        ch.consume(serviceName, function(msg) {
+        ch.assertQueue(serviceQueueName, {durable: false});
+        ch.prefetch(1);
+        logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] Server created amqp negotiation queue '%s'", serviceQueueName);
+
+        ch.consume(serviceQueueName, function(msg) {
            logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message: %s", msg.content.toString());
            var event = JSON.parse(msg.content);
             event.payload = 'handshake_accepted';
