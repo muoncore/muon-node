@@ -54,7 +54,11 @@ function LeftConnection(name, inbound, outbound) {
         },
         handler: function(h) {
             if (listener) throw new Error('cannot set handler as listener already set');
+            if (handler) throw new Error('left handler already set on channel "' + name + '"');
             handler = h;
+            handler.downstreamConnection(this);
+
+
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
@@ -126,7 +130,10 @@ function RightConnection(name, inbound, outbound) {
         },
         handler: function(h) {
             if (listener) throw new Error('cannot set handler as listener already set');
+            if (handler) throw new Error('right handler already set on channel "' + name + '"');
             handler = h;
+            handler.upstreamConnection(this);
+
             return csp.go(function*() {
                 while(true) {
                     var value = yield csp.take(inbound);
@@ -134,7 +141,7 @@ function RightConnection(name, inbound, outbound) {
                     if (value.headers !== undefined) {
                         id = value.headers.id;
                     }
-                     logger.debug("[***** CCSP-HANNEL *****] " + name + " ChannelConnection.handler() event.id=" + id);
+                     logger.debug("[***** CSP-HANNEL *****] " + name + " ChannelConnection.handler() event.id=" + id);
                     if (handler) {
                         try {
                             var result = handler.sendDownstream(value);
@@ -168,11 +175,8 @@ function Channel(name) {
     var inbound = csp.chan();
     var outbound = csp.chan();
 
-    var leftHandler;
-    var rightHandler;
-
-    var leftConnection = new LeftConnection(name, inbound, outbound);
-    var rightConnection = new RightConnection(name, outbound, inbound);
+    var leftConnection = new LeftConnection(name, inbound, outbound, this);
+    var rightConnection = new RightConnection(name, outbound, inbound, this);
 
     logger.debug('[***** CSP-CHANNEL *****] Created! (' + name + ')');
     return {
@@ -195,16 +199,10 @@ function Channel(name) {
                });
            },
         leftHandler: function(handler) {
-            if (leftHandler) throw new Error('left handler already set on channel "' + name + '"');
             leftConnection.handler(handler);
-            leftHandler = handler;
-            handler.downstreamConnection(leftConnection);
         },
         rightHandler: function(handler) {
-            if (leftHandler) throw new Error('right handler already set on channel "' + name + '"');
             rightConnection.handler(handler);
-            handler.upstreamConnection(rightConnection);
-            rightHandler = handler;
         },
         leftConnection: function() {
             return leftConnection;

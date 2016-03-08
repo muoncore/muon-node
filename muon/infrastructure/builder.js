@@ -1,6 +1,7 @@
 
 var ServerStacks = require("../../muon/api/server-stacks");
 var TransportClient = require("../../muon/transport/transport-client");
+var amqpTransport = require('../../muon/transport/rabbit/transport.js');
 
 module.exports = function(config) {
 
@@ -35,8 +36,7 @@ module.exports = function(config) {
         var BrowserTransport = require("../../muon/transport/browser/browser-transport");
         infrastructure.transport = new BrowserTransport(config.serviceName, infrastructure.serverStacks, config.transport.url);
     } else {
-        var AmqpTransport = require("../../muon/transport/amqp/amqp09-transport");
-        infrastructure.transport = new AmqpTransport(config.serviceName, infrastructure.serverStacks.openChannel(), config.transport.url);
+        infrastructure.transport = amqpTransport.create(config.serviceName, infrastructure.serverStacks, config.transport.url);
     }
 
     infrastructure.transportClient = new TransportClient(infrastructure.transport);
