@@ -5,7 +5,7 @@ var uuid = require('node-uuid');
 
 exports.serviceNegotiationQueueName = function(serviceName) {
 
-    var serviceQueueName = "muon.service.negotiation." + serviceName;
+    var serviceQueueName = "service." + serviceName;
     return serviceQueueName;
 }
 
