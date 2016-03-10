@@ -8,17 +8,9 @@ var muon2;
 describe("event domain test", function () {
 
 
-    it("create event with payload", function (done) {
-
-        event = events.create("PING");
-        assert.equal(event.payload.data, 'PING');
-        done();
 
 
-    });
-
-
-    it("create event with headers", function (done) {
+    it("create rpc event with valid headers", function (done) {
 
           var event = events.rpcEvent("PING", 'testclient', 'muon://testserver/ping', 'application/json');
           assert.equal(event.payload.data, 'PING');
@@ -32,7 +24,7 @@ describe("event domain test", function () {
           }
           catch(err) {
             expect(err).not.to.be(undefined);
-            expect(err.message).to.contain('Error! problem validating event.transport with joi schema');
+            expect(err.message).to.contain('problem validating rpc event schema');
           }
           done();
     });

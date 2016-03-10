@@ -13,16 +13,17 @@ exports.connect = function(serviceName, serverStackChannel, url) {
       logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceQueueName);
       conn.createChannel(function(err, ch) {
 
-        ch.assertQueue(serviceQueueName, {durable: false});
+        ch.assertQueue(serviceQueueName, helper.queueSettings());
         ch.prefetch(1);
         logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] Server created amqp negotiation queue '%s'", serviceQueueName);
 
         ch.consume(serviceQueueName, function(msg) {
            logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message: %s", msg.content.toString());
            var event = JSON.parse(msg.content);
-            event.payload = 'handshake_accepted';
+
+            event.eventType = 'handshakeAccepted';
            logger.trace('[*** TRANSPORT:SERVER ***] sending handshake accept response to amqp queue' + event.socket_recv_q);
-            initMuonClientServerSocket(conn, event.socket_send_q, event.socket_recv_q, serverStackChannel);
+            initMuonClientServerSocket(conn, event.LISTEN_ON, event.REPLY_TO, serverStackChannel);
             ch.sendToQueue(event.socket_recv_q, new Buffer(JSON.stringify(event)), {persistent: false});
             logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent");
             ch.ack(msg);
@@ -35,7 +36,7 @@ function initMuonClientServerSocket(amqpConnection, listen_queue, send_queue, se
 
     amqpConnection.createChannel(function(err, ch) {
 
-        ch.assertQueue(listen_queue, {durable: false});
+        ch.assertQueue(listen_queue, helper.queueSettings());
         ch.prefetch(1); // todo do we need this?
         ch.consume(listen_queue, function(msg){
             logger.debug("[*** TRANSPORT:SERVER:INBOUND ***]  received inbound muon event: %s", msg.content.toString());

@@ -34,7 +34,7 @@ exports.create = function(serviceName, configuration) {
 
            var event = events.rpcEvent(payload, serviceName, remoteServiceUrl, 'application/json');
 
-              var transChannel = infrastructure.transport.openChannel(serviceName, 'test-rpc-protocol-(totally made up, not yet implemented)');
+           var transChannel = infrastructure.transport.openChannel(event.headers.targetService, 'request');
            //var transChannel = infrastructure.transportClient.openChannel();
            var clientChannel = channel.create("client-api");
            var rpcProtocolHandler = rpcProtocol.newHandler();

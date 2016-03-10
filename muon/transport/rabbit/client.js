@@ -5,6 +5,8 @@ var helper = require('./transport-helper.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var uuid = require('node-uuid');
 
+
+
 exports.connect = function(serviceName, url) {
 
     var clientChannel = bichannel.create(serviceName + "-amqp-transport-client");
@@ -15,26 +17,21 @@ exports.connect = function(serviceName, url) {
 
              var handshakeId = uuid.v4();
              var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
-             var sendQueueName = serviceName + ".send." + handshakeId;
-             var receiveQueueName = serviceName + ".recv." + handshakeId;
+             var serverListenQueueName = serviceName + ".listen." + handshakeId;
+             var replyQueueName = serviceName + ".reply." + handshakeId;
+              var handshakeMsg = helper.handshakeRequest('request', serviceName, serverListenQueueName, replyQueueName);
              logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake id=' + handshakeId);
-             logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] sendQueueName=' + sendQueueName);
-             logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] receiveQueueName=' + receiveQueueName);
+             logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake msg=' + JSON.stringify(handshakeMsg));
+             logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] serverListenQueueName=' + serverListenQueueName);
+             logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] replyQueueName=' + replyQueueName);
 
-            var handshakeMsg = {
-                type: 'handshake',
-                payload: 'request_handshake',
-                source_service: 'client',
-                target_service: serviceName,
-                socket_recv_q: receiveQueueName,
-                socket_send_q: sendQueueName
-            };
 
-            createSendQueue(handshakeMsg.socket_send_q, amqpChannel)
-            .then(createRecvQueue(handshakeMsg.socket_recv_q, amqpChannel))
-            .then(readyInboundSocket(handshakeMsg.socket_recv_q, amqpChannel, clientChannel.rightConnection()))
+
+            createSendQueue(serverListenQueueName, amqpChannel)
+            .then(createRecvQueue(replyQueueName, amqpChannel))
+            .then(readyInboundSocket(replyQueueName, amqpChannel, clientChannel.rightConnection()))
             .then(sendHandshake(serviceQueueName, handshakeMsg, amqpChannel))
-            .then(readyOutboundSocket(handshakeMsg.socket_send_q, amqpChannel, clientChannel.rightConnection()));
+            .then(readyOutboundSocket(serverListenQueueName, amqpChannel, clientChannel.rightConnection()));
 
         });
     });
@@ -46,7 +43,8 @@ exports.connect = function(serviceName, url) {
 var sendHandshake = function(serviceQueueName, handshakeMsg, amqpChannel) {
 
      var promise = new RSVP.Promise(function(resolve, reject) {
-        amqpChannel.assertQueue(serviceQueueName, {durable: false});
+
+        amqpChannel.assertQueue(serviceQueueName, helper.queueSettings());
         amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(handshakeMsg)), {persistent: false});
         logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
         resolve();
@@ -58,7 +56,7 @@ var sendHandshake = function(serviceQueueName, handshakeMsg, amqpChannel) {
 var listenForHandshakeResponse = function(recvQueueName, amqpChannel, clientChannel) {
     var promise = new RSVP.Promise(function(resolve, reject) {
         logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***] waiting for handshake accept on queue " + recvQueueName);
-        amqpChannel.assertQueue(recvQueueName, {durable: false});
+        amqpChannel.assertQueue(recvQueueName, helper.queueSettings());
         amqpChannel.consume(recvQueueName, function(handshakeMsg) {
             amqpChannel.ack(handshakeMsg);
             clientChannel.send(handshakeMsg);
@@ -71,10 +69,10 @@ var listenForHandshakeResponse = function(recvQueueName, amqpChannel, clientChan
 var readyInboundSocket = function(recvQueueName, amqpChannel, clientChannel) {
     var promise = new RSVP.Promise(function(resolve, reject) {
         logger.trace("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
-        amqpChannel.assertQueue(recvQueueName, {durable: false});
+        amqpChannel.assertQueue(recvQueueName, helper.queueSettings());
         amqpChannel.consume(recvQueueName, function(msg) {
             var event = JSON.parse(msg.content.toString());
-            if (event.type === 'handshake') {
+            if (event.eventType === 'handshakeAccepted') {
                  //amqpChannel.ack(msg);
                  logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg.content.toString());
                  logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol complete");
@@ -92,9 +90,9 @@ var readyInboundSocket = function(recvQueueName, amqpChannel, clientChannel) {
 var readyOutboundSocket = function(serviceQueueName, amqpChannel, clientChannel) {
 
      var promise = new RSVP.Promise(function(resolve, reject) {
-        amqpChannel.assertQueue(serviceQueueName, {durable: false});
+        amqpChannel.assertQueue(serviceQueueName, helper.queueSettings());
         clientChannel.listen(function(event){
-            logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] sending outbound event %s", event);
+            logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] sending outbound event %s", JSON.stringify(event));
             amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(event)), {persistent: false});
         });
         resolve();
@@ -107,7 +105,7 @@ var readyOutboundSocket = function(serviceQueueName, amqpChannel, clientChannel)
 var createSendQueue = function(sendQueueName, amqpChannel) {
     var promise = new RSVP.Promise(function(resolve, reject) {
             logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] creating temp send queue "' + sendQueueName + "'");
-            amqpChannel.assertQueue(sendQueueName, {durable: false}, function(err, other) {
+            amqpChannel.assertQueue(sendQueueName, helper.queueSettings(), function(err, other) {
                 logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] queue "' + sendQueueName + '" asserted');
                 if (err) {
                     reject();
@@ -123,7 +121,7 @@ var createSendQueue = function(sendQueueName, amqpChannel) {
 var createRecvQueue = function(recvQueueName, amqpChannel) {
     var promise = new RSVP.Promise(function(resolve, reject) {
           logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] create recv queue "' + recvQueueName + '"');
-          amqpChannel.assertQueue(recvQueueName, {durable: false}, function(err, other) {
+          amqpChannel.assertQueue(recvQueueName, helper.queueSettings(), function(err, other) {
               logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] recv queue "' + recvQueueName + '" asserted');
               if (err) {
                   reject();
