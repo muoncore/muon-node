@@ -39,7 +39,6 @@ exports.create = function(serviceName, configuration) {
            var clientChannel = channel.create("client-api");
            var rpcProtocolHandler = rpcProtocol.newHandler();
            clientChannel.rightHandler(rpcProtocolHandler);
-           console.dir(transChannel);
            transChannel.handler(rpcProtocolHandler);
 
            var promise = new RSVP.Promise(function(resolve, reject) {

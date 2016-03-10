@@ -18,14 +18,14 @@ exports.connect = function(serviceName, serverStackChannel, url) {
         logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] Server created amqp negotiation queue '%s'", serviceQueueName);
 
         ch.consume(serviceQueueName, function(msg) {
-           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message: %s", msg.content.toString());
+           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message: %s", msg.toString());
+
            var event = JSON.parse(msg.content);
 
-            event.eventType = 'handshakeAccepted';
-            var msgBuffer = new Buffer(JSON.stringify({headers: event}));
+            var msgBuffer = new Buffer(JSON.stringify(helper.handshakeAccept()));
            logger.trace('[*** TRANSPORT:SERVER ***] sending handshake accept response to amqp queue' + event.headers.REPLY_TO);
             initMuonClientServerSocket(conn, event.headers.LISTEN_ON, event.headers.REPLY_TO, serverStackChannel);
-            ch.sendToQueue(event.headers.REPLY_TO, msgBuffer, {persistent: false, headers: event});
+            ch.sendToQueue(event.headers.REPLY_TO, msgBuffer, {persistent: false, headers: event.headers});
             logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent");
             ch.ack(msg);
         }, {noAck: false});

@@ -45,7 +45,7 @@ var sendHandshake = function(serviceQueueName, handshakeMsg, amqpChannel) {
      var promise = new RSVP.Promise(function(resolve, reject) {
 
         amqpChannel.assertQueue(serviceQueueName, helper.queueSettings());
-        amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify({headers: handshakeMsg})), {persistent: false, headers: handshakeMsg});
+        amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(handshakeMsg)), {persistent: false, headers: handshakeMsg});
         logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
         resolve();
      });
@@ -71,14 +71,20 @@ var readyInboundSocket = function(recvQueueName, amqpChannel, clientChannel) {
         logger.trace("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
         amqpChannel.assertQueue(recvQueueName, helper.queueSettings());
         amqpChannel.consume(recvQueueName, function(msg) {
-            console.dir(msg);
-            //var event = JSON.parse(msg.content.toString());
+            var prettyMsg = {
+                properties: msg.properties,
+                fields: msg.fields,
+                content: msg.content.toString()
+            }
+            console.dir(prettyMsg);
+
             if (msg.properties.headers.eventType === 'handshakeAccepted') {
                  //amqpChannel.ack(msg);
                  logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg.content.toString());
                  logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol complete");
                 resolve();
             } else {
+                var event = JSON.parse(msg.content.toString());
                 logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(event));
                 clientChannel.send(event);
             }
