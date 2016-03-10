@@ -22,9 +22,10 @@ exports.connect = function(serviceName, serverStackChannel, url) {
            var event = JSON.parse(msg.content);
 
             event.eventType = 'handshakeAccepted';
-           logger.trace('[*** TRANSPORT:SERVER ***] sending handshake accept response to amqp queue' + event.socket_recv_q);
-            initMuonClientServerSocket(conn, event.LISTEN_ON, event.REPLY_TO, serverStackChannel);
-            ch.sendToQueue(event.socket_recv_q, new Buffer(JSON.stringify(event)), {persistent: false});
+            var msgBuffer = new Buffer(JSON.stringify({headers: event}));
+           logger.trace('[*** TRANSPORT:SERVER ***] sending handshake accept response to amqp queue' + event.headers.REPLY_TO);
+            initMuonClientServerSocket(conn, event.headers.LISTEN_ON, event.headers.REPLY_TO, serverStackChannel);
+            ch.sendToQueue(event.headers.REPLY_TO, msgBuffer, {persistent: false, headers: event});
             logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent");
             ch.ack(msg);
         }, {noAck: false});
