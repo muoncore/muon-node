@@ -18,15 +18,15 @@ module.exports.create = function(n) {
             incomingFunction = f;
         },
         sendDownstream: function(event) {
-            logger.debug('[*** CHANNEL ***] ' + name + ' sending event  via handler downstream');
+            logger.debug('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler downstream event.id=' + event.id);
             var result = outgoingFunction(event);
-            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler downstream result=' + JSON.stringify(result));
+            logger.trace('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler downstream event=' + JSON.stringify(event));
             return result;
         },
         sendUpstream: function(event) {
-            logger.debug('[*** CHANNEL ***] ' + name + ' sending event via handler upstream' + JSON.stringify(event));
+            logger.debug('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler upstream event.id=' + event.id);
             var result = incomingFunction(event);
-            logger.debug('[*** CHANNEL ***] ' + name + ' returning handler upstream result=' + JSON.stringify(result));
+            logger.trace('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler upstream event=' + JSON.stringify(event));
             return result;
         },
         upstreamConnection: function(c) {
@@ -37,10 +37,10 @@ module.exports.create = function(n) {
         },
         otherConnection(conn) {
             if (conn === upstreamConnection.name()) {
-                logger.trace('[*** CHANNEL ***]  ' + name + ' other connection is downstream: ' + downstreamConnection.name());
+                logger.trace('[*** CSP-CHANNEL ***]  ' + name + ' other connection is downstream: ' + downstreamConnection.name());
                 return downstreamConnection;
             } else {
-                logger.trace('[*** CHANNEL ***] ' + name + ' other connection is upstream: ' + upstreamConnection.name());
+                logger.trace('[*** CSP-CHANNEL ***] ' + name + ' other connection is upstream: ' + upstreamConnection.name());
                 return upstreamConnection;
             }
         }

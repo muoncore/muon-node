@@ -29,7 +29,7 @@ function LeftConnection(name, inbound, outbound) {
             if (msg.id !== undefined) {
                 id = msg.id;
             }
-            logger.trace("[***** CSP-CHANNEL *****] " + name + " ChannelConnection.send() event.id='" + id + "'");
+            logger.debug("[***** CSP-CHANNEL *****] " + name + ".send() event.id='" + id + "'");
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
@@ -42,8 +42,8 @@ function LeftConnection(name, inbound, outbound) {
                     if (value.id !== undefined) {
                         id = value.id;
                     }
-                       logger.trace("[***** CSP-CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
-                     logger.trace("[***** CSP-CHANNEL *****] " + name + " ChannelConnection.listen() callback=" + JSON.stringify(callback));
+                     logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() event.id=" + id);
+                     logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() callback=" + JSON.stringify(callback));
                     if (callback) {
                         callback(value);
                     } else {
@@ -66,11 +66,11 @@ function LeftConnection(name, inbound, outbound) {
                     if (value.id !== undefined) {
                         id = value.id;
                     }
-                    logger.trace("[***** CHANNEL *****] " + name + "ChannelConnection.handler() event.id=" + id);
+                    logger.debug("[***** CHANNEL *****] " + name + ".handler() event.id=" + id);
                     if (handler) {
                         try {
                             var result = handler.sendUpstream(value);
-                            logger.debug('handler result.id=' + id);
+                            logger.trace('handler result.id=' + id);
                             handler.otherConnection(name).send(result);
                         } catch(err) {
                             logger.error(name + ': ' + err);
@@ -103,7 +103,7 @@ function RightConnection(name, inbound, outbound) {
             if (msg.id !== undefined) {
                 id = msg.id;
             }
-            logger.debug("[***** CSP-CHANNEL *****] " + name + " ChannelConnection.send() event.id='" + id + "'");
+            logger.debug("[***** CSP-CHANNEL *****] " + name + ".send() event.id=" + id);
            // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);
             csp.putAsync(outbound, msg);
         },
@@ -118,7 +118,7 @@ function RightConnection(name, inbound, outbound) {
                     if (value.id !== undefined) {
                         id = value.id;
                     }
-                     logger.debug("[***** CSP-CHANNEL *****] " + name + " ChannelConnection.listen() event.id=" + id);
+                     logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() event.id=" + id);
                     if (callback) {
                         callback(value);
                     } else {
@@ -141,7 +141,7 @@ function RightConnection(name, inbound, outbound) {
                     if (value.id !== undefined) {
                         id = value.id;
                     }
-                     logger.debug("[***** CSP-HANNEL *****] " + name + " ChannelConnection.handler() event.id=" + id);
+                     logger.debug("[***** CSP-CHANNEL *****] " + name + ".handler() event.id=" + id);
                     if (handler) {
                         try {
                             var result = handler.sendDownstream(value);
@@ -150,7 +150,7 @@ function RightConnection(name, inbound, outbound) {
                         } catch(err) {
                             logger.error(name + ': ' + err);
                             var reply = {status: 'error'};
-                            logger.info('[***** CSP-CHANNEL *****]  error: returning message back upstream');
+                            logger.error('[***** CSP-CHANNEL *****] ' + name + ' RightConnection error: returning message back upstream');
                             csp.putAsync(outbound, reply);
                         }
 
@@ -165,7 +165,7 @@ function RightConnection(name, inbound, outbound) {
             return name;
         }
     }
-    logger.trace('[***** CSP-CHANNEL *****] returning right connection '+ name);
+    logger.trace('[***** CSP-CHANNEL *****] returning right connection ' + name);
     return connectionObject;
 }
 
