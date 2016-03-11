@@ -57,9 +57,7 @@ describe("Muon core test", function () {
                 logger.error("muoncore-test.js promise.then() error!!!!!: " + error);
                 throw new Error('error in return muon promise in muoncore-test.js', error);
 
-            }).finally(function(){
-                 done();
-              });
+            });
 
         }, 1500);
 

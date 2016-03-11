@@ -26,14 +26,13 @@ exports.connect = function(serviceName, url) {
              logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] serverListenQueueName=' + serverListenQueueName);
              logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] replyQueueName=' + replyQueueName);
 
-            async.series([
-                createSendQueue(serverListenQueueName, amqpChannel),
-                createRecvQueue(replyQueueName, amqpChannel),
-                readyInboundSocket(replyQueueName, amqpChannel, clientChannel.rightConnection()),
-                sendHandshake(serviceQueueName, handshakeMsg, amqpChannel),
-                listenForHandshakeResponse(replyQueueName, amqpChannel),
-                readyOutboundSocket(serverListenQueueName, amqpChannel, clientChannel.rightConnection())
-            ]);
+
+            RSVP.resolve()
+            .then(createSendQueue(serverListenQueueName, amqpChannel))
+            .then(createRecvQueue(replyQueueName, amqpChannel))
+            .then(readyInboundSocket(replyQueueName, amqpChannel, clientChannel.rightConnection()))
+            .then(sendHandshake(serviceQueueName, handshakeMsg, amqpChannel))
+            .then(readyOutboundSocket(serverListenQueueName, amqpChannel, clientChannel.rightConnection()));
 
         });
     });
@@ -44,69 +43,98 @@ exports.connect = function(serviceName, url) {
 
 var sendHandshake = function(serviceQueueName, handshakeMsg, amqpChannel) {
 
+  return function(prevResult) {
+
      var promise = new RSVP.Promise(function(resolve, reject) {
 
         amqpChannel.assertQueue(serviceQueueName, helper.queueSettings());
-        amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(handshakeMsg)), {persistent: false, headers: handshakeMsg});
+        amqpChannel.sendToQueue(serviceQueueName, new Buffer(''), {persistent: false, headers: handshakeMsg});
         logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
-        logger.error('sendHandshake resolve()');
+         logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] sendHandshake success');
         resolve('4');
      });
      return promise;
+  }
 }
 
-
+/*
 var listenForHandshakeResponse = function(recvQueueName, amqpChannel) {
+
+ return function(prevResult) {
+
     var promise = new RSVP.Promise(function(resolve, reject) {
         logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***] waiting for handshake accept on queue " + recvQueueName);
         //amqpChannel.assertQueue(recvQueueName, helper.queueSettings());
         amqpChannel.consume(recvQueueName, function(handshakeMsg) {
-             console.dir(msg);
-             logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg.content.toString());
+             logger.error('listenForHandshakeResponse() cleint received incoming handshake from server');
+             //console.dir(handshakeMsg);
+             logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", handshakeMsg.content.toString());
              logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol complete");
             amqpChannel.ack(handshakeMsg);
             //amqpChannel.close();
             logger.error('listenForHandshakeResponse resolve()');
             resolve('5');
         }, {noAck: false});
+
      });
+
      return promise;
+  }
 }
+*/
 
 var readyInboundSocket = function(recvQueueName, amqpChannel, clientChannel) {
+
+ return function(prevResult) {
     var promise = new RSVP.Promise(function(resolve, reject) {
         logger.trace("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
         amqpChannel.assertQueue(recvQueueName, helper.queueSettings());
         amqpChannel.consume(recvQueueName, function(msg) {
-            var event = JSON.parse(msg.content.toString());
-            logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(event));
-            clientChannel.send(event);
-        }, {noAck: true});
-        logger.error('readyInboundSocket resolve()');
+
+
+            if (msg.content.toString() === '' || msg.properties.headers.eventType === 'handshakeAccepted') {
+                // we're connected to the remote service
+                 logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg.content.toString());
+                 logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol complete");
+            } else {
+                 var event = JSON.parse(msg.content.toString());
+                logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(event));
+                clientChannel.send(event);
+            }
+            amqpChannel.ack(msg);
+
+
+        }, {noAck: false});
+        logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyInboundSocket success');
         resolve('3');
      });
 
      return promise;
+  }
 }
 
 
 var readyOutboundSocket = function(serviceQueueName, amqpChannel, clientChannel) {
 
+ return function(prevResult) {
      var promise = new RSVP.Promise(function(resolve, reject) {
         amqpChannel.assertQueue(serviceQueueName, helper.queueSettings());
         clientChannel.listen(function(event){
             logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] sending outbound event %s", JSON.stringify(event));
-            amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(event)), {persistent: false});
+            amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(event)), {persistent: false, headers: event.headers});
         });
-        logger.error('readyOutboundSocket resolve()');
+        logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
         resolve('6');
      });
      logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] outbound socket ready on amqp queue  '%s'", serviceQueueName);
      return promise;
+  }
 }
 
 
 var createSendQueue = function(sendQueueName, amqpChannel) {
+
+ return function(prevResult) {
     var promise = new RSVP.Promise(function(resolve, reject) {
             logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] creating temp send queue "' + sendQueueName + "'");
             amqpChannel.assertQueue(sendQueueName, helper.queueSettings(), function(err, other) {
@@ -114,16 +142,19 @@ var createSendQueue = function(sendQueueName, amqpChannel) {
                 if (err) {
                     reject();
                 } else {
-                    logger.error('createSendQueue resolve()');
+                    logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] created send queue success');
                     resolve('1');
                 }
             });
      });
      return promise;
+  }
 }
 
 
 var createRecvQueue = function(recvQueueName, amqpChannel) {
+
+ return function(prevResult) {
     var promise = new RSVP.Promise(function(resolve, reject) {
           logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] create recv queue "' + recvQueueName + '"');
           amqpChannel.assertQueue(recvQueueName, helper.queueSettings(), function(err, other) {
@@ -131,12 +162,13 @@ var createRecvQueue = function(recvQueueName, amqpChannel) {
               if (err) {
                   reject();
               } else {
-                    logger.error('createRecvQueue resolve()');
+                  logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] created recv queue success');
                   resolve('2');
               }
           });
      });
      return promise;
+  }
 }
 
 

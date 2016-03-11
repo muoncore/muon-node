@@ -31,7 +31,7 @@ exports.handshakeRequest = function(protocol, sourceService, listenQueue, replyQ
      LISTEN_ON: listenQueue,
      SOURCE_SERVICE: sourceService
     };
-   return {headers: msg};
+   return msg;
 
 }
 
@@ -46,6 +46,6 @@ exports.handshakeAccept = function() {
        "LISTEN_ON": "stream-listen",
        "SOURCE_SERVICE": "some-service"
     };
-   return {headers: msg};
+   return msg;
 
 }

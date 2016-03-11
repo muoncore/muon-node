@@ -18,14 +18,20 @@ exports.connect = function(serviceName, serverStackChannel, url) {
         logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] Server created amqp negotiation queue '%s'", serviceQueueName);
 
         ch.consume(serviceQueueName, function(msg) {
-           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message. content=%s", msg.content.toString());
-           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  negotiation headers=%s", msg.properties.toString());
-           var event = JSON.parse(msg.content);
 
-            var msgBuffer = new Buffer(JSON.stringify(helper.handshakeAccept()));
-           logger.trace('[*** TRANSPORT:SERVER ***] sending handshake accept response to amqp queue' + event.headers.REPLY_TO);
-            initMuonClientServerSocket(conn, event.headers.LISTEN_ON, event.headers.REPLY_TO, serverStackChannel);
-            ch.sendToQueue(event.headers.REPLY_TO, msgBuffer, {persistent: false, headers: event.headers});
+            var prettyMsg = {
+                properties: JSON.stringify(msg.properties),
+                fields: msg.fields,
+                content: msg.content.toString(),
+            }
+            logger.warn('[*** TRANSPORT:SERVER:HANDSHAKE ***] raw incoming message: ');
+            console.dir(prettyMsg);
+           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message. content=%s", msg.properties.toString());
+           var headers = msg.properties.headers;
+            logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  negotiation headers=%s", JSON.stringify(headers));
+           logger.trace('[*** TRANSPORT:SERVER ***] sending handshake accept response to amqp queue ' + headers.REPLY_TO);
+            initMuonClientServerSocket(conn, headers.LISTEN_ON, headers.REPLY_TO, serverStackChannel);
+            ch.sendToQueue(headers.REPLY_TO, new Buffer(''), {persistent: false, headers: helper.handshakeAccept()});
             logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent");
             ch.ack(msg);
         }, {noAck: false});
@@ -44,12 +50,12 @@ function initMuonClientServerSocket(amqpConnection, listen_queue, send_queue, se
             var event = JSON.parse(msg.content.toString());
             serverStackChannel.send(event);
             ch.ack(msg);
-            //logger.trace("[*** TRANSPORT:SERVER:INBOUND ***]  inbound muon event sent to server stack channel %s", event.content.id);
+            logger.trace("[*** TRANSPORT:SERVER:INBOUND ***]  inbound muon event sent to server stack channel %s", event.id);
         }, {noAck: false});
 
         serverStackChannel.listen(function(event) {
             logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event: %s", JSON.stringify(event));
-            ch.sendToQueue(send_queue, new Buffer(JSON.stringify(event)), {persistent: false});
+            ch.sendToQueue(send_queue, new Buffer(JSON.stringify(event)), {persistent: false, headers: event.headers});
         });
     });
 }

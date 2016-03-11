@@ -22,6 +22,7 @@ muon = muoncore.create("nodejs-client", config);
 var promise = muon.request('request://example-service/', "ping");
 
 promise.then(function (event) {
+    logger.info('*****************************************************************************************');
     logger.info("nodejs-client response received! event.id=" + event.id);
     logger.info("nodejs-client response received! event=" + JSON.stringify(event));
     process.exit(0);
