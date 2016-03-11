@@ -7,7 +7,7 @@ require('sexylog');
 
 exports.connect = function(serviceName, serverStackChannel, url) {
 
-    logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] " + serviceName + "' connecting to muon");
+    logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] servers-ide of service '" + serviceName + "' connecting to muon...");
       var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
     amqp.connect(url, function(err, conn) {
       logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceQueueName);
