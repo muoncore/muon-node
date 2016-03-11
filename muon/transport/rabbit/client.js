@@ -30,8 +30,8 @@ exports.connect = function(serviceName, url) {
             RSVP.resolve()
             .then(createSendQueue(serverListenQueueName, amqpChannel))
             .then(createRecvQueue(replyQueueName, amqpChannel))
-            .then(readyInboundSocket(replyQueueName, amqpChannel, clientChannel.rightConnection()))
             .then(sendHandshake(serviceQueueName, handshakeMsg, amqpChannel))
+            .then(readyInboundSocket(replyQueueName, amqpChannel, clientChannel.rightConnection()))
             .then(readyOutboundSocket(serverListenQueueName, amqpChannel, clientChannel.rightConnection()));
 
         });
@@ -91,22 +91,19 @@ var readyInboundSocket = function(recvQueueName, amqpChannel, clientChannel) {
         amqpChannel.assertQueue(recvQueueName, helper.queueSettings());
         amqpChannel.consume(recvQueueName, function(msg) {
 
-
             if (msg.content.toString() === '' || msg.properties.headers.eventType === 'handshakeAccepted') {
                 // we're connected to the remote service
                  logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg.content.toString());
                  logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol complete");
+                 logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyInboundSocket success');
+                 resolve('3');
             } else {
                  var event = JSON.parse(msg.content.toString());
                 logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(event));
                 clientChannel.send(event);
             }
             amqpChannel.ack(msg);
-
-
         }, {noAck: false});
-        logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyInboundSocket success');
-        resolve('3');
      });
 
      return promise;
@@ -120,7 +117,7 @@ var readyOutboundSocket = function(serviceQueueName, amqpChannel, clientChannel)
      var promise = new RSVP.Promise(function(resolve, reject) {
         amqpChannel.assertQueue(serviceQueueName, helper.queueSettings());
         clientChannel.listen(function(event){
-            logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] sending outbound event %s", JSON.stringify(event));
+            logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] sending outbound event", JSON.stringify(event));
             amqpChannel.sendToQueue(serviceQueueName, new Buffer(JSON.stringify(event)), {persistent: false, headers: event.headers});
         });
         logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
