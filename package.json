@@ -23,6 +23,7 @@
     "amqplib": "*",
     "split": "*",
     "underscore": "*",
+    "async": "*",
     "url": "*",
     "cors": "*",
     "js-csp": "*",

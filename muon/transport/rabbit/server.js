@@ -18,8 +18,8 @@ exports.connect = function(serviceName, serverStackChannel, url) {
         logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] Server created amqp negotiation queue '%s'", serviceQueueName);
 
         ch.consume(serviceQueueName, function(msg) {
-           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message: %s", msg.toString());
-
+           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message. content=%s", msg.content.toString());
+           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  negotiation headers=%s", msg.properties.toString());
            var event = JSON.parse(msg.content);
 
             var msgBuffer = new Buffer(JSON.stringify(helper.handshakeAccept()));
