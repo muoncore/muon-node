@@ -4,8 +4,6 @@ require('sexylog');
 var helper = require('./transport-helper.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var uuid = require('node-uuid');
-var async = require('async');
-
 
 
 exports.connect = function(serviceName, url) {
