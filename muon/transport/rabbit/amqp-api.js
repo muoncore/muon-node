@@ -5,6 +5,13 @@ require('sexylog');
 var helper = require('./transport-helper.js');
 
 
+var queueSettings = {
+     durable: false,
+     type: "direct",
+     autoDelete: true,
+     confirm: true
+   };
+
 exports.connect = function(url, callback) {
     logger.info("[*** TRANSPORT:AMQP:BOOTSTRAP ***] connecting to amqp " + url);
     amqp.connect(url, function(err, amqpConnection) {
@@ -79,13 +86,13 @@ function handleChannelEvents(amqpChannel) {
 function publish(amqpChannel, queueName, payload, headers) {
     logger.trace("[*** TRANSPORT:AMQP:OUTBOUND ***] publish on queue " + queueName + " payload: ", JSON.stringify(payload));
     logger.trace("[*** TRANSPORT:AMQP:OUTBOUND ***] publish on queue " + queueName + " headers: ", JSON.stringify(headers));
-    amqpChannel.assertQueue(queueName);
+    amqpChannel.assertQueue(queueName, queueSettings);
     amqpChannel.sendToQueue(queueName, new Buffer(JSON.stringify(payload)), {persistent: false, headers: headers});
 
 }
 
 function consume(amqpChannel, queueName, callback) {
-   amqpChannel.assertQueue(queueName);
+   amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(msg) {
      if (msg !== null) {
        var payload = JSON.parse(msg.content.toString());
