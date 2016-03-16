@@ -3,6 +3,7 @@ var RSVP = require('rsvp');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 require('sexylog');
 var helper = require('./transport-helper.js');
+var RSVP = require('rsvp');
 
 
 var queueSettings = {
@@ -12,48 +13,82 @@ var queueSettings = {
      confirm: true
    };
 
-exports.connect = function(url, callback) {
+
+
+
+
+var amqpConnectionOk = false;
+var amqpChannelOk = false;
+
+
+
+exports.connect = function(url) {
+
+
+       var promise = new RSVP.Promise(function(resolve, reject) {
+
+           function callback(err, amqpConnection, amqpChannel) {
+                if (err) {
+                    reject(err);
+                } else {
+                    var api = {
+                          publish: function(queueName, payload, headers) {
+                              publish(amqpChannel, queueName, payload, headers);
+                          },
+                          consume: function(queueName, callback) {
+                             consume(amqpChannel, queueName, callback);
+                          },
+                          shutdown: function() {
+                              amqpConnection.close();
+                          }
+                    }
+                    resolve(api);
+                }
+           }
+           amqpConnect(url, callback);
+        });
+        return promise;
+}
+
+
+function amqpConnect(url, callback) {
+
     logger.info("[*** TRANSPORT:AMQP:BOOTSTRAP ***] connecting to amqp " + url);
     amqp.connect(url, function(err, amqpConnection) {
 
         if (err) {
-            logger.error("[*** TRANSPORT:AMQP:BOOTSTRAP ***] error connecting to amqp service: " + err);
-            callback(err, null);
+            logger.error("[*** TRANSPORT:AMQP:BOOTSTRAP ***] error connecting to amqp: " + err);
+            callback(err);
         } else {
+          amqpConnectionOk = true;
           logger.debug("[*** TRANSPORT:AMQP:BOOTSTRAP ***] amqp connected.");
-           handleConnectionEvents(amqpConnection);
-          var amqpChannel;
+          handleConnectionEvents(amqpConnection);
           amqpConnection.createChannel(onChannel);
-
-          function onChannel(err, ch) {
-            if (err != null) bail(err);
-            amqpChannel = ch;
-            handleChannelEvents(amqpChannel);
-            var amqpApi = {
-                  publish: function(queueName, payload, headers) {
-                      publish(amqpChannel, queueName, payload, headers);
-                  },
-                  consume: function(queueName, callback) {
-                     consume(amqpChannel, queueName, callback);
-                  },
-                  shutdown: function() {
-                      amqpConnection.close();
-                  }
+          function onChannel(err, amqpChannel) {
+            if (err != null) {
+                logger.error("[*** TRANSPORT:AMQP:BOOTSTRAP ***] error creating amqp channel: " + err);
+                callback(err);
+            } else {
+                amqpChannelOk = true;
+                logger.trace("[*** TRANSPORT:AMQP:BOOTSTRAP ***] amqp comms channel created successfully");
+                handleChannelEvents(amqpChannel);
+                callback(null, amqpConnection, amqpChannel);
             }
-            callback(null, amqpApi);
+
           }
         }
     });
 }
 
-
 function handleConnectionEvents(amqpConnection) {
       amqpConnection.on('close', function(err) {
             logger.info('amqp connection closed ' + err);
+            amqpConnectionOk = false;
       });
 
       amqpConnection.on('error', function(err) {
              logger.error('amqp connection error ' + err);
+             amqpConnectionOk = false;
       });
 
       amqpConnection.on('blocked', function(err) {
@@ -68,10 +103,12 @@ function handleConnectionEvents(amqpConnection) {
 function handleChannelEvents(amqpChannel) {
       amqpChannel.on('close', function(err) {
             logger.info('amqp channel close ' + err);
+            amqpChannelOk = false;
       });
 
       amqpChannel.on('error', function(err) {
             logger.error('amqp channel error ' + err);
+            amqpChannelOk = false;
       });
 
       amqpChannel.on('return', function(err) {
