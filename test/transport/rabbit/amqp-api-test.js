@@ -12,7 +12,7 @@ describe("amqp api test", function () {
 
     it("send and receive a simple message", function (done) {
             var url = "amqp://muon:microservices@localhost";
-            var numMessages = 100;
+            var numMessages = 3;
             var messageCount = 0;
 
             console.log('connecting via amqp api');
@@ -24,8 +24,8 @@ describe("amqp api test", function () {
                    var payload = {message: "amqp_api_test_message"};
 
                    console.log('waiting for message');
-                   api.inbound('api_test_queue').listen(function(err, msg) {
-                       console.log('message received');
+                   api.inbound('api_test_queue').listen(function(msg) {
+                       console.log('message received: ');
                        assert.equal(msg.message, payload.message);
                        messageCount++;
                        if (messageCount == numMessages) {
