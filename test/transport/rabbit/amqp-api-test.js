@@ -4,7 +4,7 @@ var expect = require('expect.js');
 
 describe("amqp api test", function () {
 
-    this.timeout(60000);
+    this.timeout(8000);
 
       after(function() {
 
@@ -12,7 +12,7 @@ describe("amqp api test", function () {
 
     it("send and receive a simple message", function (done) {
             var url = "amqp://muon:microservices@localhost";
-            var numMessages = 100000;
+            var numMessages = 100;
             var messageCount = 0;
 
             console.log('connecting via amqp api');
@@ -24,7 +24,7 @@ describe("amqp api test", function () {
                    var payload = {message: "amqp_api_test_message"};
 
                    console.log('waiting for message');
-                   api.consume('api_test_queue', function(err, msg) {
+                   api.inbound('api_test_queue').listen(function(err, msg) {
                        console.log('message received');
                        assert.equal(msg.message, payload.message);
                        messageCount++;
@@ -35,7 +35,8 @@ describe("amqp api test", function () {
                    });
                   console.log('sending payload');
                   for (var i = 0 ; i < numMessages ; i++) {
-                            api.publish('api_test_queue', payload, {});
+                            payload.id = i;
+                            api.outbound('api_test_queue').send(payload);
                   }
 
             }, function (err) {

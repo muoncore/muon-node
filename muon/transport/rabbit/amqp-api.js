@@ -27,16 +27,24 @@ exports.connect = function(url) {
 
        var promise = new RSVP.Promise(function(resolve, reject) {
 
+
            function callback(err, amqpConnection, amqpChannel) {
                 if (err) {
                     reject(err);
                 } else {
+                   var clientChannel = bichannel.create("amqp-api");
                     var api = {
-                          publish: function(queueName, payload, headers) {
-                              publish(amqpChannel, queueName, payload, headers);
+                          outbound: function(queueName) {
+                            clientChannel.rightConnection().listen(function(msg) {
+                                publish(amqpChannel, queueName, msg, msg.headers);
+                            });
+                            return clientChannel.leftConnection();
                           },
-                          consume: function(queueName, callback) {
-                             consume(amqpChannel, queueName, callback);
+                          inbound: function(queueName) {
+                            consume(amqpChannel, queueName, function(msg) {
+                                clientChannel.rightConnection().send(msg);
+                            });
+                            return clientChannel.leftConnection();
                           },
                           shutdown: function() {
                               amqpConnection.close();
@@ -132,12 +140,13 @@ function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(msg) {
      if (msg !== null) {
+       logger.trace("[*** TRANSPORT:AMQP:OUTBOUND ***] consumed message on queue " + queueName + " msg: " + JSON.stringify(msg));
        var payload = JSON.parse(msg.content.toString());
        logger.trace("[*** TRANSPORT:AMQP:OUTBOUND ***] consumed message on queue " + queueName + " content: " + JSON.stringify(payload));
        callback(null, payload);
        amqpChannel.ack(msg);
      } else {
-        callback(new Error('error comsuing message on queue ' + queueName), null);
+        callback(new Error('error consuming null message on queue ' + queueName), null);
      }
    }, {noAck: false});
 
