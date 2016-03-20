@@ -1,2 +1,10 @@
-# Muon Node docs
+---
+---
+:title: Muon Node
+:layout: documentation
+:source-highlighter: pygments
+:toc: right
 
+= Muon Node docs
+
+This is muon node.
