@@ -57,7 +57,7 @@ describe("amqp api test", function () {
             console.log('connecting via amqp api');
             var amqpConnect = amqpApi.connect(url);
 
-            console.log('connect.tehn()...');
+            console.log('connect.then()...');
              amqpConnect.then(function (api) {
 
                    var payload = {message: "amqp_api_test_message"};

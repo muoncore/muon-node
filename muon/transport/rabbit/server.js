@@ -26,13 +26,13 @@ exports.connect = function(serviceName, serverStackChannel, url) {
             }
             logger.warn('[*** TRANSPORT:SERVER:HANDSHAKE ***] raw incoming message: ');
             console.dir(prettyMsg);
-           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message. content=%s", msg.properties.toString());
+           logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message. content=%s", msg.content.toString());
            var headers = msg.properties.headers;
             logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  negotiation headers=%s", JSON.stringify(headers));
            logger.trace('[*** TRANSPORT:SERVER ***] sending handshake accept response to amqp queue ' + headers.REPLY_TO);
             initMuonClientServerSocket(conn, headers.LISTEN_ON, headers.REPLY_TO, serverStackChannel);
             ch.sendToQueue(headers.REPLY_TO, new Buffer(''), {persistent: false, headers: helper.handshakeAccept()});
-            logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent");
+            logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue ");
             ch.ack(msg);
         }, {noAck: false});
       });

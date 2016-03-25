@@ -25,6 +25,7 @@ function LeftConnection(name, inbound, outbound) {
     var listener;
     var connectionObject = {
         send: function(msg) {
+            //console.log('channel.send() msg=' + JSON.stringify(msg));
             var id = "unknown";
             if (msg.id !== undefined) {
                 id = msg.id;
