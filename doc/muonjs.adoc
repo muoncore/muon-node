@@ -1,13 +1,14 @@
 ---
 layout: documentation
 ---
-:title: Muon Node
+:title: Muon.JS
 :date: 2015-01-05 11:40
 :source-highlighter: pygments
 :toc: right
-:toc-title: Muon Node
+:toc-title: Muon.JS
 :toclevels: 6
 
-# Muon Java
+# Muon JS - Into the Browser
 
-include::node/latest/intro.adoc[leveloffset=+1]
+Muon JS is Muon in the browser.
+
