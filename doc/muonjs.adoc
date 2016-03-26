@@ -10,5 +10,35 @@ layout: documentation
 
 # Muon JS - Into the Browser
 
-Muon JS is Muon in the browser.
+Muon JS is Muon in the browser. This document describes how to set up and use Muon in the browser and describes use cases for it.
+
+Once you have a running service, refer to the shared Muon JavaScript documentation on usage.
+
+## A Service in 5 minutes
+
+## Browser usage and limitations
+
+Most application architectures service browser applications treat the browser as a client in a client/ server system.
+
+A Muon based browser application is more correctly throught of as a _restricted peer_ of your server side Microservices.
+
+All of the same capabilities and protocols that are available to Node/ other Muon implementations are also available to browser
+based systems via Muon.js. If you Muon gateway enables unrestricted traffic, a fully functional microservice can be hosted
+in a browser instance and be discoverable and accessible by any of your distributed system.
+
+TODO - link to example of this happening.
+
+This is generally wanted, and the normal interaction is for Muon.js to only be permitted to form client connections, rather than
+to host server endpoints.
+
+## Configuration
+
+## Deployment
+
+## Using Muon.js as a Microservice system simulator
+
+
+TODO - link to the simulator project. Can we host this somewhere?
+
+## Next Steps
 
