@@ -57,6 +57,7 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
         logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
 
         amqpApi.inbound(recvQueueName).listen(function(msg) {
+             //todo validate event/msg format here
              if ( msg.headers.eventType === 'handshakeAccepted') {
                 // we're got a handshake confirmation and are now connected to the remote service
                  logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg);
@@ -80,6 +81,7 @@ var readyOutboundSocket = function(serviceQueueName, amqpApi, clientChannel) {
  return function(prevResult) {
      var promise = new RSVP.Promise(function(resolve, reject) {
         clientChannel.listen(function(event){
+            //todo validate event/msg format here
             logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  event", JSON.stringify(event));
             amqpApi.outbound(serviceQueueName).send(event);
         });

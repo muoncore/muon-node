@@ -38,6 +38,7 @@ exports.connect = function(url) {
                             //console.log('amqpApi.outbound("'  + queueName + '")');
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName);
                             clientChannel.rightConnection().listen(function(msg) {
+                                 //todo validate event/msg format here
                                  logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received message from amqp-api client: ' + JSON.stringify(msg));
                                  publish(amqpChannel, queueName, msg, msg.headers);
                             });
@@ -46,6 +47,7 @@ exports.connect = function(url) {
                           inbound: function(queueName) {
                             var clientChannel = bichannel.create("amqp-api-intbound-" + queueName);
                             consume(amqpChannel, queueName, function(err, msg) {
+                                //todo validate event/msg format here
                                 logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] sending message to amqp-api client: ' + JSON.stringify(msg));
                                 clientChannel.rightConnection().send(msg);
                             });
@@ -68,7 +70,6 @@ function amqpConnect(url, callback) {
 
     logger.info("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] connecting to amqp " + url);
     amqp.connect(url, function(err, amqpConnection) {
-
         if (err) {
             logger.error("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] error connecting to amqp: " + err);
             callback(err);
@@ -155,6 +156,8 @@ function consume(amqpChannel, queueName, callback) {
        //var headers = JSON.parse(msg.properties.headers.toString());
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " headers: " + JSON.stringify(headers));
        payload.headers = headers;
+       logger.warn('[*** TRANSPORT:SERVER:HANDSHAKE ***] raw incoming message: ');
+       logger.warn(payload);
        callback(null, payload);
        amqpChannel.ack(msg);
      } else {

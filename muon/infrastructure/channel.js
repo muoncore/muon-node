@@ -89,7 +89,7 @@ function LeftConnection(name, inbound, outbound) {
             return name;
         }
     };
-    logger.trace('[***** CSP-CHANNEL *****] returning left connection '+ name);
+    //logger.trace('[***** CSP-CHANNEL *****] returning left connection '+ name);
     return connectionObject;
 }
 
@@ -166,7 +166,7 @@ function RightConnection(name, inbound, outbound) {
             return name;
         }
     }
-    logger.trace('[***** CSP-CHANNEL *****] returning right connection ' + name);
+    //logger.trace('[***** CSP-CHANNEL *****] returning right connection ' + name);
     return connectionObject;
 }
 
