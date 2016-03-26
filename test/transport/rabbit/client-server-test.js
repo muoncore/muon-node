@@ -3,6 +3,8 @@ var client = require('../../../muon/transport/rabbit/client.js');
 var server = require('../../../muon/transport/rabbit/server.js');
 var assert = require('assert');
 var expect = require('expect.js');
+var uuid = require('node-uuid');
+var events = require('../../../muon/domain/events.js');
 
 describe("muon client/server transport test", function () {
 
@@ -24,8 +26,9 @@ describe("muon client/server transport test", function () {
             serverChannel.leftConnection().listen(function(event) {
                     console.log('********** client_server-test.js serverChannel.leftConnection().listen() event=' + JSON.stringify(event));
                     console.log('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
-                    event.payload = 'PONG';
-                    serverChannel.leftConnection().send(event);
+                    var reply = events.rpcEvent("PONG", clientName, 'muon://client1/reply', 'application/json');
+                     events.validate(reply);
+                    serverChannel.leftConnection().send(reply);
             });
 
             server.connect(serverName, serverChannel.rightConnection(), url);
@@ -35,12 +38,12 @@ describe("muon client/server transport test", function () {
             muonClientChannel.listen(function(event){
 
                 console.log('********** client_server-test.js muonClientChannel.listen() event received ' + JSON.stringify(event));
-                assert.equal(event.payload, 'PONG');
+                assert.equal(event.payload.data, 'PONG');
                 done();
             });
 
-
-            muonClientChannel.send({id: "1", payload: "PING"});
+            var event = events.rpcEvent("PING", clientName, 'muon://server1/ping', 'application/json');
+            muonClientChannel.send(event);
 
     });
 

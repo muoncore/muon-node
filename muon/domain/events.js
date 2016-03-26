@@ -22,7 +22,19 @@ var schema = Joi.object().keys({
    }).required()
 });
 
+exports.validate = function(event) {
+    return validateSchema(event);
+}
 
+function validateSchema(event) {
+    var validatedEvent = Joi.validate(event, schema);
+    if (validatedEvent.error) {
+        logger.warn('invalid event: \n', event);
+        logger.debug('joi validatedEvent: ' + JSON.stringify(validatedEvent.error.details));
+       throw new Error('Error! problem validating rpc event schema: ' + JSON.stringify(validatedEvent.error));
+    }
+    return event;
+}
 
 exports.rpcEvent = function(payload, sourceService, remoteServiceUrl, contentType) {
 
@@ -60,9 +72,27 @@ exports.rpcEvent = function(payload, sourceService, remoteServiceUrl, contentTyp
    logger.trace('event: %s', JSON.stringify(event));
    if (validatedEvent.error) {
         logger.warn('invalid event: \n', event);
-        logger.debug('joi validatedEvent: ' + JSON.stringify(validatedEvent));
+        logger.debug('joi validatedEvent: ' + JSON.stringify(validatedEvent.error.details));
        throw new Error('Error! problem validating rpc event schema: ' + JSON.stringify(validatedEvent.error));
    }
    return validatedEvent.value;
 
 };
+
+
+exports.msgToEvent = function(msg) {
+    //logger.debug('msgToEvent() msg=' + JSON.stringify(msg));
+    var payload = JSON.parse(msg.content.toString());
+    var headers = msg.properties.headers;
+    //logger.trace("events.msgToEvent('" +  JSON.stringify(payload) + "', '" +  JSON.stringify(headers) + "')");
+    var eventid = uuid.v4();
+
+    var event = {
+          id: eventid,
+          created: new Date(),
+          headers: headers,
+          payload: payload
+      };
+
+   event;
+}

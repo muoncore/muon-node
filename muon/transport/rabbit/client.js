@@ -4,7 +4,7 @@ require('sexylog');
 var helper = require('./transport-helper.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var uuid = require('node-uuid');
-
+var events = require('../../domain/events.js');
 
 exports.connect = function(serviceName, url) {
 
@@ -52,45 +52,46 @@ var sendHandshake = function(serviceQueueName, handshakeMsg, amqpApi) {
 
 var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
 
- return function(prevResult) {
-    var promise = new RSVP.Promise(function(resolve, reject) {
-        logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
+     return function(prevResult) {
+        var promise = new RSVP.Promise(function(resolve, reject) {
+            logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
 
-        amqpApi.inbound(recvQueueName).listen(function(msg) {
-             //todo validate event/msg format here
-             if ( msg.headers.eventType === 'handshakeAccepted') {
-                // we're got a handshake confirmation and are now connected to the remote service
-                 logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg);
-                 logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully");
-                 resolve();
-            } else {
-                 var event = msg;
-                 if (! event.id) event.id = uuid.v4();
-                logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(event));
-                clientChannel.send(event);
-            }
-        });
-     });
-     return promise;
-  }
+            amqpApi.inbound(recvQueueName).listen(function(msg) {
+                 //todo validate event/msg format here
+                 if ( msg.headers.eventType === 'handshakeAccepted') {
+                    // we're got a handshake confirmation and are now connected to the remote service
+                     logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg);
+                     logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully");
+                     resolve();
+                } else {
+                     var event = msg;
+                     if (! event.id) event.id = uuid.v4();
+                     logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(event));
+                     events.validate(event);
+                     clientChannel.send(event);
+                }
+            });
+         });
+         return promise;
+     }
 }
 
 
 var readyOutboundSocket = function(serviceQueueName, amqpApi, clientChannel) {
 
- return function(prevResult) {
-     var promise = new RSVP.Promise(function(resolve, reject) {
-        clientChannel.listen(function(event){
-            //todo validate event/msg format here
-            logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  event", JSON.stringify(event));
-            amqpApi.outbound(serviceQueueName).send(event);
-        });
-        logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
-        resolve();
-     });
-     logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] outbound socket ready on amqp queue  '%s'", serviceQueueName);
-     return promise;
-  }
+     return function(prevResult) {
+         var promise = new RSVP.Promise(function(resolve, reject) {
+            clientChannel.listen(function(event){
+                events.validate(event);
+                logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  event", JSON.stringify(event));
+                amqpApi.outbound(serviceQueueName).send(event);
+            });
+            logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
+            resolve();
+         });
+         logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] outbound socket ready on amqp queue  '%s'", serviceQueueName);
+         return promise;
+      }
 }
 
 
