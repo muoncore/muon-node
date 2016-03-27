@@ -24,7 +24,8 @@ describe("muon client/server transport test", function () {
 
 
             serverChannel.leftConnection().listen(function(event) {
-                    console.log('********** client_server-test.js serverChannel.leftConnection().listen() event=' + JSON.stringify(event));
+                    console.log('********** client_server-test.js serverChannel.leftConnection().listen() event.id=' + event.id);
+                    console.dir(event);
                     console.log('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
                     var reply = events.rpcEvent("PONG", clientName, 'muon://client1/reply', 'application/json');
                      events.validate(reply);
@@ -37,7 +38,8 @@ describe("muon client/server transport test", function () {
 
             muonClientChannel.listen(function(event){
 
-                console.log('********** client_server-test.js muonClientChannel.listen() event received ' + JSON.stringify(event));
+                console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
+                console.dir(event);
                 assert.equal(event.payload.data, 'PONG');
                 done();
             });
