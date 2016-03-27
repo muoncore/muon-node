@@ -82,21 +82,21 @@ exports.rpcEvent = function(payload, sourceService, remoteServiceUrl, contentTyp
 
 exports.msgToEvent = function(msg) {
     logger.trace('msgToEvent('  + JSON.stringify(msg) + ')');
-    var contents = msg.content.toString(); //todo <- not getting paylaod in right format here? :(
-
+    var contents = msg.content.toString();
+    logger.error("msgToEvent() contents: '" + contents + "'");
+    var payload = JSON.parse(contents);
+    logger.error("msgToEvent() payload: '" + JSON.stringify(payload) + "'");
     var headers = msg.properties.headers;
     var eventid = uuid.v4();
-    var payload = '';
-    if (contents && contents.payload && contents.payload.data) payload = contents.payload.data;
     var event = {
           id: eventid,
           created: new Date(),
           headers: headers,
           payload: {
-            data: payload
+            data: payload.data
           }
       };
-    logger.trace('msgToEvent( return event='  + JSON.stringify(event) + ')');
+    logger.trace('msgToEvent() return event='  + JSON.stringify(event) );
    return event;
 }
 
@@ -104,11 +104,11 @@ exports.msgToEvent = function(msg) {
 exports.eventToMsg = function(event) {
     logger.trace('eventToMsg('  + JSON.stringify(event) + ')');
     var payload = '';
-    if (event && event.payload) payload = event.payload.data;
+    if (event && event.payload) payload = event.payload;
     if (! payload || payload == null || payload == undefined) {
-        payload = {};
+        payload = {data: ''};
     }
    var msg = {content: payload, headers: event.headers};
-    logger.trace('eventToMsg( return msg='  + JSON.stringify(msg) + ')');
+    logger.trace('eventToMsg() return msg='  + JSON.stringify(msg));
     return msg;
 }

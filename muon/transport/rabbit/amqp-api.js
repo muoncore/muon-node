@@ -136,8 +136,9 @@ function handleChannelEvents(amqpChannel) {
 }
 
 function publish(amqpChannel, queueName, event) {
-    var payload = events.eventToMsg(event).content;
-    var headers = events.eventToMsg(event).headers;
+    var messageFormat = events.eventToMsg(event);
+    var payload = messageFormat.content;
+    var headers = messageFormat.headers;
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue " + queueName + " payload: ", JSON.stringify(payload));
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue " + queueName + " headers: ", JSON.stringify(headers));
     amqpChannel.assertQueue(queueName, queueSettings);
@@ -154,7 +155,7 @@ function consume(amqpChannel, queueName, callback) {
        var headers = msg.properties.headers;
        //var headers = JSON.parse(msg.properties.headers.toString());
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " headers: " + JSON.stringify(event.headers));
-       logger.warn('[*** TRANSPORT:SERVER:HANDSHAKE ***] raw incoming message: ');
+       logger.warn('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
        logger.warn(event);
        callback(null, event);
        amqpChannel.ack(msg);

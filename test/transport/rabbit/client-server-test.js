@@ -27,7 +27,7 @@ describe("muon client/server transport test", function () {
                     console.log('********** client_server-test.js serverChannel.leftConnection().listen() event.id=' + event.id);
                     console.dir(event);
                     console.log('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
-                    var reply = events.rpcEvent("PONG", clientName, 'muon://client1/reply', 'application/json');
+                    var reply = events.rpcEvent('PONG', clientName, 'muon://client1/reply', 'application/json');
                      events.validate(reply);
                     serverChannel.leftConnection().send(reply);
             });
