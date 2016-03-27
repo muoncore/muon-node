@@ -1,5 +1,5 @@
 var uuid = require('node-uuid');
-
+var Joi = require('joi');
 
 
 
@@ -49,3 +49,38 @@ exports.handshakeAccept = function() {
    return msg;
 
 }
+
+
+exports.message = function(payload, headers) {
+
+    var message = {
+        payload: payload,
+        headers: headers
+    }
+    validateSchema(message);
+    return message;
+}
+
+
+var messageSchema = Joi.object().keys({
+   payload: Joi.object().required(),
+   headers:  Joi.object().required()
+});
+
+
+exports.validateMessage = function(message) {
+    validateSchema(message);
+}
+
+
+
+function validateSchema(event) {
+    var validatedEvent = Joi.validate(event, schema);
+    if (validatedEvent.error) {
+        logger.warn('invalid message: \n', event);
+        logger.info('invalid joi schema for message: ' + JSON.stringify(validatedEvent.error.details));
+       throw new Error('Error! problem validating transport message schema: ' + JSON.stringify(validatedEvent.error));
+    }
+    return event;
+}
+

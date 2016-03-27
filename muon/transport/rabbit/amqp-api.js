@@ -13,15 +13,10 @@ var queueSettings = {
      type: "direct",
      autoDelete: true,
      confirm: true
-   };
-
-
-
-
+};
 
 var amqpConnectionOk = false;
 var amqpChannelOk = false;
-
 
 
 exports.connect = function(url) {
@@ -37,12 +32,12 @@ exports.connect = function(url) {
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName);
                             clientChannel.rightConnection().listen(function(msg) {
                                  logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received message from amqp-api client: ' + JSON.stringify(msg));
-                                 publish(amqpChannel, queueName, msg, msg.headers);
+                                 publish(amqpChannel, queueName, msg);
                             });
                             return clientChannel.leftConnection();
                           },
                           inbound: function(queueName) {
-                            var clientChannel = bichannel.create("amqp-api-intbound-" + queueName);
+                            var clientChannel = bichannel.create("amqp-api-inbound-" + queueName);
                             consume(amqpChannel, queueName, function(err, msg) {
                                 if (err) {
                                     logger.error('[*** TRANSPORT:AMQP-API:INBOUND ***] error consuming message from queue "' + queueName + '": ' + err);

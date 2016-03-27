@@ -30,7 +30,7 @@ function validateSchema(event) {
     var validatedEvent = Joi.validate(event, schema);
     if (validatedEvent.error) {
         logger.warn('invalid event: \n', event);
-        logger.debug('joi validatedEvent: ' + JSON.stringify(validatedEvent.error.details));
+        logger.info('joi validatedEvent: ' + JSON.stringify(validatedEvent.error.details));
        throw new Error('Error! problem validating rpc event schema: ' + JSON.stringify(validatedEvent.error));
     }
     return event;
@@ -38,7 +38,7 @@ function validateSchema(event) {
 
 exports.rpcEvent = function(payload, sourceService, remoteServiceUrl, contentType) {
 
-   logger.trace("events.rpcEvent('" +  payload + "', '" +  sourceService + "', '" +  remoteServiceUrl + "', '" +  contentType + "')");
+   logger.trace("events.rpcEvent(payload='" +  payload + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "', contentType='" +  contentType + "')");
 
       var eventid = uuid.v4();
 

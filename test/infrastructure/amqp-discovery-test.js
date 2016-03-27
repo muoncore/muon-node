@@ -20,7 +20,7 @@ describe("AMQP Discovery", function () {
         discovery2.close();
         discovery3.close();
     });
-
+/*
     it("Discoveries can locate each other over the amqp broker", function (done) {
         this.timeout(25000);
 
@@ -58,4 +58,5 @@ describe("AMQP Discovery", function () {
         }, 10000);
 
     });
+    */
 });

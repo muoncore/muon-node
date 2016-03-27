@@ -12,7 +12,7 @@ require('sexylog');
 
 describe("AMQP Transport", function () {
 
-
+/*
     this.timeout(5000);
      var channel2 = channel.create('server');
     var transport1 =  new AmqpTransport("transport1", channel2.rightConnection(), "amqp://muon:microservices@localhost");
@@ -51,4 +51,6 @@ describe("AMQP Transport", function () {
 
         }, 500);
     });
+
+    */
 });
