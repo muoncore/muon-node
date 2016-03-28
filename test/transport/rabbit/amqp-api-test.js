@@ -1,7 +1,7 @@
-var amqpApi = require('../../../muon/transport/rabbit/amqp-api.js');
+var amqp = require('../../../muon/transport/rabbit/amqp-api.js');
 var assert = require('assert');
 var expect = require('expect.js');
-var events = require('../../../muon/domain/events.js');
+var helper = require('../../../muon/transport/rabbit/transport-helper.js');
 
 describe("amqp api test", function () {
 
@@ -17,17 +17,17 @@ describe("amqp api test", function () {
             var messageCount = 0;
 
             console.log('connecting via amqp api');
-            var amqpConnect = amqpApi.connect(url);
+            var amqpConnect = amqp.connect(url);
 
             console.log('connect.tehn()...');
-             amqpConnect.then(function (api) {
+             amqpConnect.then(function (amqpApi) {
 
-                   var payload = {message: "amqp_api_test_message"};
+                   var payload = {text: "amqp_api_test_message"};
 
                    console.log('waiting for message');
-                   api.inbound('api_test_queue').listen(function(event) {
-                       console.log('message received: ' + JSON.stringify(event));
-                       assert.equal(event.payload.data.message, payload.message);
+                   amqpApi.inbound('api_test_queue').listen(function(message) {
+                       console.log('message received: ' + JSON.stringify(message));
+                       assert.equal(message.payload.text, payload.text);
                        messageCount++;
                        if (messageCount == numMessages) {
                             done();
@@ -37,8 +37,8 @@ describe("amqp api test", function () {
                   console.log('sending payload');
                   for (var i = 0 ; i < numMessages ; i++) {
                             payload.id = i;
-                            var event = events.rpcEvent(payload, 'test', 'muon://testservice/', 'text/plain');
-                            api.outbound('api_test_queue').send(event);
+                            var message = helper.message(payload, {'Content-type': 'application/json'});
+                            amqpApi.outbound('api_test_queue').send(message);
                   }
 
             }, function (err) {

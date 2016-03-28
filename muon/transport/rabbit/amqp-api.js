@@ -32,6 +32,7 @@ exports.connect = function(url) {
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName);
                             clientChannel.rightConnection().listen(function(msg) {
                                  logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received message from amqp-api client: ' + JSON.stringify(msg));
+                                 helper.validateMessage(msg);
                                  publish(amqpChannel, queueName, msg);
                             });
                             return clientChannel.leftConnection();
@@ -130,10 +131,9 @@ function handleChannelEvents(amqpChannel) {
       });
 }
 
-function publish(amqpChannel, queueName, event) {
-    var messageFormat = events.eventToMsg(event);
-    var payload = messageFormat.content;
-    var headers = messageFormat.headers;
+function publish(amqpChannel, queueName, message) {
+    var payload = message.payload;
+    var headers = message.headers;
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue " + queueName + " payload: ", JSON.stringify(payload));
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue " + queueName + " headers: ", JSON.stringify(headers));
     amqpChannel.assertQueue(queueName, queueSettings);
@@ -143,17 +143,15 @@ function publish(amqpChannel, queueName, event) {
 
 function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
-   amqpChannel.consume(queueName, function(msg) {
-     if (msg !== null) {
-       var event = events.msgToEvent(msg);
-       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " payload: " + JSON.stringify(event.payload));
-       var headers = msg.properties.headers;
-       //var headers = JSON.parse(msg.properties.headers.toString());
-       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " headers: " + JSON.stringify(event.headers));
+   amqpChannel.consume(queueName, function(amqpMsg) {
+     if (amqpMsg !== null) {
+       var message = helper.demessage(amqpMsg);
+       logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.payload: " + JSON.stringify(message.payload));
+       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.message));
        logger.warn('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
-       logger.warn(event);
-       callback(null, event);
-       amqpChannel.ack(msg);
+       logger.warn(message);
+       callback(null, message);
+       amqpChannel.ack(amqpMsg);
      } else {
         callback(new Error('error consuming null message on queue ' + queueName), null);
      }

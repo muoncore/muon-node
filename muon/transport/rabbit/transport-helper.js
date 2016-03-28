@@ -52,7 +52,35 @@ exports.handshakeAccept = function() {
 
 
 exports.message = function(payload, headers) {
+     logger.trace('message(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
+    if (! headers) headers = {};
+    var payloadString = '-***###-payload-string-undefined-###***-';
+    if (typeof payload == 'object') {
+       payloadString = JSON.stringify(payload);
+    } else {
+        payloadString = payload.toString();
+    }
+    var contents = new Buffer(payloadString);
+    var message = {
+        payload: contents,
+        headers: headers
+    }
+    validateSchema(message);
+    return message;
+}
 
+
+exports.demessage = function(amqpMsg) {
+    logger.trace('demessage(amqpMsg='  + JSON.stringify(amqpMsg) + ')');
+    var headers = amqpMsg.properties.headers;
+    var payload = JSON.parse(amqpMsg.content).data;
+    if (! headers) headers = {};
+    if (headers['Content-type'] == 'application/json') {
+        payload = JSON.parse(new Buffer(payload).toString());
+    } else {
+        payload = payload.toString();
+    }
+    logger.trace('demessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     var message = {
         payload: payload,
         headers: headers
@@ -63,6 +91,8 @@ exports.message = function(payload, headers) {
 
 
 var messageSchema = Joi.object().keys({
+   id: Joi.string().guid().optional(),
+   created: Joi.date().timestamp('javascript').optional(),
    payload: Joi.object().required(),
    headers:  Joi.object().required()
 });
@@ -75,10 +105,10 @@ exports.validateMessage = function(message) {
 
 
 function validateSchema(event) {
-    var validatedEvent = Joi.validate(event, schema);
+    var validatedEvent = Joi.validate(event, messageSchema);
     if (validatedEvent.error) {
-        logger.warn('invalid message: \n', event);
-        logger.info('invalid joi schema for message: ' + JSON.stringify(validatedEvent.error.details));
+        logger.info('invalid message: \n', event);
+        logger.warn('invalid joi schema for message: ' + JSON.stringify(validatedEvent.error.details));
        throw new Error('Error! problem validating transport message schema: ' + JSON.stringify(validatedEvent.error));
     }
     return event;
