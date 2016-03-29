@@ -8,7 +8,7 @@ var messages = require('../../../muon/domain/messages.js');
 
 describe("muon client/server transport test", function () {
 
-    this.timeout(4000);
+    this.timeout(30000);
 
       after(function() {
             //bi-channel.closeAll();
@@ -40,7 +40,8 @@ describe("muon client/server transport test", function () {
 
             server.connect(serverName, "request", mockServerStacks, url);
 
-            var muonClientChannel = client.connect(serverName, url);
+        setTimeout(function() {
+             var muonClientChannel = client.connect(serverName, url);
 
             muonClientChannel.listen(function(event){
 
@@ -52,6 +53,8 @@ describe("muon client/server transport test", function () {
 
             var event = messages.rpcMessage("PING", clientName, 'muon://server1/ping');
             muonClientChannel.send(event);
+        }, 500)
+
 
     });
 

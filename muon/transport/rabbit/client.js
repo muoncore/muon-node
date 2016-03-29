@@ -38,7 +38,7 @@ var sendHandshake = function(serviceQueueName, handshakeMsg, amqpApi) {
      var promise = new RSVP.Promise(function(resolve, reject) {
         //console.log('sendHandshake() promise executing sending payload ' + JSON.stringify(handshakeMsg));
         var channel = amqpApi.outbound(serviceQueueName).send(handshakeMsg);
-        logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
+        logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
         resolve();
      });
      return promise;
@@ -79,7 +79,7 @@ var readyOutboundSocket = function(serviceQueueName, amqpApi, clientChannel) {
                 logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
                 amqpApi.outbound(serviceQueueName).send(message);
             });
-            logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
+            logger.info('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
             resolve();
          });
          logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] outbound socket ready on amqp queue  '%s'", serviceQueueName);

@@ -2,7 +2,6 @@ var amqp = require('amqplib/callback_api');
 var RSVP = require('rsvp');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 require('sexylog');
-var helper = require('./transport-helper.js');
 var RSVP = require('rsvp');
 var messages = require('../../domain/messages.js');
 
