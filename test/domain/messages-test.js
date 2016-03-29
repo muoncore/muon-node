@@ -70,7 +70,7 @@ describe("event domain test", function () {
     });
 
 
-    it("create invalid message with headers and thrown exception", function (done) {
+    it("creating message with invalid headers throws exception", function (done) {
           try {
             var msg = messages.rpcMessage("PING", 'testclient', '', '');
           }
