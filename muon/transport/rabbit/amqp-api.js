@@ -98,6 +98,7 @@ function handleConnectionEvents(amqpConnection) {
 
       amqpConnection.on('error', function(err) {
              logger.error('amqp connection error ' + err);
+             logger.error(err.stack);
              amqpConnectionOk = false;
       });
 
@@ -118,7 +119,7 @@ function handleChannelEvents(amqpChannel) {
 
       amqpChannel.on('error', function(err) {
             logger.error('amqp channel error ' + err);
-            //logger.error(new Error(err).stack);
+            logger.error(err.stack);
             amqpChannelOk = false;
       });
 
