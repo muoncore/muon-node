@@ -54,7 +54,6 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
 
             amqpApi.inbound(recvQueueName).listen(function(message) {
                  messages.validate(message);
-
                  if ( message.headers.event_type === 'handshakeAccepted') {
                     // we're got a handshake confirmation and are now connected to the remote service
                      logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", message);
