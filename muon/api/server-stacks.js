@@ -1,7 +1,7 @@
 var _ = require("underscore");
 var bichannel = require('../infrastructure/channel');
 var rpcProtocol = require('../protocol/rpc-protocol.js');
-var events = require('../domain/events.js');
+var messages = require('../domain/messages.js');
 
 
 var ServerStacks = function (transport) {
@@ -26,31 +26,8 @@ ServerStacks.prototype.openChannel = function(protocol) {
     clientChannel.leftConnection().listen(function(event) {
 
       var serverResponseCallback = function(serverResposne) {
-/*
-             var eventid = uuid.v4();
-              var respondEvent = {
-                         id: eventid,
-                         headers: {
-                             eventType: "RequestServerReply",
-                             id: eventid,
-                             oringinalEventId: event.id,
-                             targetService: event.headers.sourceService,
-                             sourceService: event.headers.targetService,
-                             protocol: "request",
-                             url: event.headers.url,
-                             "Content-Type": "application/json",
-                             sourceAvailableContentTypes: ["application/json"],
-                             channelOperation: "NORMAL",
-
-                         },
-                         payload: {
-                             message: serverResposne
-                         }
-                     };
-                     */
-
-              var respondEvent = events.rpcEvent(serverResposne, event.headers.sourceService, event.headers.url, 'application/json');
-             clientChannel.leftConnection().send(respondEvent);
+              var respondMessage = messages.rpcMessage(serverResposne, event.headers.origin_service, event.headers.url);
+             clientChannel.leftConnection().send(respondMessage);
          };
 
 

@@ -3,7 +3,7 @@ var RSVP = require('rsvp');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var helper = require('./transport-helper.js');
 require('sexylog');
-var events = require('../../domain/events.js');
+var messages = require('../../domain/messages.js');
 
 
 exports.connect = function(serviceName, serverStackChannel, url) {
@@ -14,10 +14,10 @@ exports.connect = function(serviceName, serverStackChannel, url) {
          var amqpQueue = amqpApi.inbound(serviceQueueName);
          amqpQueue.listen(function(msg) {
             logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message=%s", JSON.stringify(msg));
-            initMuonClientServerSocket(amqpApi, msg.headers.LISTEN_ON, msg.headers.REPLY_TO, serverStackChannel);
-            var replyMsg = helper.message({}, helper.handshakeAccept());
-            amqpApi.outbound(msg.headers.REPLY_TO).send(replyMsg);
-            logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " +  msg.headers.REPLY_TO);
+            initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
+            var replyMsg = messages.handshakeAccept();
+            amqpApi.outbound(msg.headers.server_reply_q).send(replyMsg);
+            logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " +  msg.headers.server_reply_q);
          });
     });
 }
@@ -26,15 +26,14 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
 
      amqpApi.inbound(listen_queue).listen(function(message) {
             logger.debug("[*** TRANSPORT:SERVER:INBOUND ***]  received inbound message: %s", JSON.stringify(message));
-            helper.validateMessage(message);
-            var event = events.messageToEvent(message);
-            serverStackChannel.send(event);
-            logger.trace("[*** TRANSPORT:SERVER:INBOUND ***]  inbound muon event sent to server stack channel %s", event.id);
+            messages.validate(message);
+            serverStackChannel.send(message);
+            logger.trace("[*** TRANSPORT:SERVER:INBOUND ***]  inbound muon event sent to server stack channel message.id=%s", message.id);
      });
 
      serverStackChannel.listen(function(event) {
             logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event: %s", JSON.stringify(event));
-            events.validate(event);
+            messages.validate(event);
             amqpApi.outbound(send_queue).send(event);
      });
 

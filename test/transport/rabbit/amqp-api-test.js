@@ -1,7 +1,7 @@
 var amqp = require('../../../muon/transport/rabbit/amqp-api.js');
 var assert = require('assert');
 var expect = require('expect.js');
-var helper = require('../../../muon/transport/rabbit/transport-helper.js');
+var messageHelper = require('../../../muon/domain/messages.js');
 
 describe("amqp api test", function () {
 
@@ -37,7 +37,7 @@ describe("amqp api test", function () {
                   console.log('sending payload');
                   for (var i = 0 ; i < numMessages ; i++) {
                             payload.id = i;
-                            var message = helper.message(payload, {'Content-type': 'application/json'});
+                            var message = messageHelper.rpcMessage(payload, 'testclient', 'muon://testserver/ping');
                             amqpApi.outbound('api_test_queue').send(message);
                   }
 

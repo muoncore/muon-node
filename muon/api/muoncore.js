@@ -7,7 +7,7 @@ var RSVP = require('rsvp');
 require('sexylog');
 var rpcProtocol = require('../protocol/rpc-protocol');
 var rpcServerProtocol = require('../protocol/rpc-protocol');
-var events = require('../domain/events.js');
+var messages = require('../domain/messages.js');
 var MuonBuilder = require("../infrastructure/builder");
 
 
@@ -32,9 +32,9 @@ exports.create = function(serviceName, configuration) {
         },
         request: function(remoteServiceUrl, payload, clientCallback) {
 
-           var event = events.rpcEvent(payload, serviceName, remoteServiceUrl, 'application/json');
+           var event = messages.rpcMessage(payload, serviceName, remoteServiceUrl);
 
-           var transChannel = infrastructure.transport.openChannel(event.headers.targetService, 'request');
+           var transChannel = infrastructure.transport.openChannel(event.headers.target_service, 'request');
            //var transChannel = infrastructure.transportClient.openChannel();
            var clientChannel = channel.create("client-api");
            var rpcProtocolHandler = rpcProtocol.newHandler();

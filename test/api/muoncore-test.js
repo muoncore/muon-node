@@ -48,7 +48,7 @@ describe("Muon core test", function () {
                 logger.info("muon://example-client server response received! event=" + JSON.stringify(event));
                 logger.info("muon promise.then() asserting response...");
                 assert(event, "request event is undefined");
-                assert.equal(event.payload.data, "pong", "expected 'pong' response message from muon://example-service/tennis")
+                assert.equal(event.payload, "pong", "expected 'pong' response message from muon://example-service/tennis")
                 done();
             }, function (err) {
                 logger.error("muon promise.then() error!!!!!");

@@ -4,7 +4,7 @@ var bichannel = require('../../../muon/infrastructure/channel.js');
 require('sexylog');
 var helper = require('./transport-helper.js');
 var RSVP = require('rsvp');
-var events = require('../../domain/events.js');
+var messages = require('../../domain/messages.js');
 
 
 
@@ -32,7 +32,7 @@ exports.connect = function(url) {
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName);
                             clientChannel.rightConnection().listen(function(msg) {
                                  logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received outbound message: ' + JSON.stringify(msg));
-                                 helper.validateMessage(msg);
+                                 messages.validate(msg);
                                  publish(amqpChannel, queueName, msg);
                             });
                             return clientChannel.leftConnection();
@@ -146,7 +146,7 @@ function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
      if (amqpMsg !== null) {
-       var message = helper.demessage(amqpMsg);
+       var message = messages.fromWire(amqpMsg);
        logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.payload: " + JSON.stringify(message.payload));
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.message));
        logger.warn('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');

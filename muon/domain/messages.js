@@ -3,22 +3,23 @@ var uuid = require('node-uuid');
 require('sexylog');
 var url = require("url");
 
+
 var schema = Joi.object().keys({
    id: Joi.string().guid().required(),
    created: Joi.date().timestamp('javascript'),
-   payload: Joi.object({
-                data:  Joi.any().required()
-            }).required(),
+   payload: Joi.any().required(),
    headers:  Joi.object({
-       id: Joi.string().guid().required(),
-       eventType: Joi.string().min(3).required(),
+       origin_id: Joi.string().guid().required(),
+       event_type: Joi.string().min(3).required(),
        protocol:  Joi.string().min(3).required(),
-       targetService: Joi.string().min(3).required(),
-       sourceService: Joi.string().min(3).required(),
+       target_service: Joi.string().min(3).required(),
+       origin_service: Joi.string().min(3).required(),
+       server_reply_q:  Joi.string().min(3).optional(),
+       server_listen_q: Joi.string().min(3).optional(),
        url: Joi.string().uri().required(),
-       channelOperation: Joi.string().min(3).required(),
-       "Content-Type": Joi.string().min(3).required(),
-       sourceAvailableContentTypes: Joi.array().required()
+       channel_op: Joi.string().min(3).required(),
+       content_type: Joi.string().min(3).required(),
+       content_types: Joi.array().required()
    }).required()
 });
 
@@ -30,67 +31,118 @@ function validateSchema(message) {
     var validatedMessage = Joi.validate(message, schema);
     if (validatedMessage.error) {
         logger.warn('invalid message: \n', message);
-        logger.warn('invalid joi schema for message! details: ' + JSON.stringify(validatedMessage.error.details));
+        logger.info('invalid joi schema for message! details: ' + JSON.stringify(validatedMessage.error.details));
+         logger.error(new Error().stack);
        throw new Error('Error! problem validating rpc message schema: ' + JSON.stringify(validatedMessage.error));
     }
     return message;
 }
 
-exports.rpcMessage = function(payload, sourceService, remoteServiceUrl, contentType) {
+exports.rpcMessage = function(payload, sourceService, remoteServiceUrl) {
 
-   logger.trace("messages.rpcMessage(payload='" +  payload + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "', contentType='" +  contentType + "')");
+   logger.trace("messages.rpcMessage(payload='" +  payload + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "')");
 
-      var messageid = uuid.v4();
+    var messageid = uuid.v4();
 
-        if (! contentType) {
-            contentType = "application/json";
-        }
+    var serviceRequest = url.parse(remoteServiceUrl, true);
 
-      var serviceRequest = url.parse(remoteServiceUrl, true);
+    var headers = {
+          event_type: "request.made",
+          protocol: "request",
+          target_service: serviceRequest.hostname,
+          origin_service: sourceService,
+          url: remoteServiceUrl
+    };
 
-       var message = {
-              id: messageid,
-              created: new Date(),
-              headers: {
-                  id: messageid,
-                  eventType: "RequestMade",
-                  protocol: "request",
-                  targetService: serviceRequest.hostname,
-                  sourceService: sourceService,
-                  url: remoteServiceUrl,
-                  channelOperation: "NORMAL",
-                   "Content-Type": "application/json",
-                   sourceAvailableContentTypes: ["application/json"]
-              },
-              payload: {
-                  data: payload
-              }
-          };
+   var message = createMessage(payload, headers);
    return validateSchema(message);
 
 };
 
 
 exports.fromWire = function(msg) {
-    logger.trace('messages.fromWire('  + JSON.stringify(msg) + ')');
-    var contents = msg.content.toString();
-    logger.trace("messages.fromWire() contents: '" + contents + "'");
-    var payload = JSON.parse(contents);
-    logger.trace("messages.fromWire() payload: '" + JSON.stringify(payload) + "'");
-    var headers = msg.properties.headers;
-    var messageid = uuid.v4();
-    var message = {
-          id: messageid,
-          created: new Date(),
-          headers: headers,
-          payload: {
-            data: payload.data
-          }
-      };
-    logger.trace('messages.fromWire() return message='  + JSON.stringify(message) );
-   return message;
+    try {
+        logger.trace('messages.fromWire('  + JSON.stringify(msg) + ')');
+        //console.dir(msg);
+        var contents = msg.content.toString();
+        logger.trace("messages.fromWire() contents: '" + contents + "'");
+        payload = contents;
+        try {
+            payload = JSON.parse(contents);
+        } catch (err) {
+            // do nothing, it's not an json object so can't be parsed
+        }
+        var headers = msg.properties.headers;
+        var message = createMessage(payload, headers);
+        logger.trace('messages.fromWire() return message='  + JSON.stringify(message) );
+       return message;
+   } catch (err) {
+        logger.error('error converting amqp wire format message to muon event message');
+        logger.error(err);
+        logger.error(err.stack);
+        throw new Error(err);
+   }
 }
 
 
+exports.handshakeRequest = function(protocol, sourceService, listenQueue, replyQueue ) {
+
+  var headers = {
+     event_type: "handshakeInitiated",
+     protocol:"request",
+     server_reply_q:replyQueue,
+     server_listen_q: listenQueue,
+     target_service: '--n/a--',
+     origin_service: sourceService,
+     url: 'muon://n/a'
+    };
+   return createMessage(null, headers);
+
+}
+
+exports.handshakeAccept = function() {
+
+  var headers = {
+     event_type: "handshakeAccepted",
+     protocol:"request",
+     target_service: '--n/a--',
+     origin_service: '--n/a--',
+     url: 'muon://n/a'
+    };
+   return createMessage(null, headers);
+
+}
+
+function createMessage(payload, headers) {
+    logger.trace('createMessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
+    if (! payload) payload = {};
+    if (! headers.channel_op) headers.channel_op = 'normal';
+    if (! headers.content_type) headers.content_type = 'application/json';
+    if (! headers.content_types) headers.content_types = ['application/json'];
+     if (! headers.origin_id) headers.origin_id = uuid.v4();
+    //if (! headers.server_reply_q) headers.content_type = '--n/a--';
+    //if (! headers.server_listen_q) headers.content_type = '--n/a--';
+
+     var message = {
+         id: uuid.v4(),
+         created: new Date(),
+         payload: payload,
+         headers: {
+              origin_id: headers.origin_id,
+              event_type: headers.event_type,
+              protocol: headers.protocol,
+              target_service: headers.target_service,
+              origin_service: headers.origin_service,
+              url: headers.url,
+              server_reply_q: headers.server_reply_q,
+              server_listen_q: headers.server_listen_q,
+              channel_op: headers.channel_op,
+              content_type: headers.content_type,
+              content_types: headers.content_types
+         },
+     };
+     logger.trace('createMessage() return message='  + JSON.stringify(message));
+    return message;
+}
 
 
