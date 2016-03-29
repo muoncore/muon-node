@@ -151,8 +151,8 @@ function consume(amqpChannel, queueName, callback) {
        messages.validate(message);
        logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.payload: " + JSON.stringify(message.payload));
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.message));
-       logger.warn('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
-       logger.warn(message);
+       logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
+       logger.trace(message);
        callback(null, message);
        amqpChannel.ack(amqpMsg);
      } else {
