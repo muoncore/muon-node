@@ -6,18 +6,20 @@ require('sexylog');
 var messages = require('../../domain/messages.js');
 
 
-exports.connect = function(serviceName, serverStackChannel, url) {
+exports.connect = function(serviceName, protocol, serverStacks, url) {
+
     logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] server stack of service '" + serviceName + "' connecting to muon...");
     var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
     amqp.connect(url).then(function(amqpApi) {
          logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceQueueName);
          var amqpQueue = amqpApi.inbound(serviceQueueName);
          amqpQueue.listen(function(msg) {
-            logger.trace("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message=%s", JSON.stringify(msg));
+            var serverStackChannel = serverStacks.openChannel(protocol);
+            logger.info("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message=%s", JSON.stringify(msg));
             initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
             var replyMsg = messages.handshakeAccept();
             amqpApi.outbound(msg.headers.server_reply_q).send(replyMsg);
-            logger.debug("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " +  msg.headers.server_reply_q);
+            logger.info("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " +  msg.headers.server_reply_q);
          });
     });
 }
@@ -32,7 +34,7 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
      });
 
      serverStackChannel.listen(function(event) {
-            logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event: %s", JSON.stringify(event));
+            logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event to queue " + send_queue + ": %s", JSON.stringify(event));
             messages.validate(event);
             amqpApi.outbound(send_queue).send(event);
      });

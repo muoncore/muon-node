@@ -68,6 +68,7 @@ function amqpConnect(url, callback) {
     amqp.connect(url, function(err, amqpConnection) {
         if (err) {
             logger.error("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] error connecting to amqp: " + err);
+            logger.error(err.stack);
             callback(err);
         } else {
           amqpConnectionOk = true;
@@ -150,7 +151,7 @@ function consume(amqpChannel, queueName, callback) {
        var message = messages.fromWire(amqpMsg);
        messages.validate(message);
        logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.payload: " + JSON.stringify(message.payload));
-       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.message));
+       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.headers));
        logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
        logger.trace(message);
        callback(null, message);

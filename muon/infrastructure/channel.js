@@ -44,10 +44,12 @@ function LeftConnection(name, inbound, outbound) {
                         id = value.id;
                     }
                      logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() event.id=" + id);
-                     logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() callback=" + JSON.stringify(callback));
+
                     if (callback) {
+                        logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() callback=" + JSON.stringify(callback));
                         callback(value);
                     } else {
+                        logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() returning value=" + value);
                         return value;
                     }
                 }

@@ -13,7 +13,7 @@ var handlerMappings = {};
 
 ServerStacks.prototype.openChannel = function(protocol) {
 
-     logger.trace("[*** API ***] creating muon server stacks channels...");
+     logger.info("[*** API ***] opening muon server stacks channel...");
      var rpcProtocolHandler = rpcProtocol.newHandler();
       var clientChannel = bichannel.create("serverapi");
        var serverStackChannel = bichannel.create("serverstacks");
@@ -41,7 +41,7 @@ ServerStacks.prototype.openChannel = function(protocol) {
                //TODO return message with error
             serverStackChannel.leftConnection().send(event);
         } else {
-            logger.info('[*** API ***] Handler found for endpoint "'+ event.headers.url + '" event.id=' + event.headers.id);
+            logger.info('[*** API ***] Handler found for endpoint "'+ event.headers.url + '" event.id=' + event.id);
             handler(event, serverResponseCallback);
         }
 

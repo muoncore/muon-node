@@ -8,8 +8,7 @@ var bichannel = require('../../infrastructure/channel.js');
 exports.create = function (localServiceName, serverStacks, url) {
     logger.info('[*** TRANSPORT:BOOTSTRAP ***] creating new MUON AMQP Transport connection with url=' + url);
     var protocolName = 'no-protocol-defined-yet';
-    var serverStacksChannel = serverStacks.openChannel(protocolName);
-    server.connect(localServiceName, serverStacksChannel, url);
+    server.connect(localServiceName, protocolName, serverStacks, url);
 
     var transport = {
         openChannel: function(remoteServiceName, protocolName) {

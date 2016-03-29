@@ -19,7 +19,13 @@ describe("muon client/server transport test", function () {
             var clientName = 'client1';
             var url = "amqp://muon:microservices@localhost";
 
-            var serverChannel = bichannel.create("server-amqp-transport-server");
+
+            var serverChannel = bichannel.create("server-stacks");
+            var mockServerStacks = {
+                openChannel: function() {
+                    return serverChannel.rightConnection();
+                }
+            }
 
 
 
@@ -32,7 +38,7 @@ describe("muon client/server transport test", function () {
                     serverChannel.leftConnection().send(reply);
             });
 
-            server.connect(serverName, serverChannel.rightConnection(), url);
+            server.connect(serverName, "request", mockServerStacks, url);
 
             var muonClientChannel = client.connect(serverName, url);
 
