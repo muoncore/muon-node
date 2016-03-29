@@ -37,10 +37,7 @@ var sendHandshake = function(serviceQueueName, handshakeMsg, amqpApi) {
     //console.log('sendHandshake() returning promise');
      var promise = new RSVP.Promise(function(resolve, reject) {
         //console.log('sendHandshake() promise executing sending payload ' + JSON.stringify(handshakeMsg));
-        var msg = {
-            headers: handshakeMsg,
-            payload: {}
-        }
+        var msg = helper.message({}, handshakeMsg);
         var channel = amqpApi.outbound(serviceQueueName).send(msg);
         logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
         resolve();
@@ -56,16 +53,16 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
         var promise = new RSVP.Promise(function(resolve, reject) {
             logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
 
-            amqpApi.inbound(recvQueueName).listen(function(msg) {
-                 //todo validate event/msg format here
-                 if ( msg.headers.eventType === 'handshakeAccepted') {
+            amqpApi.inbound(recvQueueName).listen(function(message) {
+                 helper.validateMessage(message);
+
+                 if ( message.headers.eventType === 'handshakeAccepted') {
                     // we're got a handshake confirmation and are now connected to the remote service
-                     logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", msg);
+                     logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", message);
                      logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully");
                      resolve();
                 } else {
-                     var event = msg;
-                     if (! event.id) event.id = uuid.v4();
+                     var event = events.messageToEvent(message);
                      logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(event));
                      events.validate(event);
                      clientChannel.send(event);

@@ -83,9 +83,9 @@ exports.rpcEvent = function(payload, sourceService, remoteServiceUrl, contentTyp
 exports.msgToEvent = function(msg) {
     logger.trace('msgToEvent('  + JSON.stringify(msg) + ')');
     var contents = msg.content.toString();
-    logger.error("msgToEvent() contents: '" + contents + "'");
+    logger.trace("msgToEvent() contents: '" + contents + "'");
     var payload = JSON.parse(contents);
-    logger.error("msgToEvent() payload: '" + JSON.stringify(payload) + "'");
+    logger.trace("msgToEvent() payload: '" + JSON.stringify(payload) + "'");
     var headers = msg.properties.headers;
     var eventid = uuid.v4();
     var event = {
@@ -97,6 +97,29 @@ exports.msgToEvent = function(msg) {
           }
       };
     logger.trace('msgToEvent() return event='  + JSON.stringify(event) );
+   return event;
+}
+
+
+
+
+exports.messageToEvent = function(msg) {
+    logger.trace('messageToEvent('  + JSON.stringify(msg) + ')');
+    var contents = msg.payload;
+    logger.trace("messageToEvent() contents: '" + contents + "'");
+    var payload = contents;
+    logger.trace("messageToEvent() payload: '" + JSON.stringify(payload) + "'");
+    var headers = msg.headers;
+    var eventid = uuid.v4();
+    var event = {
+          id: eventid,
+          created: new Date(),
+          headers: headers,
+          payload: {
+            data: payload
+          }
+      };
+    logger.trace('messageToEvent() return event='  + JSON.stringify(event) );
    return event;
 }
 

@@ -42,8 +42,8 @@ exports.handshakeAccept = function() {
   var msg = {
         "eventType": "handshakeAccepted",
       "PROTOCOL":"request",
-      "REPLY_TO":"stream-reply",
-       "LISTEN_ON": "stream-listen",
+      "REPLY_TO":"--serverside--",
+       "LISTEN_ON": "--server-side--",
        "SOURCE_SERVICE": "some-service"
     };
    return msg;
@@ -78,10 +78,11 @@ exports.demessage = function(amqpMsg) {
     if (headers['Content-type'] == 'application/json') {
         payload = JSON.parse(new Buffer(payload).toString());
     } else {
-        payload = payload.toString();
+        payload = new Buffer(payload).toString();
     }
     logger.trace('demessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     var message = {
+        //id: uuid.v4(),
         payload: payload,
         headers: headers
     }
@@ -90,10 +91,28 @@ exports.demessage = function(amqpMsg) {
 }
 
 
+
+/*
+
+var transportHeaders = {
+ id: (guid),
+ client_send_date: (date),
+ muon_receive_date: (date),
+ content_type: ’type/subtype’,
+ channel_op: ’string’ (optional: normal, close)
+ event_type: “handshake/initiated” (required: type/value),
+  protocol: ”request” (required),
+  server_reply_q: “reply.queue.name" (optional | required if handshake),
+  server_listen_q: “listen.queue.name"  (optional | required if handshake),
+  origin_service: “client-name"  (required),
+  target_service: ”sever-name” (required),
+};
+
+*/
 var messageSchema = Joi.object().keys({
    id: Joi.string().guid().optional(),
    created: Joi.date().timestamp('javascript').optional(),
-   payload: Joi.object().required(),
+   payload: Joi.any().required(),
    headers:  Joi.object().required()
 });
 

@@ -31,7 +31,7 @@ exports.connect = function(url) {
                           outbound: function(queueName) {
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName);
                             clientChannel.rightConnection().listen(function(msg) {
-                                 logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received message from amqp-api client: ' + JSON.stringify(msg));
+                                 logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received outbound message: ' + JSON.stringify(msg));
                                  helper.validateMessage(msg);
                                  publish(amqpChannel, queueName, msg);
                             });
@@ -134,8 +134,8 @@ function handleChannelEvents(amqpChannel) {
 function publish(amqpChannel, queueName, message) {
     var payload = message.payload;
     var headers = message.headers;
-    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue " + queueName + " payload: ", JSON.stringify(payload));
-    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue " + queueName + " headers: ", JSON.stringify(headers));
+    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' payload: ", JSON.stringify(payload));
+    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' headers: ", JSON.stringify(headers));
     amqpChannel.assertQueue(queueName, queueSettings);
     amqpChannel.sendToQueue(queueName, new Buffer(JSON.stringify(payload)), {persistent: false, headers: headers});
 
