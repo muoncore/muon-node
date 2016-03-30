@@ -4,7 +4,7 @@ var bichannel = require('../../../muon/infrastructure/channel.js');
 require('sexylog');
 var RSVP = require('rsvp');
 var messages = require('../../domain/messages.js');
-
+var nodeUrl = require('url');
 
 
 var queueSettings = {
@@ -17,12 +17,26 @@ var queueSettings = {
 var amqpConnectionOk = false;
 var amqpChannelOk = false;
 
+function validateUrl(url) {
+        try {
+            var parsedUrl = nodeUrl.parse(url);
+        } catch (err) {
+            return new Error('invalid ampq url: ' + url);
+        }
+
+       if (parsedUrl.protocol != 'amqp:') return new Error('invalid ampq url: ' + url);
+       if (! parsedUrl.slashes) return new Error('invalid ampq url: ' + url);
+       if (! parsedUrl.hostname) return new Error('invalid ampq url: ' + url);
+       return;
+}
 
 exports.connect = function(url) {
+
 
        var promise = new RSVP.Promise(function(resolve, reject) {
            function callback(err, amqpConnection, amqpChannel) {
                 if (err) {
+                    logger.error('error connecting to amqp' + err);
                     reject(err);
                 } else {
 
@@ -55,6 +69,8 @@ exports.connect = function(url) {
                     resolve(api);
                 }
            }
+           var invalid = validateUrl(url);
+           if (invalid) reject(invalid);
            amqpConnect(url, callback);
         });
         return promise;

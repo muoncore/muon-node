@@ -16,32 +16,44 @@ describe("muon client/server transport test", function () {
 
     this.timeout(15000);
 
+    var mockServerStacks;
+
+     beforeEach(function() {
+        var serverChannel = bichannel.create("server-stacks");
+        mockServerStacks = {
+            openChannel: function() {
+                return serverChannel.rightConnection();
+            }
+        }
+
+        serverChannel.leftConnection().listen(function(event) {
+                console.log('********** client_server-test.js serverChannel.leftConnection().listen() event.id=' + event.id);
+                console.dir(event);
+                console.log('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
+                var reply = messages.rpcMessage('PONG', clientName, 'muon://client1/reply');
+                messages.validate(reply);
+                serverChannel.leftConnection().send(reply);
+        });
+     });
+
+      afterEach(function() {
+            //shutdown nicely
+      });
+
+     before(function() {
+
+     });
+
       after(function() {
             //shutdown nicely
       });
 
     it("client server negotiate handshake", function (done) {
 
-            var serverChannel = bichannel.create("server-stacks");
-            var mockServerStacks = {
-                openChannel: function() {
-                    return serverChannel.rightConnection();
-                }
-            }
-            serverChannel.leftConnection().listen(function(event) {
-                    console.log('********** client_server-test.js serverChannel.leftConnection().listen() event.id=' + event.id);
-                    console.dir(event);
-                    console.log('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
-                    var reply = messages.rpcMessage('PONG', clientName, 'muon://client1/reply');
-                     messages.validate(reply);
-                    serverChannel.leftConnection().send(reply);
-            });
-            // serviceName, url, serverStacks, discovery
-            server.connect(serverName, url, mockServerStacks, discovery);
-
+        server.connect(serverName, url, mockServerStacks, discovery);
 
         // now create a muon client socket to connect to server1:
-        console.dir('creating muon client..');
+        console.log('creating muon client..');
         var muonClientChannel = client.connect(serverName, url, discovery);
         muonClientChannel.listen(function(event){
             console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
