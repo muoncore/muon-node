@@ -35,12 +35,14 @@ describe("AMQP Discovery", function () {
             codecs:["application/json"],
             connectionUrls:["amqp://muon:microservices@localhost"]
         });
+
         discovery2.advertiseLocalService({
             identifier:"simple",
             tags:["node", "simple"],
             codecs:["application/json"],
             connectionUrls:["amqp://muon:microservices@localhost"]
         });
+
         discovery3.advertiseLocalService({
             identifier:"awesomeService",
             tags:["node", "awesomeService"],
@@ -49,30 +51,10 @@ describe("AMQP Discovery", function () {
         });
 
         setTimeout(function() {
-
-            discovery1.discoverServices(function(data) {
-                //console.log("Have data from service discovery");
-                //console.dir(data);
-                   var servicesFound = {
-                            tombola: '.',
-                            simple: '.',
-                            awesomeService: '.'
-                   }
-
-                for (var i = 0 ; i < data.length ; i++) {
-                       var service = data[i];
-                       var serviceName = service.identifier;
-                       console.log('found serviceName: ' + serviceName);
-                       if (servicesFound[serviceName] === '.') {
-                         servicesFound[serviceName] = true;
-                       }
-
-                }
-                //console.dir(servicesFound);
-               for (var key in servicesFound) {
-                    assert.equal(true, servicesFound[serviceName], 'did not find service "' + serviceName + '" in discovery list');
-               }
-
+            discovery1.discoverServices(function(services) {
+                assert.ok(services.find('simple'), 'could not find "simple" service in discovery list');
+                assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list');
+                assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list');
                 done();
             });
         }, 6000);

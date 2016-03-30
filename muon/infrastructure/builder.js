@@ -1,45 +1,52 @@
-
 var ServerStacks = require("../../muon/api/server-stacks");
-var TransportClient = require("../../muon/transport/transport-client");
-var amqpTransport = require('../../muon/transport/rabbit/transport.js');
 
-module.exports = function(config) {
 
-    var infrastructure = {};
-    infrastructure.serverStacks = new ServerStacks();
+module.exports.build = function(config) {
 
-    if (config.hasOwnProperty("type")) {
-        config.discovery.type = config.type;
-        config.transport.type = config.type;
-        config.discovery.url = config.url;
-        config.transport.url = config.url;
+    var serverStacks = new ServerStacks();
+
+    var infrastructure = {
+        config: config,
+        discovery: '',
+        transport: '',
+        serverStacks: serverStacks
     }
 
     if (config.discovery.type == "browser") {
         logger.info("Using BROWSER")
         var BrowserDiscovery = require("../../muon/discovery/browser/browser-discovery");
-
         infrastructure.discovery = new BrowserDiscovery(config.discovery.url);
     } else {
         logger.info("Using AMQP");
         var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
-
         infrastructure.discovery = new AmqpDiscovery(config.discovery.url);
-        infrastructure.discovery.advertiseLocalService({
-            identifier:config.serviceName,
-            tags:["node", config.serviceName],
-            codecs:["application/json"]
-        });
     }
 
     if (config.transport.type == "browser") {
         var BrowserTransport = require("../../muon/transport/browser/browser-transport");
         infrastructure.transport = new BrowserTransport(config.serviceName, infrastructure.serverStacks, config.transport.url);
     } else {
-        infrastructure.transport = amqpTransport.create(config.serviceName, infrastructure.serverStacks, config.transport.url);
+        var amqpTransport = require('../../muon/transport/rabbit/transport.js');
+        var serviceName = infrastructure.config.serviceName;
+        var url = infrastructure.config.transport.url;
+        infrastructure.transport = amqpTransport.create(serviceName, url, serverStacks, infrastructure.discovery);
     }
 
-    infrastructure.transportClient = new TransportClient(infrastructure.transport);
-
     return infrastructure;
+}
+
+module.exports.config = function(serviceName, url, type) {
+    if (! type) type = "amqp";
+    var config = {
+        serviceName: serviceName,
+        discovery:{
+            type: type,
+            url: url
+        },
+        transport:{
+            type: type,
+            url: url
+        }
+    };
+    return config;
 }

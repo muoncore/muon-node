@@ -19,7 +19,17 @@ var AmqpDiscovery = function (url) {
     });
 
     this.discoveredServiceList = [];
-    this.discoveredServices = [];
+    this.discoveredServices = {
+        find: function(name) {
+            for (var i = 0 ; i < this.serviceList.length ; i++) {
+                if (this.serviceList[i].identifier == name) {
+                    return this.serviceList[i];
+                };
+            }
+            return null;
+        },
+        serviceList: []
+    };
 
 };
 
@@ -49,7 +59,7 @@ function startAnnouncements(discovery) {
                     var pay = message;
                     if (discovery.discoveredServiceList.indexOf(pay.identifier) < 0) {
                         discovery.discoveredServiceList.push(pay.identifier);
-                        discovery.discoveredServices.push(pay);
+                        discovery.discoveredServices.serviceList.push(pay);
                     }
                 } catch (err) {
                     logger.warn("Had issues parsing ... ");

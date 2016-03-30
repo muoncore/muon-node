@@ -1,13 +1,15 @@
 var amqpTransport = require('../../../muon/transport/rabbit/transport.js');
 var assert = require('assert');
 var expect = require('expect.js');
-var ServerStacks = require("../../../muon/api/server-stacks");
 var messages = require('../../../muon/domain/messages.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
+var builder = require("../../../muon/infrastructure/builder");
+ var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
+
 
 describe("muon client/server transport test", function () {
 
-    this.timeout(4000);
+    this.timeout(10000);
 
       after(function() {
             //bi-channel.closeAll();
@@ -16,6 +18,7 @@ describe("muon client/server transport test", function () {
     it("client server negotiate handshake", function (done) {
             var server = 'transport-test-server';
             var url = "amqp://muon:microservices@localhost";
+
              var event = messages.rpcMessage("PING", 'testclient', 'muon://' + server + '/ping');
 
             var fakeServerStackChannel = bichannel.create("fake-serverstacks");
@@ -24,7 +27,8 @@ describe("muon client/server transport test", function () {
                     return fakeServerStackChannel.rightConnection();
                 }
             }
-            var muonTransport  = amqpTransport.create(server, fakeServerStacks, url);
+            var discovery = new AmqpDiscovery(url);
+            var muonTransport  = amqpTransport.create(server, url, fakeServerStacks, discovery);
             var transportChannel = muonTransport.openChannel(server, 'test-rpc-protocol-(totally made up, not yet implemented)');
 
             transportChannel.send(event);

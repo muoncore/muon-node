@@ -5,20 +5,22 @@ var assert = require('assert');
 var expect = require('expect.js');
 var uuid = require('node-uuid');
 var messages = require('../../../muon/domain/messages.js');
+var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
 
 describe("muon client/server transport test", function () {
 
-    this.timeout(30000);
+    var serverName = 'server1';
+    var clientName = 'client1';
+    var url = "amqp://muon:microservices@localhost";
+    var discovery = new AmqpDiscovery(url);
+
+    this.timeout(15000);
 
       after(function() {
-            //bi-channel.closeAll();
+            //shutdown nicely
       });
 
     it("client server negotiate handshake", function (done) {
-            var serverName = 'server1';
-            var clientName = 'client1';
-            var url = "amqp://muon:microservices@localhost";
-
 
             var serverChannel = bichannel.create("server-stacks");
             var mockServerStacks = {
@@ -26,9 +28,6 @@ describe("muon client/server transport test", function () {
                     return serverChannel.rightConnection();
                 }
             }
-
-
-
             serverChannel.leftConnection().listen(function(event) {
                     console.log('********** client_server-test.js serverChannel.leftConnection().listen() event.id=' + event.id);
                     console.dir(event);
@@ -37,24 +36,22 @@ describe("muon client/server transport test", function () {
                      messages.validate(reply);
                     serverChannel.leftConnection().send(reply);
             });
+            // serviceName, url, serverStacks, discovery
+            server.connect(serverName, url, mockServerStacks, discovery);
 
-            server.connect(serverName, "request", mockServerStacks, url);
 
-        setTimeout(function() {
-             var muonClientChannel = client.connect(serverName, url);
-
-            muonClientChannel.listen(function(event){
-
-                console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
-                console.dir(event);
-                assert.equal(event.payload, 'PONG');
-                done();
-            });
-
-            var event = messages.rpcMessage("PING", clientName, 'muon://server1/ping');
-            muonClientChannel.send(event);
-        }, 500)
-
+        // now create a muon client socket to connect to server1:
+        console.dir('creating muon client..');
+        var muonClientChannel = client.connect(serverName, url, discovery);
+        muonClientChannel.listen(function(event){
+            console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
+            console.dir(event);
+            assert.equal(event.payload, 'PONG');
+            done();
+        });
+         console.dir('sending muon event via client..');
+        var event = messages.rpcMessage("PING", clientName, 'muon://server1/ping');
+        muonClientChannel.send(event);
 
     });
 

@@ -6,7 +6,16 @@ require('sexylog');
 var messages = require('../../domain/messages.js');
 
 
-exports.connect = function(serviceName, protocol, serverStacks, url) {
+exports.connect = function(serviceName, url, serverStacks, discovery) {
+
+
+    logger.info("[*** TRANSPORT:SERVER:BOOTSTRAP ***] advertise service on muon discovery '" + serviceName + "'");
+    discovery.advertiseLocalService({
+        identifier: serviceName,
+        tags: ["node", serviceName],
+        codecs: ["application/json"],
+        connectionUrls:[url]
+    });
 
     logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] server stack of service '" + serviceName + "' connecting to muon...");
     var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
@@ -14,8 +23,8 @@ exports.connect = function(serviceName, protocol, serverStacks, url) {
          logger.info("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceQueueName);
          var amqpQueue = amqpApi.inbound(serviceQueueName);
          amqpQueue.listen(function(msg) {
-            var serverStackChannel = serverStacks.openChannel(protocol);
             logger.debug("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message=%s", JSON.stringify(msg));
+            var serverStackChannel = serverStacks.openChannel(msg.headers.protocol);
             initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
             var replyMsg = messages.handshakeAccept();
             amqpApi.outbound(msg.headers.server_reply_q).send(replyMsg);

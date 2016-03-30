@@ -8,34 +8,25 @@ require('sexylog');
 var rpcProtocol = require('../protocol/rpc-protocol');
 var rpcServerProtocol = require('../protocol/rpc-protocol');
 var messages = require('../domain/messages.js');
-var MuonBuilder = require("../infrastructure/builder");
+var ServerStacks = require("../../muon/api/server-stacks");
+var amqpTransport = require('../../muon/transport/rabbit/transport.js');
+var builder = require("../infrastructure/builder");
 
+exports.create = function(serviceName, url) {
 
-
-exports.create = function(serviceName, configuration) {
-
-    configuration.serviceName = serviceName;
-
-    var infrastructure = new MuonBuilder(configuration);
-
-    /*
-
-
-
-    */
+    var config = builder.config(serviceName, url);
+    var infrastructure = new builder.build(config);
 
     var muonApi = {
-        getDiscovery: function() { return infrastructure.discovery },
-        getTransportClient: function() { return infrastructure.transportClient },
+        discovery: function() { return infrastructure.discovery },
         shutdown: function() {
-            logger.info("Shutting down!!");
+            logger.info("Shutting down!! //todo code the logic in");
         },
         request: function(remoteServiceUrl, payload, clientCallback) {
 
            var event = messages.rpcMessage(payload, serviceName, remoteServiceUrl);
 
            var transChannel = infrastructure.transport.openChannel(event.headers.target_service, 'request');
-           //var transChannel = infrastructure.transportClient.openChannel();
            var clientChannel = channel.create("client-api");
            var rpcProtocolHandler = rpcProtocol.newHandler();
            clientChannel.rightHandler(rpcProtocolHandler);
