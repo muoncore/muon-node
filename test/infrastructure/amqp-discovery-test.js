@@ -3,6 +3,7 @@ require('mocha-sinon');
 var sinon = require("sinon");
 var assert = require('assert');
 var url = require('url');
+var expect = require('expect.js');
 var _ = require('underscore');
 var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
 require('sexylog');
@@ -20,7 +21,7 @@ describe("AMQP Discovery", function () {
         discovery2.close();
         discovery3.close();
     });
-/*
+
     it("Discoveries can locate each other over the amqp broker", function (done) {
         this.timeout(25000);
 
@@ -36,13 +37,13 @@ describe("AMQP Discovery", function () {
         });
         discovery2.advertiseLocalService({
             identifier:"simple",
-            tags:["node", "tombola"],
+            tags:["node", "simple"],
             codecs:["application/json"],
             connectionUrls:["amqp://muon:microservices@localhost"]
         });
         discovery3.advertiseLocalService({
             identifier:"awesomeService",
-            tags:["node", "tombola"],
+            tags:["node", "awesomeService"],
             codecs:["application/json"],
             connectionUrls:["amqp://muon:microservices@localhost"]
         });
@@ -50,13 +51,32 @@ describe("AMQP Discovery", function () {
         setTimeout(function() {
 
             discovery1.discoverServices(function(data) {
-                console.log("Have data from service discovery");
-                console.dir(data);
-                assert.equal(data.length, 3);
+                //console.log("Have data from service discovery");
+                //console.dir(data);
+                   var servicesFound = {
+                            tombola: '.',
+                            simple: '.',
+                            awesomeService: '.'
+                   }
+
+                for (var i = 0 ; i < data.length ; i++) {
+                       var service = data[i];
+                       var serviceName = service.identifier;
+                       console.log('found serviceName: ' + serviceName);
+                       if (servicesFound[serviceName] === '.') {
+                         servicesFound[serviceName] = true;
+                       }
+
+                }
+                //console.dir(servicesFound);
+               for (var key in servicesFound) {
+                    assert.equal(true, servicesFound[serviceName], 'did not find service "' + serviceName + '" in discovery list');
+               }
+
                 done();
             });
-        }, 10000);
+        }, 6000);
 
     });
-    */
+
 });
