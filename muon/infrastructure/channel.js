@@ -29,13 +29,20 @@ function LeftConnection(name, inbound, outbound, validator) {
         onError: function(callback) {
             errCallback = callback;
         },
+        throwErr: function(err) {
+            if (! err instanceof Error) {
+               err = new Error(err);
+            }
+            logger.warn('error message being thrown on channel "' + name + '". sending downstream.');
+            csp.putAsync(outbound, err);
+        },
         send: function(msg) {
             logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
             logger.debug("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
             // validate message
             try {
-               if (validator) {
+               if (validator && ! (msg instanceof Error)) {
                     logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() validating msg");
                     validator.validate(msg);
                }
@@ -128,13 +135,20 @@ function RightConnection(name, inbound, outbound, validator) {
         onError: function(callback) {
             errCallback = callback;
         },
+        throwErr: function(err) {
+            if (! err instanceof Error) {
+               err = new Error(err);
+            }
+            logger.warn('error message being thrown on channel "' + name + '". sending downstream.');
+            csp.putAsync(outbound, err);
+        },
         send: function(msg) {
             logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
             logger.debug("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
            // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);
             try {
-               if (validator) {
+               if (validator && ! (msg instanceof Error)) {
                     logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() validating msg");
                     validator.validate(msg);
                }

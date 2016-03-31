@@ -257,8 +257,6 @@ describe("Bi directional channel test", function () {
             });
          };
 
-
-
          var rightClient = function(connection) {
             connection.listen(function(response) {
                      done(new Error('right listener should not have received message'));
@@ -280,8 +278,44 @@ describe("Bi directional channel test", function () {
          leftClient(channel.leftConnection());
          rightClient(channel.rightConnection());
          channel.leftConnection().send("invalid message");
+    });
 
 
+
+    it("channel does not validate error messages", function (done) {
+
+         var leftClient = function(connection) {
+            connection.onError(function(err) {
+                    done(new Error('left client error listener should not have received message'));
+            });
+            connection.listen(function(response) {
+                    done(new Error('left listener should not have received message'));
+            });
+         };
+
+         var rightClient = function(connection) {
+            connection.listen(function(response) {
+                     done(new Error('right listener should not have received message'));
+            });
+            connection.onError(function(err) {
+                     assert.ok(err);
+                     assert.ok(err instanceof Error);
+                     done();
+            });
+         }
+
+         var validiator = {
+            validate: function(msg) {
+                if (! msg.id) {
+                    throw new Error('invalid message');
+                }
+            }
+         }
+
+         var channel = bichannel.create("test-1", validiator);
+         leftClient(channel.leftConnection());
+         rightClient(channel.rightConnection());
+         channel.leftConnection().send(new Error('non valdiating errror'));
     });
 });
 
