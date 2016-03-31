@@ -242,6 +242,68 @@ describe("Bi directional channel test", function () {
 
     });
 
+    it("left to right channel throws and receives error via onError function", function (done) {
+        var err = new Error('some random boring exceptional problem');
+
+         var leftClient = function(connection) {
+            connection.throwErr(err);
+
+            connection.listen(function(response) {
+                     done(new Error('left connection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    done(new Error('left connection error listener should not recieve message'));
+            });
+         };
+
+         var rightClient = function(connection) {
+            connection.listen(function(response) {
+                     done(new Error('right connection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    assert.ok(error);
+                    done();
+            });
+
+         }
+
+         var channel = bichannel.create("error-test");
+         leftClient(channel.leftConnection());
+         rightClient(channel.rightConnection());
+
+    });
+
+    it("right to left channel throws and receives error via onError function", function (done) {
+        var err = new Error('some random boring exceptional problem');
+
+         var rightClient = function(connection) {
+            connection.throwErr(err);
+
+            connection.listen(function(response) {
+                     done(new Error('right connection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    done(new Error('right connection error listener should not recieve message'));
+            });
+         };
+
+         var leftClient = function(connection) {
+            connection.listen(function(response) {
+                     done(new Error('left conection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    assert.ok(error);
+                    done();
+            });
+
+         }
+
+         var channel = bichannel.create("error-test");
+         leftClient(channel.leftConnection());
+         rightClient(channel.rightConnection());
+
+    });
+
 
     it("channel validates messages", function (done) {
 

@@ -22,7 +22,13 @@ exports.connect = function(serviceName, url, discovery) {
         .then(sendHandshake(serviceQueueName, handshakeMsg, api))
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
         .then(readyOutboundSocket(serverListenQueueName, api, clientChannel.rightConnection()))
-        .on('error', function(err) {logger.error(err)});
+        .catch(function(err) {
+            logger.error(err);
+            clientChannel.rightConnection().throwErr(err);
+        });
+     }).catch(function(err) {
+        logger.error(err);
+        clientChannel.rightConnection().throwErr(err);
      });
 
     return clientChannel.leftConnection();

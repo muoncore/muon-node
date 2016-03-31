@@ -47,7 +47,7 @@ function LeftConnection(name, inbound, outbound, validator) {
                     validator.validate(msg);
                }
             } catch(err) {
-                logger.error('invalid message received on channel "' + name + '" sending to error listener');
+                logger.warn('invalid message received on channel "' + name + '" sending to error listener');
                 console.dir(errCallback);
                 errCallback(err); // invalid send it back
                 return;
@@ -65,8 +65,8 @@ function LeftConnection(name, inbound, outbound, validator) {
                     var id = msg.id || "unknown";
                     logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
                     // deal with errors
-                    if (msg instanceof Error) {
-                        logger.error('error message received on channel ' + name);
+                    if (msg instanceof Error && errCallback) {
+                        logger.warn('error message received on channel ' + name);
                         errCallback(msg);
                         return;
                     }
@@ -100,7 +100,7 @@ function LeftConnection(name, inbound, outbound, validator) {
                             logger.trace('handler result.id=' + id);
                             handler.otherConnection(name).send(result);
                         } catch(err) {
-                            logger.error(name + ': ' + err);
+                            logger.warn(name + ': ' + err);
                             var reply = {status: 'error'};
                             handler.otherConnection(name).send(reply);
                         }
@@ -171,8 +171,8 @@ function RightConnection(name, inbound, outbound, validator) {
                     logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
                     logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
                     // deal with errors
-                    if (msg instanceof Error) {
-                        logger.error('error message received on channel ' + name);
+                    if (msg instanceof Error && errCallback) {
+                        logger.warn('error message received on channel ' + name);
                         errCallback(msg);
                         return;
                     }
@@ -207,7 +207,7 @@ function RightConnection(name, inbound, outbound, validator) {
                         } catch(err) {
                             logger.error(name + ': ' + err);
                             var reply = {status: 'error'};
-                            logger.error('[***** CSP-CHANNEL *****] ' + name + ' RightConnection error: returning message back upstream');
+                            logger.warn('[***** CSP-CHANNEL *****] ' + name + ' RightConnection error: returning message back upstream');
                             csp.putAsync(outbound, reply);
                         }
 
