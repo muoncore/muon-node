@@ -1,7 +1,6 @@
 var amqp = require('../../../muon/transport/rabbit/amqp-api.js');
 var assert = require('assert');
 var expect = require('expect.js');
-var chai = require('chai-as-promised');
 var messageHelper = require('../../../muon/domain/messages.js');
 
 describe("amqp api test", function () {

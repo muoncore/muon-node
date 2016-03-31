@@ -1,6 +1,7 @@
 var bichannel = require('../../muon/infrastructure/channel.js');
 var handler = require('../../muon/infrastructure/handler.js');
 var assert = require('assert');
+var expect = require('expect.js');
 require('sexylog');
 var csp = require("js-csp");
 
@@ -176,6 +177,112 @@ describe("Bi directional channel test", function () {
                     done();
                 });
         });
+
+
+
+    it("left to right channel sends and receives error via onError function", function (done) {
+        var err = new Error('some random boring exceptional problem');
+
+         var leftClient = function(connection) {
+            connection.send(err);
+
+            connection.listen(function(response) {
+                     done(new Error('left connection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    done(new Error('left connection error listener should not recieve message'));
+            });
+         };
+
+         var rightClient = function(connection) {
+            connection.listen(function(response) {
+                     done(new Error('right connection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    assert.ok(error);
+                    done();
+            });
+
+         }
+
+         var channel = bichannel.create("error-test");
+         leftClient(channel.leftConnection());
+         rightClient(channel.rightConnection());
+
+    });
+
+    it("right to left channel sends and receives error via onError function", function (done) {
+        var err = new Error('some random boring exceptional problem');
+
+         var rightClient = function(connection) {
+            connection.send(err);
+
+            connection.listen(function(response) {
+                     done(new Error('right connection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    done(new Error('right connection error listener should not recieve message'));
+            });
+         };
+
+         var leftClient = function(connection) {
+            connection.listen(function(response) {
+                     done(new Error('left conection listener should not recieve message'));
+            });
+            connection.onError(function(error){
+                    assert.ok(error);
+                    done();
+            });
+
+         }
+
+         var channel = bichannel.create("error-test");
+         leftClient(channel.leftConnection());
+         rightClient(channel.rightConnection());
+
+    });
+
+
+    it("channel validates messages", function (done) {
+
+         var leftClient = function(connection) {
+
+            connection.onError(function(err) {
+                    assert.ok(err);
+                    assert.ok(err instanceof Error);
+                    done();
+            });
+            connection.listen(function(response) {
+                    done(new Error('left listener should not have received message'));
+            });
+         };
+
+
+
+         var rightClient = function(connection) {
+            connection.listen(function(response) {
+                     done(new Error('right listener should not have received message'));
+            });
+            connection.onError(function(response) {
+                     done(new Error('right client should not have received message'));
+            });
+         }
+
+         var validiator = {
+            validate: function(msg) {
+                if (! msg.id) {
+                    throw new Error('invalid message');
+                }
+            }
+         }
+
+         var channel = bichannel.create("test-1", validiator);
+         leftClient(channel.leftConnection());
+         rightClient(channel.rightConnection());
+         channel.leftConnection().send("invalid message");
+
+
+    });
 });
 
 
