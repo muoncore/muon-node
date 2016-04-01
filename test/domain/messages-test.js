@@ -5,7 +5,7 @@ var messages = require('../../muon/domain/messages.js');
 var muon;
 var muon2;
 
-describe("event domain test", function () {
+describe("test messages:", function () {
 
 
     it("create rpc message with valid headers", function (done) {
@@ -70,6 +70,7 @@ describe("event domain test", function () {
                  { origin_id: '696f4064-2cc5-44c2-a4dd-6c61bdb1e799',
                    event_type: 'request.made',
                    protocol: 'request',
+                   event_source: arguments.callee.caller.name,
                    target_service: 'server1',
                    origin_service: 'client1',
                    url: 'muon://server1/ping',

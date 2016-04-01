@@ -3,6 +3,7 @@ var uuid = require('node-uuid');
 require('sexylog');
 var url = require("url");
 var jsonutil = require('jsonutil');
+var stackTrace = require('stack-trace');
 
 var schema = Joi.object().keys({
    id: Joi.string().guid().required(),
@@ -11,7 +12,7 @@ var schema = Joi.object().keys({
    headers:  Joi.object({
        origin_id: Joi.string().guid().optional(),
        event_type: Joi.string().min(3).regex(/(handshake|request|error)\.[a-z]/).required(),
-       //event_source: Joi.string().min(3).regex(/(protocol|transport|event|api|error)\.[a-z]/).required(),
+       event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).required(),
        protocol:  Joi.string().min(3).regex(/(request|streaming|event)/).required(),
        target_service: Joi.string().min(3).required(),
        origin_service: Joi.string().min(3).required(),
@@ -52,10 +53,12 @@ exports.rpcMessage = function(payload, sourceService, remoteServiceUrl) {
     var messageid = uuid.v4();
 
     var serviceRequest = url.parse(remoteServiceUrl, true);
+    logger.error('********************************* arguments.callee.caller=' + callingObject());
 
     var headers = {
           event_type: "request.made",
           protocol: "request",
+          event_source: callingObject(),
           target_service: serviceRequest.hostname,
           origin_service: sourceService,
           url: remoteServiceUrl
@@ -99,6 +102,7 @@ exports.handshakeRequest = function(protocol, sourceService, listenQueue, replyQ
      protocol:"request",
      server_reply_q:replyQueue,
      server_listen_q: listenQueue,
+     event_source: callingObject(),
      target_service: '--n/a--',
      origin_service: sourceService,
      url: 'muon://n/a'
@@ -126,6 +130,7 @@ exports.handshakeAccept = function() {
 
   var headers = {
      event_type: "handshake.accepted",
+     event_source: callingObject(),
      protocol:"request",
      target_service: '--n/a--',
      origin_service: '--n/a--',
@@ -155,6 +160,7 @@ function createMessage(payload, headers) {
               protocol: headers.protocol,
               target_service: headers.target_service,
               origin_service: headers.origin_service,
+              event_source: callingObject(),
               url: headers.url,
               server_reply_q: headers.server_reply_q,
               server_listen_q: headers.server_listen_q,
@@ -168,3 +174,27 @@ function createMessage(payload, headers) {
 }
 
 
+function callingObject() {
+
+    var err = new Error('something went wrong');
+    var trace = stackTrace.parse(err);
+    var stackCounter = 1;
+     // <-- TODO to get correct file name you may need to tweak the call stack index
+
+    var inThisObject = true;
+    var object = 'messages.js';
+    while(inThisObject) {
+        var call = trace[stackCounter];
+        var file = call.getFileName();
+        var pathElements = file.split('/');
+        var object = pathElements[pathElements.length - 1];
+        //logger.trace('in stacktrace: object=' + object);
+        if (object === 'messages.js') {
+            stackCounter++;
+        } else {
+            inThisObject = false;
+        }
+        object = object + ':' + call.getLineNumber();
+    }
+	return object;
+}

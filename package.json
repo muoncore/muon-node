@@ -43,6 +43,7 @@
     "signals": "*",
     "assert": "*",
     "joi": "*",
+    "stack-trace": "*",
     "sexylog": "*",
     "async-rq": "*"
   },
