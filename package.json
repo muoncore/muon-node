@@ -23,6 +23,7 @@
     "amqplib": "*",
     "split": "*",
     "underscore": "*",
+    "jsonutil": "*",
     "async": "*",
     "url": "*",
     "cors": "*",

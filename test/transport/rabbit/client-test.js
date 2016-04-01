@@ -28,7 +28,7 @@ describe("muon client test", function () {
             //shutdown nicely
       });
 
-    it("client error handled gracefully", function (done) {
+    it("client url error handled gracefully", function (done) {
 
         var serverName = 'serverabc123';
         var clientName = 'clientabc123';
@@ -46,6 +46,31 @@ describe("muon client test", function () {
         });
 
         // must have a listener to work
+        muonClientChannel.listen(function(msg){
+
+        });
+
+    });
+
+    it("client discovery error handled gracefully", function (done) {
+
+        var serverName = 'serverabc123';
+        var clientName = 'clientabc123';
+        var url = "amqp://muon:microservices@localhost";
+        var discovery = new AmqpDiscovery(url);
+
+        var muonClientChannel = client.connect(serverName, url, discovery);
+
+        muonClientChannel.onError(function(err){
+            console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
+            console.dir(err);
+            console.log(typeof err);
+            assert.ok(err);
+            assert.ok(err instanceof Error);
+            expect(err.toString()).to.contain('unable to find muon service');
+            done();
+        });
+
         muonClientChannel.listen(function(msg){
 
         });

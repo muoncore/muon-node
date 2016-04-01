@@ -42,7 +42,7 @@ var findService = function(serviceName, discovery) {
         var attempts = 0;
         var serviceFinder = setInterval(function () {
                 attempts++;
-                var maxattempts = 10;
+                var maxattempts = 5;
                 var serviceFound = false;
                 logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] looking for muon service '" + serviceName + "' attempts=" + attempts);
                 discovery.discoverServices(function(services) {
@@ -54,7 +54,7 @@ var findService = function(serviceName, discovery) {
                             resolve(service);
                         } else if (attempts > maxattempts) {
                             logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + "' after " + attempts + " attempts. aborting. reject()");
-                            reject(service);
+                            reject(new Error('unable to find muon service ' + serviceName));
                         } else {
                             logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + "'");
                         }
@@ -64,7 +64,7 @@ var findService = function(serviceName, discovery) {
                         }
                  });
 
-        }, 2000);
+        }, 1000);
 
      });
      return promise;
@@ -95,7 +95,7 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
 
             amqpApi.inbound(recvQueueName).listen(function(message) {
                  messages.validate(message);
-                 if ( message.headers.event_type === 'handshakeAccepted') {
+                 if ( messages.isHandshakeAccept(message)) {
                     // we're got a handshake confirmation and are now connected to the remote service
                      logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", JSON.stringify(message));
                      logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully");

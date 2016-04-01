@@ -24,6 +24,7 @@ exports.connect = function(serviceName, url, serverStacks, discovery) {
          var amqpQueue = amqpApi.inbound(serviceQueueName);
          amqpQueue.listen(function(msg) {
             logger.debug("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message=%s", JSON.stringify(msg));
+            messages.validate(msg);
             var serverStackChannel = serverStacks.openChannel(msg.headers.protocol);
             initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
             var replyMsg = messages.handshakeAccept();

@@ -8,10 +8,7 @@ var muon2;
 describe("event domain test", function () {
 
 
-
-
     it("create rpc message with valid headers", function (done) {
-
           var msg = messages.rpcMessage("PING", 'testclient', 'muon://testserver/ping');
           console.log('valid message: ');
           console.dir(msg);
@@ -36,13 +33,31 @@ describe("event domain test", function () {
     });
 
     it("create wire message object payload", function (done) {
-
-
           var amqpMsg = amqpMessage({text: 'PING'});
           var message = messages.fromWire(amqpMsg);
           console.log('valid message: ');
           console.dir(message);
           assert.equal(message.payload.text, 'PING');
+          done();
+    });
+
+    it("copy message", function (done) {
+          var amqpMsg = amqpMessage({text: 'PING'});
+          var message = messages.fromWire(amqpMsg);
+          var messageCopy = messages.copy(message);
+          assert.deepEqual(message, messageCopy);
+          done();
+    });
+
+    it("is handshake accept message", function (done) {
+          var handshake = messages.handshakeAccept();
+          assert.ok(messages.isHandshakeAccept(handshake));
+          done();
+    });
+
+    it("is handshake message", function (done) {
+          var handshake = messages.handshakeAccept();
+          assert.ok(messages.isHandshake(handshake));
           done();
     });
 
@@ -53,7 +68,7 @@ describe("event domain test", function () {
                 created: new Date(),
                 headers:
                  { origin_id: '696f4064-2cc5-44c2-a4dd-6c61bdb1e799',
-                   event_type: 'RequestMade',
+                   event_type: 'request.made',
                    protocol: 'request',
                    target_service: 'server1',
                    origin_service: 'client1',

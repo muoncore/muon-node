@@ -2,16 +2,17 @@ var Joi = require('joi');
 var uuid = require('node-uuid');
 require('sexylog');
 var url = require("url");
-
+var jsonutil = require('jsonutil');
 
 var schema = Joi.object().keys({
    id: Joi.string().guid().required(),
    created: Joi.date().timestamp('javascript'),
    payload: Joi.any().required(),
    headers:  Joi.object({
-       origin_id: Joi.string().guid().required(),
-       event_type: Joi.string().min(3).required(),
-       protocol:  Joi.string().min(3).required(),
+       origin_id: Joi.string().guid().optional(),
+       event_type: Joi.string().min(3).regex(/(handshake|request|error)\.[a-z]/).required(),
+       //event_source: Joi.string().min(3).regex(/(protocol|transport|event|api|error)\.[a-z]/).required(),
+       protocol:  Joi.string().min(3).regex(/(request|streaming|event)/).required(),
        target_service: Joi.string().min(3).required(),
        origin_service: Joi.string().min(3).required(),
        server_reply_q:  Joi.string().min(3).optional(),
@@ -37,6 +38,12 @@ function validateSchema(message) {
     }
     return message;
 }
+
+exports.copy = function(json) {
+    return jsonutil.deepCopy(json);
+}
+
+
 
 exports.rpcMessage = function(payload, sourceService, remoteServiceUrl) {
 
@@ -88,7 +95,7 @@ exports.fromWire = function(msg) {
 exports.handshakeRequest = function(protocol, sourceService, listenQueue, replyQueue ) {
 
   var headers = {
-     event_type: "handshakeInitiated",
+     event_type: "handshake.initiated",
      protocol:"request",
      server_reply_q:replyQueue,
      server_listen_q: listenQueue,
@@ -100,10 +107,25 @@ exports.handshakeRequest = function(protocol, sourceService, listenQueue, replyQ
 
 }
 
+
+exports.isHandshakeAccept = function(msg) {
+    validateSchema(msg);
+    return (msg.headers.event_type === 'handshake.accepted');
+}
+
+exports.isHandshake = function(msg) {
+    try {
+        validateSchema(msg);
+    } catch (err) {
+        return false;
+    }
+    return (msg.headers.event_type.indexOf('handshake.') > -1);
+}
+
 exports.handshakeAccept = function() {
 
   var headers = {
-     event_type: "handshakeAccepted",
+     event_type: "handshake.accepted",
      protocol:"request",
      target_service: '--n/a--',
      origin_service: '--n/a--',
