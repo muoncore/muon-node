@@ -1,28 +1,34 @@
-var enum = require('enum');
+//var enum = require('enum');
 var messages = require('./messages.js');
 
-var schema = Joi.object().keys({
-   id: Joi.string().guid().required(),
-   created: Joi.date().timestamp('javascript'),
-   payload: Joi.any().required(),
-   headers:  Joi.object({
-       origin_id: Joi.string().guid().required(),
-       event_type: Joi.string().min(3).regex('').required(),
-       protocol:  Joi.string().min(3).required(),
-       target_service: Joi.string().min(3).required(),
-       origin_service: Joi.string().min(3).required(),
-       server_reply_q:  Joi.string().min(3).optional(),
-       server_listen_q: Joi.string().min(3).optional(),
-       url: Joi.string().uri().required(),
-       channel_op: Joi.string().min(3).required(),
-       content_type: Joi.string().min(3).required(),
-       content_types: Joi.array().required()
-   }).required()
-});
-
-exports.create = function(type, message, object) {
 
 
+exports.create = function(errorType, err, origMsg, source) {
+    var protocol = 'error';
+    if (! origMsg) protocol = origMsg.headers.protocol;
+    var headers = {
+        event_type: 'error.' + errorType,
+        origin_id: origMsg.id,
+        protocol: protocol
+    };
+    return messages.createMessage(err, headers, source);
+}
+
+exports.isError = function(message) {
+    var isError = false;
+    messages.validate(msg);
+    if (msg.headers.event_type.split('.')[0] == 'error') {
+        isError = true;
+    }
+    return isError;
+}
 
 
+exports.isException = function(message) {
+    var isException = false;
+    messages.validate(msg);
+    if (msg.headers.event_type.split('.')[1] == 'exception') {
+        isException = true;
+    }
+    return isException;
 }

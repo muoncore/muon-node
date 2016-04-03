@@ -74,7 +74,7 @@ describe("test messages:", function () {
                    target_service: 'server1',
                    origin_service: 'client1',
                    url: 'muon://server1/ping',
-                   channel_op: 'NORMAL',
+                   channel_op: 'normal',
                    content_type: 'application/json',
                    content_types: [ 'application/json' ] },
                 payload: 'PING'
