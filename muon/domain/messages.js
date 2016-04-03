@@ -16,7 +16,7 @@ var schema = Joi.object().keys({
        event_type: Joi.string().min(3).regex(/(handshake|request|error)\.[a-z]/).required(),
        //event_subtype: Joi.string().min(3).regex(/(ok|exception|invalid|format)\.[a-z]/).required(),
        event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).required(),
-       protocol:  Joi.string().min(3).regex(/(request|streaming|event)/).required(),
+       protocol:  Joi.string().min(3).regex(/(request|streaming|event|error)/).required(),
        target_service: Joi.string().min(3).required(),
        origin_service: Joi.string().min(3).required(),
        server_reply_q:  Joi.string().min(3).optional(),

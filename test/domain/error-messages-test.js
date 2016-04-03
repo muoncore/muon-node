@@ -19,6 +19,24 @@ describe("event domain test", function () {
           done();
     });
 
+    it("test if exception message", function (done) {
+          var error = new Error('muon 404');
+          var errMsg = errors.create('failure', error, {});
+          console.log('exception message: ');
+          console.dir(errMsg);
+          assert.ok(errors.isError(errMsg));
+          done();
+    });
+
+    it("test if exception message", function (done) {
+          var error = new Error('muon 404');
+          var errMsg = errors.create('exception', error, {});
+          console.log('exception message: ');
+          console.dir(errMsg);
+          assert.ok(errors.isException(errMsg));
+          done();
+    });
+
 
 
 });

@@ -14,7 +14,7 @@ exports.create = function(errorType, err, origMsg, source) {
     return messages.createMessage(err, headers, source);
 }
 
-exports.isError = function(message) {
+exports.isError = function(msg) {
     var isError = false;
     messages.validate(msg);
     if (msg.headers.event_type.split('.')[0] == 'error') {
@@ -24,7 +24,7 @@ exports.isError = function(message) {
 }
 
 
-exports.isException = function(message) {
+exports.isException = function(msg) {
     var isException = false;
     messages.validate(msg);
     if (msg.headers.event_type.split('.')[1] == 'exception') {
