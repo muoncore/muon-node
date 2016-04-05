@@ -5,6 +5,7 @@ var helper = require('./transport-helper.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var uuid = require('node-uuid');
 var messages = require('../../domain/messages.js');
+var errors = require('../../domain/error-messages.js');
 
 exports.connect = function(serviceName, url, discovery) {
     var clientChannel = bichannel.create(serviceName + "-amqp-transport-client");
@@ -23,12 +24,20 @@ exports.connect = function(serviceName, url, discovery) {
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
         .then(readyOutboundSocket(serverListenQueueName, api, clientChannel.rightConnection()))
         .catch(function(err) {
-            logger.error(err);
-            clientChannel.rightConnection().throwErr(err);
+            try {
+                logger.error('wibble: ' + err);
+                var errMsg = errors.create('exception.transport_negotiation_failure', err, {});
+                logger.warn(errMsg);
+                clientChannel.rightConnection().send(errMsg);
+            } catch(err) {
+                logger.error(err);
+            }
+
         });
      }).catch(function(err) {
         logger.error(err);
-        clientChannel.rightConnection().throwErr(err);
+        var errMsg = errors.create('amqp_transport_failure', err, {});
+        clientChannel.rightConnection().send(errMsg);
      });
 
     return clientChannel.leftConnection();

@@ -4,6 +4,7 @@ var messages = require('./messages.js');
 
 
 exports.create = function(errorType, err, origMsg, source) {
+    logger.trace('errors.create(' + errorType + ', ' + err + ', ' + origMsg + ')');
     var protocol = 'error';
     if (! origMsg) protocol = origMsg.headers.protocol;
     var headers = {
