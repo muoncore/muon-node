@@ -24,20 +24,10 @@ exports.connect = function(serviceName, url, discovery) {
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
         .then(readyOutboundSocket(serverListenQueueName, api, clientChannel.rightConnection()))
         .catch(function(err) {
-            try {
-                logger.error('wibble: ' + err);
-                var errMsg = errors.create('exception.transport_negotiation_failure', err, {});
-                logger.warn(errMsg);
-                clientChannel.rightConnection().send(errMsg);
-            } catch(err) {
-                logger.error(err);
-            }
-
+            returnErrorUpstream('exception.transport_negotiation_failure', err, clientChannel.rightConnection());
         });
      }).catch(function(err) {
-        logger.error(err);
-        var errMsg = errors.create('amqp_transport_failure', err, {});
-        clientChannel.rightConnection().send(errMsg);
+        returnErrorUpstream('exception.transport_connection_failure', err, clientChannel.rightConnection());
      });
 
     return clientChannel.leftConnection();
@@ -140,3 +130,15 @@ var readyOutboundSocket = function(serviceQueueName, amqpApi, clientChannel) {
 
 
 
+function returnErrorUpstream(text, err, clientChannel) {
+    try {
+        logger.error(err);
+        var errMsg = errors.create('exception', 'transport_negotiation_failure', err, {});
+        logger.warn(errMsg);
+        clientChannel.send(errMsg);
+    } catch(err) {
+        //logger.error(err);
+        logger.error(err.stack);
+    }
+
+}

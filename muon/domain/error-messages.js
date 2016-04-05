@@ -3,12 +3,12 @@ var messages = require('./messages.js');
 
 
 
-exports.create = function(errorType, err, origMsg, source) {
-    logger.trace('errors.create(' + errorType + ', ' + err + ', ' + origMsg + ')');
+exports.create = function(errType, errMsg, err, origMsg, source) {
+    logger.trace('errors.create(' + errType + ', ' + errType + ', ' + err + ', ' + origMsg + ')');
     var protocol = 'error';
     if (! origMsg) protocol = origMsg.headers.protocol;
     var headers = {
-        event_type: 'error.' + errorType,
+        event_type: errType + '.' + errMsg,
         origin_id: origMsg.id,
         protocol: protocol
     };
@@ -18,7 +18,8 @@ exports.create = function(errorType, err, origMsg, source) {
 exports.isError = function(msg) {
     var isError = false;
     messages.validate(msg);
-    if (msg.headers.event_type.split('.')[0] == 'error') {
+    event_type = msg.headers.event_type.split('.')[0];
+    if (event_type == 'error') {
         isError = true;
     }
     return isError;
@@ -28,7 +29,7 @@ exports.isError = function(msg) {
 exports.isException = function(msg) {
     var isException = false;
     messages.validate(msg);
-    if (msg.headers.event_type.split('.')[1] == 'exception') {
+    if (msg.headers.event_type.split('.')[0] == 'exception') {
         isException = true;
     }
     return isException;

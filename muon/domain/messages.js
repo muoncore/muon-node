@@ -13,7 +13,7 @@ var schema = Joi.object().keys({
    payload: Joi.any().required(),
    headers:  Joi.object({
        origin_id: Joi.string().guid().optional(),
-       event_type: Joi.string().min(3).regex(/(handshake|request|error)\.[a-z]/).required(),
+       event_type: Joi.string().min(3).regex(/(handshake|request|error|exception)\.[a-z]/).required(),
        //event_subtype: Joi.string().min(3).regex(/(ok|exception|invalid|format)\.[a-z]/).required(),
        event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).required(),
        protocol:  Joi.string().min(3).regex(/(request|streaming|event|error)/).required(),
@@ -166,13 +166,12 @@ function createMessage(payload, headers, source) {
     if (! headers.origin_id) headers.origin_id = uuid.v4();
     if (source) headers.event_source = source;
     if (! headers.event_source) headers.event_source = callingObject();
-
-     if (! headers.target_service) headers.target_service = '---n/a---';
-     if (! headers.origin_service) headers.origin_service = '---n/a---';
-     if (! headers.url) headers.url = 'muon://n/a';
-     if (! headers.server_reply_q) headers.server_reply_q = '---n/a---';
-     if (! headers.server_listen_q) headers.server_listen_q = '---n/a---';
-     if (! headers.channel_op) headers.channel_op = 'normal';
+    if (! headers.target_service) headers.target_service = '---n/a---';
+    if (! headers.origin_service) headers.origin_service = '---n/a---';
+    if (! headers.url) headers.url = 'muon://n/a';
+    if (! headers.server_reply_q) headers.server_reply_q = '---n/a---';
+    if (! headers.server_listen_q) headers.server_listen_q = '---n/a---';
+    if (! headers.channel_op) headers.channel_op = 'normal';
 
      var message = {
          id: uuid.v4(),

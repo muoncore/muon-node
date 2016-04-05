@@ -54,13 +54,13 @@ describe("muon client test", function () {
                    console.log(typeof err);
                    assert.ok(err);
                    assert.ok(err instanceof Error);
-                   expect(err.toString()).to.contain('unable to find muon service');
+                   expect(err.toString()).to.contain('Error: invalid ampq url');
                    done();
             } else if (errors.isError(msg)) {
                 throw new Error('message expected to be an exception error');
 
             } else {
-                throw new Error('message expected to be an error');
+                throw new Error('message expected to be an exception');
             }
 
         });
@@ -105,7 +105,7 @@ describe("muon client test", function () {
                 throw new Error('message expected to be an exception error');
 
             } else {
-                throw new Error('message expected to be an error');
+                throw new Error('message expected to be exception');
             }
 
         });
