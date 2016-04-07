@@ -125,7 +125,7 @@ var readyOutboundSocket = function(serviceQueueName, amqpApi, clientChannel) {
             clientChannel.listen(function(message){
                 messages.validate(message);
                 logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
-                amqpApi.outbound(serviceQueueName).send(message);
+                amqpApi.outbound(serviceQueueName).send({headers: {message_type: 'muon'}, payload: message});
             });
             logger.info('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
             resolve();
