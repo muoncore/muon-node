@@ -5,6 +5,7 @@ var assert = require('assert');
 var expect = require('expect.js');
 var uuid = require('node-uuid');
 var messages = require('../../../muon/domain/messages.js');
+
 var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
 
 describe("muon client test", function () {
@@ -33,7 +34,7 @@ describe("muon client test", function () {
         var serverName = 'serverabc123';
         var clientName = 'clientabc123';
         var url = "amqp://";
-        //var discovery = new AmqpDiscovery(url);
+        var discovery = new AmqpDiscovery(url);
 
 
         client.onError(function(err) {
@@ -46,7 +47,7 @@ describe("muon client test", function () {
                    done();
         });
 
-        var muonClientChannel = client.connect(serverName, url, '');
+        var muonClientChannel = client.connect(serverName, 'rpc', url, discovery);
 
         muonClientChannel.listen(function(msg){
         });
@@ -70,7 +71,7 @@ describe("muon client test", function () {
                    done();
         });
 
-        var muonClientChannel = client.connect(serverName, url, discovery);
+        var muonClientChannel = client.connect(serverName, 'rpc', url, discovery);
 
 
         muonClientChannel.listen(function(msg){

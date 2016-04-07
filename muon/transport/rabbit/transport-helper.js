@@ -1,5 +1,6 @@
 var uuid = require('node-uuid');
 var Joi = require('joi');
+require('sexylog');
 
 
 
@@ -22,36 +23,33 @@ exports.queueSettings = function() {
 }
 
 
-exports.handshakeRequest = function(protocol, sourceService, listenQueue, replyQueue ) {
+exports.handshakeRequestHeaders = function(protocol, listenQueue, replyQueue) {
 
-  var msg = {
-     eventType: "handshakeInitiated",
-     PROTOCOL:"request",
-     REPLY_TO:replyQueue,
-     LISTEN_ON: listenQueue,
-     SOURCE_SERVICE: sourceService
+  var headers = {
+     message_type: "handshake.initiated",
+     protocol: protocol,
+     server_reply_q: replyQueue,
+     server_listen_q: listenQueue,
     };
-   return msg;
+   return headers;
+
+}
+
+exports.isHandshakeAccept = function(msg) {
+    return (msg.headers.message_type === 'handshake.accepted');
+}
+
+exports.handshakeAcceptHeaders = function() {
+
+  var headers = {
+     message_type: "handshake.accepted"
+    };
+   return headers;
 
 }
 
 
-
-exports.handshakeAccept = function() {
-
-  var msg = {
-        "eventType": "handshakeAccepted",
-      "PROTOCOL":"request",
-      "REPLY_TO":"--serverside--",
-       "LISTEN_ON": "--server-side--",
-       "SOURCE_SERVICE": "some-service"
-    };
-   return msg;
-
-}
-
-
-exports.message = function(payload, headers) {
+exports.toWire = function(payload, headers) {
      logger.trace('message(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     if (! headers) headers = {};
     var payloadString = '-***###-payload-string-undefined-###***-';
@@ -65,12 +63,11 @@ exports.message = function(payload, headers) {
         payload: contents,
         headers: headers
     }
-    validateSchema(message);
     return message;
 }
 
 
-exports.demessage = function(amqpMsg) {
+exports.fromWireOld = function(amqpMsg) {
     logger.trace('demessage(amqpMsg='  + JSON.stringify(amqpMsg) + ')');
     var headers = amqpMsg.properties.headers;
     var payload = JSON.parse(amqpMsg.content).data;
@@ -82,54 +79,38 @@ exports.demessage = function(amqpMsg) {
     }
     logger.trace('demessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     var message = {
-        //id: uuid.v4(),
         payload: payload,
         headers: headers
     }
-    validateSchema(message);
     return message;
 }
 
 
 
-/*
-
-var transportHeaders = {
- id: (guid),
- client_send_date: (date),
- muon_receive_date: (date),
- content_type: ’type/subtype’,
- channel_op: ’string’ (optional: normal, close)
- event_type: “handshake/initiated” (required: type/value),
-  protocol: ”request” (required),
-  server_reply_q: “reply.queue.name" (optional | required if handshake),
-  server_listen_q: “listen.queue.name"  (optional | required if handshake),
-  origin_service: “client-name"  (required),
-  target_service: ”sever-name” (required),
-};
-
-*/
-var messageSchema = Joi.object().keys({
-   id: Joi.string().guid().optional(),
-   created: Joi.date().timestamp('javascript').optional(),
-   payload: Joi.any().required(),
-   headers:  Joi.object().required()
-});
-
-
-exports.validateMessage = function(message) {
-    validateSchema(message);
+exports.fromWire = function(msg) {
+    try {
+        logger.trace('messages.fromWire('  + JSON.stringify(msg) + ')');
+        //console.dir(msg);
+        var headers = msg.properties.headers;
+        var contents = msg.content.toString();
+        logger.trace("messages.fromWire() contents: '" + contents + "'");
+        try {
+            contents = JSON.parse(contents);
+        } catch (err) {
+            // do nothing, it's not an json object so can't be parsed
+        }
+        var message = {
+            headers: headers,
+            payload: contents
+        };
+        logger.trace('messages.fromWire() return message='  + JSON.stringify(message) );
+       return message;
+   } catch (err) {
+        logger.error('error converting amqp wire format message to muon event message');
+        logger.error(err);
+        logger.error(err.stack);
+        throw new Error(err);
+   }
 }
 
-
-
-function validateSchema(event) {
-    var validatedEvent = Joi.validate(event, messageSchema);
-    if (validatedEvent.error) {
-        logger.info('invalid message: \n', event);
-        logger.warn('invalid joi schema for message: ' + JSON.stringify(validatedEvent.error.details));
-       throw new Error('Error! problem validating transport message schema: ' + JSON.stringify(validatedEvent.error));
-    }
-    return event;
-}
 

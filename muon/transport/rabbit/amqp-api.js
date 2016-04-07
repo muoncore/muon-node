@@ -5,6 +5,7 @@ require('sexylog');
 var RSVP = require('rsvp');
 var messages = require('../../domain/messages.js');
 var nodeUrl = require('url');
+var helper = require('./transport-helper.js');
 
 
 var queueSettings = {
@@ -39,26 +40,20 @@ exports.connect = function(url) {
                     logger.error('error connecting to amqp' + err);
                     reject(err);
                 } else {
-
                     var api = {
                           outbound: function(queueName) {
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName);
                             clientChannel.rightConnection().listen(function(msg) {
                                  logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received outbound message: ' + JSON.stringify(msg));
-                                 messages.validate(msg);
                                  publish(amqpChannel, queueName, msg);
                             });
                             return clientChannel.leftConnection();
                           },
                           inbound: function(queueName) {
                             var clientChannel = bichannel.create("amqp-api-inbound-" + queueName);
-                            consume(amqpChannel, queueName, function(err, msg) {
-                                if (err) {
-                                    logger.error('[*** TRANSPORT:AMQP-API:INBOUND ***] error consuming message from queue "' + queueName + '": ' + err);
-                                } else {
+                            consume(amqpChannel, queueName, function(msg) {
                                     logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] send message up stream: ' + JSON.stringify(msg));
                                     clientChannel.rightConnection().send(msg);
-                                }
                             });
                             return clientChannel.leftConnection();
                           },
@@ -149,7 +144,6 @@ function handleChannelEvents(amqpChannel) {
 }
 
 function publish(amqpChannel, queueName, message) {
-    messages.validate(message);
     var payload = message.payload;
     var headers = message.headers;
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' payload: ", JSON.stringify(payload));
@@ -162,18 +156,13 @@ function publish(amqpChannel, queueName, message) {
 function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
-     if (amqpMsg !== null) {
-       var message = messages.fromWire(amqpMsg);
-       messages.validate(message);
+       var message = helper.fromWire(amqpMsg);
        logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.payload: " + JSON.stringify(message.payload));
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.headers));
        logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
        logger.trace(message);
-       callback(null, message);
+       callback(message);
        amqpChannel.ack(amqpMsg);
-     } else {
-        callback(new Error('error consuming null message on queue ' + queueName), null);
-     }
    }, {noAck: false});
 
 }

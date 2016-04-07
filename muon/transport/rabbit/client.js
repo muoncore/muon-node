@@ -8,7 +8,7 @@ var messages = require('../../domain/messages.js');
 
 var errCallback;
 
-exports.connect = function(serviceName, url, discovery) {
+exports.connect = function(serviceName, protocol, url, discovery) {
     var clientChannel = bichannel.create(serviceName + "-amqp-transport-client");
 
     amqp.connect(url).then(function(api) {
@@ -17,11 +17,11 @@ exports.connect = function(serviceName, url, discovery) {
         var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
         var serverListenQueueName = serviceName + ".listen." + handshakeId;
         var replyQueueName = serviceName + ".reply." + handshakeId;
-        var handshakeMsg = messages.handshakeRequest('request', serviceName, serverListenQueueName, replyQueueName);
+        var handshakeHeaders = helper.handshakeRequestHeaders(protocol, serverListenQueueName, replyQueueName);
         logger.trace('[*** TRANSPORT:CLIENT:BOOTSTRAP ***] preparing to handshake...');
         RSVP.resolve()
         .then(findService(serviceName, discovery))
-        .then(sendHandshake(serviceQueueName, handshakeMsg, api))
+        .then(sendHandshake(serviceQueueName, handshakeHeaders, api))
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
         .then(readyOutboundSocket(serverListenQueueName, api, clientChannel.rightConnection()))
         .catch(function(err) {
@@ -79,13 +79,13 @@ var findService = function(serviceName, discovery) {
 }
 
 
-var sendHandshake = function(serviceQueueName, handshakeMsg, amqpApi) {
-  //console.log('sendHandshake() called');
+var sendHandshake = function(serviceQueueName, handshakeHeaders, amqpApi) {
+  //logger.trace('sendHandshake() called');
   return function(prevResult) {
-    //console.log('sendHandshake() returning promise');
+    //logger.trace('sendHandshake() returning promise');
      var promise = new RSVP.Promise(function(resolve, reject) {
-        //console.log('sendHandshake() promise executing sending payload ' + JSON.stringify(handshakeMsg));
-        var channel = amqpApi.outbound(serviceQueueName).send(handshakeMsg);
+        //console.log('sendHandshake() promise executing sending payload ' + JSON.stringify(handshakeHeaders));
+        var channel = amqpApi.outbound(serviceQueueName).send({payload: {}, headers: handshakeHeaders});
         logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
         resolve();
      });
@@ -101,15 +101,15 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
             logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
 
             amqpApi.inbound(recvQueueName).listen(function(message) {
-                 messages.validate(message);
-                 if ( messages.isHandshakeAccept(message)) {
+                 if ( helper.isHandshakeAccept(message)) {
                     // we're got a handshake confirmation and are now connected to the remote service
                      logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", JSON.stringify(message));
                      logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully");
                      resolve();
                 } else {
                      logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(message));
-                     clientChannel.send(message);
+                     var muonMessage = message.payload;
+                     clientChannel.send(muonMessage);
                 }
             });
          });

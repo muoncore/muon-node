@@ -30,7 +30,7 @@ describe("muon client/server transport test", function () {
                 console.log('********** client_server-test.js serverChannel.leftConnection().listen() event.id=' + event.id);
                 console.dir(event);
                 console.log('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
-                var reply = messages.rpcMessage('PONG', clientName, 'muon://client1/reply');
+                var reply = messages.rpcMessage('PONG', clientName, 'rpc://client1/reply');
                 messages.validate(reply);
                 serverChannel.leftConnection().send(reply);
         });
@@ -54,7 +54,7 @@ describe("muon client/server transport test", function () {
 
         // now create a muon client socket to connect to server1:
         console.log('creating muon client..');
-        var muonClientChannel = client.connect(serverName, url, discovery);
+        var muonClientChannel = client.connect(serverName, "rpc", url, discovery);
         muonClientChannel.listen(function(event){
             console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
             console.dir(event);
@@ -62,7 +62,7 @@ describe("muon client/server transport test", function () {
             done();
         });
          console.dir('sending muon event via client..');
-        var event = messages.rpcMessage("PING", clientName, 'muon://server1/ping');
+        var event = messages.rpcMessage("PING", clientName, 'rpc://server1/ping');
         muonClientChannel.send(event);
 
     });

@@ -23,7 +23,7 @@ exports.create = function(localServiceName, url, serverStacks, discovery) {
     var transport = {
         openChannel: function(remoteServiceName, protocolName) {
             logger.debug('[*** TRANSPORT:OPEN-CONNECTION ***] opening muon connect to remote service ' + remoteServiceName);
-            var transportClientChannel = client.connect(remoteServiceName, url, discovery);
+            var transportClientChannel = client.connect(remoteServiceName, protocolName, url, discovery);
             client.onError(transportErrCallback);
             return transportClientChannel;
         },

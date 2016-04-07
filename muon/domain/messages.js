@@ -14,13 +14,10 @@ var schema = Joi.object().keys({
    headers:  Joi.object({
        origin_id: Joi.string().guid().optional(),
        event_type: Joi.string().min(3).regex(/(handshake|request|error|exception)\.[a-z]/).required(),
-       //event_subtype: Joi.string().min(3).regex(/(ok|exception|invalid|format)\.[a-z]/).required(),
        event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).required(),
        protocol:  Joi.string().min(3).regex(/(request|streaming|event|error)/).required(),
        target_service: Joi.string().min(3).required(),
        origin_service: Joi.string().min(3).required(),
-       server_reply_q:  Joi.string().min(3).optional(),
-       server_listen_q: Joi.string().min(3).optional(),
        url: Joi.string().uri().required(),
        channel_op: Joi.string().min(3).regex(/(normal|closed|shutdown)/).required(),
        content_type: Joi.string().min(3).required(),
@@ -83,79 +80,13 @@ exports.rpcMessage = function(payload, sourceService, remoteServiceUrl) {
 
 
 
-exports.fromWire = function(msg) {
-    try {
-        logger.trace('messages.fromWire('  + JSON.stringify(msg) + ')');
-        //console.dir(msg);
-        var contents = msg.content.toString();
-        logger.trace("messages.fromWire() contents: '" + contents + "'");
-        payload = contents;
-        try {
-            payload = JSON.parse(contents);
-        } catch (err) {
-            // do nothing, it's not an json object so can't be parsed
-        }
-        var headers = msg.properties.headers;
-        var message = createMessage(payload, headers);
-        logger.trace('messages.fromWire() return message='  + JSON.stringify(message) );
-       return message;
-   } catch (err) {
-        logger.error('error converting amqp wire format message to muon event message');
-        logger.error(err);
-        logger.error(err.stack);
-        throw new Error(err);
-   }
-}
 
 
 
-exports.handshakeRequest = function(protocol, sourceService, listenQueue, replyQueue ) {
-  var headers = {
-     event_type: "handshake.initiated",
-     protocol:"request",
-     server_reply_q:replyQueue,
-     server_listen_q: listenQueue,
-     event_source: callingObject(),
-     target_service: '--n/a--',
-     origin_service: sourceService,
-     url: 'muon://n/a'
-    };
-   return createMessage(null, headers);
-
-}
 
 
 
-exports.isHandshakeAccept = function(msg) {
-    validateSchema(msg);
-    return (msg.headers.event_type === 'handshake.accepted');
-}
 
-
-
-exports.isHandshake = function(msg) {
-    try {
-        validateSchema(msg);
-    } catch (err) {
-        return false;
-    }
-    return (msg.headers.event_type.indexOf('handshake.') > -1);
-}
-
-
-
-exports.handshakeAccept = function() {
-  var headers = {
-     event_type: "handshake.accepted",
-     event_source: callingObject(),
-     protocol:"request",
-     target_service: '--n/a--',
-     origin_service: '--n/a--',
-     url: 'muon://n/a'
-    };
-   return createMessage(null, headers);
-
-}
 
 function createMessage(payload, headers, source) {
     logger.trace('createMessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
@@ -166,11 +97,7 @@ function createMessage(payload, headers, source) {
     if (! headers.origin_id) headers.origin_id = uuid.v4();
     if (source) headers.event_source = source;
     if (! headers.event_source) headers.event_source = callingObject();
-    if (! headers.target_service) headers.target_service = '---n/a---';
-    if (! headers.origin_service) headers.origin_service = '---n/a---';
     if (! headers.url) headers.url = 'muon://n/a';
-    if (! headers.server_reply_q) headers.server_reply_q = '---n/a---';
-    if (! headers.server_listen_q) headers.server_listen_q = '---n/a---';
     if (! headers.channel_op) headers.channel_op = 'normal';
 
      var message = {
@@ -185,8 +112,6 @@ function createMessage(payload, headers, source) {
               origin_service: headers.origin_service,
               event_source: headers.event_source,
               url: headers.url,
-              server_reply_q: headers.server_reply_q,
-              server_listen_q: headers.server_listen_q,
               channel_op: headers.channel_op,
               content_type: headers.content_type,
               content_types: headers.content_types

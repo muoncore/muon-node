@@ -29,14 +29,14 @@ describe("muon client/server transport test", function () {
             }
             var discovery = new AmqpDiscovery(url);
             var muonTransport  = amqpTransport.create(server, url, fakeServerStacks, discovery);
-            var transportChannel = muonTransport.openChannel(server, 'test-rpc-protocol-(totally made up, not yet implemented)');
+            var transportChannel = muonTransport.openChannel(server, 'rpc');
 
             transportChannel.send(event);
 
              console.log('wait for response from remote service ' + server);
             fakeServerStackChannel.leftConnection().listen(function(event){
                 console.log('********** transport.js transportChannel.listen() event received ' + JSON.stringify(event));
-                assert.equal(event.payload, 'PING');
+                assert.equal(event, 'PING');
                 done();
             });
 
@@ -44,41 +44,6 @@ describe("muon client/server transport test", function () {
 
     });
 
-     it("transport handles invalid url with onError", function (done) {
-            var server = 'transport-test-server';
-            var url = "wibble";
 
-            var fakeServerStackChannel = bichannel.create("fake-serverstacks");
-            var fakeServerStacks = {
-                openChannel: function() {
-                    return fakeServerStackChannel.rightConnection();
-                }
-            }
-            var fakeDiscovery = {
-                advertiseLocalService: function() {}
-            };
-            var muonTransport  = amqpTransport.create(server, url, fakeServerStacks, fakeDiscovery);
-
-            onErrorCalls = 0;
-            muonTransport.onError(function(err) {
-                  onErrorCalls++;
-                  console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
-                    console.dir(err);
-                    console.log(typeof err);
-                    assert.ok(err);
-                    assert.ok(err instanceof Error);
-                    expect(err.toString()).to.contain('Error: invalid ampq url');
-                    if(onErrorCalls == 2) done();
-            });
-
-            var transportChannel = muonTransport.openChannel(server, 'test-rpc-protocol-(totally made up, not yet implemented)');
-
-            transportChannel.send({});
-
-             console.log('wait for response from remote service ' + server);
-            fakeServerStackChannel.leftConnection().listen(function(event){
-
-            });
-     });
 
 });
