@@ -5,6 +5,7 @@ var helper = require('./transport-helper.js');
 require('sexylog');
 var messages = require('../../domain/messages.js');
 
+var errCallback;
 
 exports.connect = function(serviceName, url, serverStacks, discovery) {
 
@@ -31,8 +32,16 @@ exports.connect = function(serviceName, url, serverStacks, discovery) {
             amqpApi.outbound(msg.headers.server_reply_q).send(replyMsg);
             logger.info("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " +  msg.headers.server_reply_q);
          });
+    }).catch(function(err) {
+           logger.error(err);
+           logger.error(err.stack);
+           errCallback(err);
     });
-}
+};
+
+exports.onError = function(callback) {
+    errCallback =callback;
+};
 
 function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverStackChannel) {
 

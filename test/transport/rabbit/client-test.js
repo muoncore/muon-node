@@ -36,19 +36,8 @@ describe("muon client test", function () {
         var url = "amqp://";
         //var discovery = new AmqpDiscovery(url);
 
-        var muonClientChannel = client.connect(serverName, url, '');
-/*
-        muonClientChannel.onError(function(err){
-            console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
-            console.dir(err);
-            assert.ok(err);
-            assert.ok(err instanceof Error);
-            done();
-        });
-*/
-        muonClientChannel.listen(function(msg){
-            if (errors.isException(msg)) {
-                   var err = msg.payload;
+
+        client.onError(function(err) {
                    console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
                    console.dir(err);
                    console.log(typeof err);
@@ -56,13 +45,11 @@ describe("muon client test", function () {
                    assert.ok(err instanceof Error);
                    expect(err.toString()).to.contain('Error: invalid ampq url');
                    done();
-            } else if (errors.isError(msg)) {
-                throw new Error('message expected to be an exception error');
+        });
 
-            } else {
-                throw new Error('message expected to be an exception');
-            }
+        var muonClientChannel = client.connect(serverName, url, '');
 
+        muonClientChannel.listen(function(msg){
         });
 
     });
@@ -74,39 +61,20 @@ describe("muon client test", function () {
         var url = "amqp://muon:microservices@localhost";
         var discovery = new AmqpDiscovery(url);
 
-        var muonClientChannel = client.connect(serverName, url, discovery);
-/*
-        muonClientChannel.onError(function(err){
-            console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
-            console.dir(err);
-            console.log(typeof err);
-            assert.ok(err);
-            assert.ok(err instanceof Error);
-            expect(err.toString()).to.contain('unable to find muon service');
-            done();
-        });
-
-        muonClientChannel.listen(function(msg){
-
-        });
-*/
-
-        muonClientChannel.listen(function(msg){
-            if (errors.isException(msg)) {
-                   var err = msg.payload;
-                   console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
+        client.onError(function(err) {
+                 console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
                    console.dir(err);
                    console.log(typeof err);
                    assert.ok(err);
                    assert.ok(err instanceof Error);
                    expect(err.toString()).to.contain('unable to find muon service');
                    done();
-            } else if (errors.isError(msg)) {
-                throw new Error('message expected to be an exception error');
+        });
 
-            } else {
-                throw new Error('message expected to be exception');
-            }
+        var muonClientChannel = client.connect(serverName, url, discovery);
+
+
+        muonClientChannel.listen(function(msg){
 
         });
 

@@ -7,6 +7,8 @@ var uuid = require('node-uuid');
 var messages = require('../../domain/messages.js');
 var errors = require('../../domain/error-messages.js');
 
+var errCallback;
+
 exports.connect = function(serviceName, url, discovery) {
     var clientChannel = bichannel.create(serviceName + "-amqp-transport-client");
 
@@ -24,14 +26,21 @@ exports.connect = function(serviceName, url, discovery) {
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
         .then(readyOutboundSocket(serverListenQueueName, api, clientChannel.rightConnection()))
         .catch(function(err) {
-            returnErrorUpstream('exception.transport_negotiation_failure', err, clientChannel.rightConnection());
+             var negotiationErr = new Error(err);
+             logger.error(err.stack);
+             errCallback(err);
         });
      }).catch(function(err) {
-        returnErrorUpstream('exception.transport_connection_failure', err, clientChannel.rightConnection());
+         logger.error(err.stack);
+         errCallback(err);
      });
 
     return clientChannel.leftConnection();
 };
+
+exports.onError = function(callback) {
+    errCallback =callback;
+}
 
 
 var findService = function(serviceName, discovery) {
@@ -130,15 +139,3 @@ var readyOutboundSocket = function(serviceQueueName, amqpApi, clientChannel) {
 
 
 
-function returnErrorUpstream(text, err, clientChannel) {
-    try {
-        logger.error(err);
-        var errMsg = errors.create('exception', 'transport_negotiation_failure', err, {});
-        logger.warn(errMsg);
-        clientChannel.send(errMsg);
-    } catch(err) {
-        //logger.error(err);
-        logger.error(err.stack);
-    }
-
-}
