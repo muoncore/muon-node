@@ -17,12 +17,12 @@ describe("transport helper test", function () {
         assert.equal("listenq", headers.server_listen_q);
         assert.equal("replyq", headers.server_reply_q);
         assert.equal("rpc", headers.protocol);
-        assert.equal("handshake.initiated", headers.message_type);
+        assert.equal("initiated", headers.handshake);
     });
 
     it("create handshake accept headers", function () {
         var headers = helper.handshakeAcceptHeaders();
-        assert.equal("handshake.accepted", headers.message_type);
+        assert.equal("accepted", headers.handshake);
     });
 
     it("create string from wire message payload", function (done) {
@@ -31,9 +31,8 @@ describe("transport helper test", function () {
           var message = helper.fromWire(amqpMsg);
           console.log('valid message: ');
           console.dir(message);
-          assert.equal(message.payload, 'PING');
+          assert.equal(message.data, 'PING');
           assert.equal(message.headers.protocol, 'rpc');
-          assert.equal(message.headers.message_type, 'muon');
           done();
     });
 
@@ -42,18 +41,19 @@ describe("transport helper test", function () {
           var message = helper.fromWire(amqpMsg);
           console.log('valid message: ');
           console.dir(message);
-          assert.equal(message.payload.text, 'PING');
+          assert.equal(message.data.text, 'PING');
           done();
     });
 
     it("validate handshake message", function (done) {
           var handshake = {
             headers: {
-                 protocol: 'handshake.initiated',
+                 protocol: 'rpc',
+                 handshake: 'initiated',
                  server_reply_q: 'server.reply.ABCDEF-1234567890',
                  server_listen_q: 'server.listen.ABCDEF-1234567890',
             },
-            data: {}
+            data: ''
           }
           var message = helper.validateMessage(handshake);
           done();
@@ -62,26 +62,41 @@ describe("transport helper test", function () {
     it("catch invalid handshake initiate message", function () {
           var handshake = {
             headers: {
-                 protocol: 'handshake.initiated',
+                 protocol: 'rpc',
+                 handshake: 'initiated',
                  server_reply_q: '',
                  server_listen_q: 'server.listen.ABCDEF-1234567890',
             },
-            data: {}
+            data: ''
           }
            expect(function() { helper.validateMessage(handshake) }).to.throwException(/ValidationError/);
+    });
+
+    it("catch invalid handshake listen queue name message", function () {
+          var handshake = {
+            headers: {
+                 protocol: 'rpc',
+                 handshake: 'initiated',
+                 server_reply_q: 'server.reply',
+                 server_listen_q: 'server.listen',
+            },
+            data: ''
+          }
+           expect(function() { helper.validateMessage(handshake) }).to.throwException("message\":\"\"server_reply_q\" with value \"server.reply\" fails to match the required pattern");
     });
 
     it("catch invalid handshake accept message", function () {
           var handshake = {
             headers: {
-                 protocol: 'herdshake.accepted',
+                 protocol: 'rpc',
+                 handshake: 'uccepted',
             },
-            data: {}
+            data: ''
           }
-           expect(function() { helper.validateMessage(handshake) }).to.throwException(/ValidationError/);
+           expect(function() { helper.validateMessage(handshake) }).to.throwException("fails to match the required pattern: /(initiated|accepted)/");
     });
 
-    it("catch invalid payload message", function () {
+    it("catch invalid data message", function () {
           var handshake = {
             headers: {
                  protocol: 'rpc',
@@ -89,7 +104,18 @@ describe("transport helper test", function () {
             },
             payload: {}
           }
-           expect(function() { helper.validateMessage(handshake) }).to.throwException(/ValidationError/);
+           expect(function() { helper.validateMessage(handshake) }).to.throwException("message\":\"\"data\" is required");
+    });
+
+    it("allow null data message", function () {
+          var handshake = {
+            headers: {
+                 protocol: 'rpc',
+                 content_type: "text/plain"
+            },
+            data: null
+          }
+          helper.validateMessage(handshake);
     });
 
 
@@ -108,7 +134,6 @@ function amqpMessage(payload) {
                contentType: undefined,
                contentEncoding: undefined,
                headers:  {
-                  message_type: 'muon',
                   protocol: "rpc",
                   content_type: 'application/json',
                },

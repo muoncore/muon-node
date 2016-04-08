@@ -2,13 +2,18 @@ var uuid = require('node-uuid');
 var Joi = require('joi');
 require('sexylog');
 
+
+var reply_queue_regex = /[a-z0-9\-]\.reply\.[A-Z0-9\-]/;
+var listen_queue_regex = /[a-z0-9\-]\.listen\.[A-Z0-9\-]/;
+
 var transportMessageSchema = Joi.object().keys({
-   data: Joi.object().required(),
+   data: Joi.any().required(),
    properties: Joi.object().optional(),
    headers:  Joi.object({
-       protocol: Joi.string().min(3).regex(/(rpc|request|streaming|event|cqrs|handshake)/).required(),
-       server_reply_q: Joi.string().min(3).optional(),
-       server_listen_q: Joi.string().min(3).optional(),
+       protocol: Joi.string().min(3).regex(/^(rpc|request|streaming|event|cqrs)$/).required(),
+       handshake: Joi.string().min(3).regex(/(initiated|accepted)/).optional(),
+       server_reply_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(reply_queue_regex).required(), otherwise: Joi.forbidden() }),
+       server_listen_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(listen_queue_regex).required(), otherwise: Joi.forbidden() }),
        content_type: Joi.string().min(10).regex(/[a-z\.]\/[a-z\.]/).optional(),
    }).required()
 });
@@ -35,7 +40,7 @@ exports.queueSettings = function() {
 exports.handshakeRequestHeaders = function(protocol, listenQueue, replyQueue) {
 
   var headers = {
-     message_type: "handshake.initiated",
+     handshake: "initiated",
      protocol: protocol,
      server_reply_q: replyQueue,
      server_listen_q: listenQueue,
@@ -51,8 +56,8 @@ exports.isHandshakeAccept = function(msg) {
 exports.handshakeAcceptHeaders = function() {
 
   var headers = {
-     message_type: "handshake.accepted"
-    };
+     handshake: "accepted",
+   };
    return headers;
 
 }
