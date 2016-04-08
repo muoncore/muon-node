@@ -152,7 +152,7 @@ function handleChannelEvents(amqpChannel) {
 function publish(amqpChannel, queueName, message) {
     var data = message.data;
     var headers = message.headers;
-    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' payload: ", data);
+    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' data: ", data);
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' headers: ", headers);
     amqpChannel.assertQueue(queueName, queueSettings);
     amqpChannel.sendToQueue(queueName, new Buffer(JSON.stringify(data)), {persistent: false, headers: headers});
@@ -163,7 +163,7 @@ function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
        var message = helper.fromWire(amqpMsg);
-       logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.payload: ", message.data);
+       logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.data: ", message.data);
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: ", message.headers);
        logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
        logger.trace(message);

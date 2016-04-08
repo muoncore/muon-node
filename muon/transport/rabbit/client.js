@@ -23,7 +23,7 @@ exports.connect = function(serviceName, protocol, url, discovery) {
         .then(findService(serviceName, discovery))
         .then(sendHandshake(serviceQueueName, handshakeHeaders, api))
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
-        .then(readyOutboundSocket(serverListenQueueName, api, clientChannel.rightConnection()))
+        .then(readyOutboundSocket(serverListenQueueName, protocol, api, clientChannel.rightConnection()))
         .catch(function(err) {
              var negotiationErr = new Error(err);
              logger.error(err.stack);
@@ -84,8 +84,8 @@ var sendHandshake = function(serviceQueueName, handshakeHeaders, amqpApi) {
   return function(prevResult) {
     //logger.trace('sendHandshake() returning promise');
      var promise = new RSVP.Promise(function(resolve, reject) {
-        //console.log('sendHandshake() promise executing sending payload ' + JSON.stringify(handshakeHeaders));
-        var channel = amqpApi.outbound(serviceQueueName).send({payload: {}, headers: handshakeHeaders});
+        //console.log('sendHandshake() promise executing sending data ' + JSON.stringify(handshakeHeaders));
+        var channel = amqpApi.outbound(serviceQueueName).send({data: {}, headers: handshakeHeaders});
         logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'");
         resolve();
      });
@@ -108,7 +108,7 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
                      resolve();
                 } else {
                      logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(message));
-                     var muonMessage = message.payload;
+                     var muonMessage = message.data;
                      clientChannel.send(muonMessage);
                 }
             });
@@ -118,14 +118,14 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
 }
 
 
-var readyOutboundSocket = function(serviceQueueName, amqpApi, clientChannel) {
+var readyOutboundSocket = function(serviceQueueName, protocol, amqpApi, clientChannel) {
 
      return function(prevResult) {
          var promise = new RSVP.Promise(function(resolve, reject) {
             clientChannel.listen(function(message){
                 messages.validate(message);
                 logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
-                amqpApi.outbound(serviceQueueName).send({headers: {message_type: 'muon'}, payload: message});
+                amqpApi.outbound(serviceQueueName).send({headers: {protocol: protocol}, data: message});
             });
             logger.info('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
             resolve();

@@ -102,7 +102,7 @@ function createMessage(payload, headers, source) {
 
      var message = {
          id: uuid.v4(),
-         created: new Date(),
+         created: new Date().getTime(),
          payload: payload,
          headers: {
               origin_id: headers.origin_id,

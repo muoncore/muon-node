@@ -28,7 +28,7 @@ exports.connect = function(serviceName, url, serverStacks, discovery) {
             var serverStackChannel = serverStacks.openChannel(msg.headers.protocol);
             initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
             var replyHeaders = helper.handshakeAcceptHeaders();
-            amqpApi.outbound(msg.headers.server_reply_q).send({headers: replyHeaders, payload: {}});
+            amqpApi.outbound(msg.headers.server_reply_q).send({headers: replyHeaders, data: {}});
             logger.info("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " +  msg.headers.server_reply_q);
          });
     }).catch(function(err) {
@@ -46,14 +46,15 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
 
      amqpApi.inbound(listen_queue).listen(function(message) {
             logger.debug("[*** TRANSPORT:SERVER:INBOUND ***]  received inbound message: %s", JSON.stringify(message));
-            var muonMessage = message.payload;
+            var muonMessage = message.data;
+            messages.validate(muonMessage);
             serverStackChannel.send(muonMessage);
             logger.trace("[*** TRANSPORT:SERVER:INBOUND ***]  inbound muon event sent to server stack channel message.id=%s", message.id);
      });
 
      serverStackChannel.listen(function(event) {
             logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event to queue " + send_queue + ": %s", JSON.stringify(event));
-            amqpApi.outbound(send_queue).send({headers: {message_type: 'muon'}, payload: event});
+            amqpApi.outbound(send_queue).send({headers: {protocol: event.headers.protocol}, data: event});
      });
 
 }

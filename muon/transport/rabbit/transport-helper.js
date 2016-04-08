@@ -3,15 +3,16 @@ var Joi = require('joi');
 require('sexylog');
 
 
-var reply_queue_regex = /[a-z0-9\-]\.reply\.[A-Z0-9\-]/;
-var listen_queue_regex = /[a-z0-9\-]\.listen\.[A-Z0-9\-]/;
+var reply_queue_regex = /[a-z0-9\-]\.reply\.[a-zA-Z0-9\-]/;
+var listen_queue_regex = /[a-z0-9\-]\.listen\.[a-zA-Z0-9\-]/;
+var protocol_regex = /^(rpc|request|streaming|event|cqrs)$/;
 
 var transportMessageSchema = Joi.object().keys({
    data: Joi.any().required(),
    properties: Joi.object().optional(),
    headers:  Joi.object({
-       protocol: Joi.string().min(3).regex(/^(rpc|request|streaming|event|cqrs)$/).required(),
        handshake: Joi.string().min(3).regex(/(initiated|accepted)/).optional(),
+       protocol: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(protocol_regex).required(), otherwise: Joi.string().regex(protocol_regex).optional() }),
        server_reply_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(reply_queue_regex).required(), otherwise: Joi.forbidden() }),
        server_listen_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(listen_queue_regex).required(), otherwise: Joi.forbidden() }),
        content_type: Joi.string().min(10).regex(/[a-z\.]\/[a-z\.]/).optional(),
@@ -50,7 +51,7 @@ exports.handshakeRequestHeaders = function(protocol, listenQueue, replyQueue) {
 }
 
 exports.isHandshakeAccept = function(msg) {
-    return (msg.headers.message_type === 'handshake.accepted');
+    return (msg.headers.handshake === 'accepted' || msg.headers.handshake === 'initiated');
 }
 
 exports.handshakeAcceptHeaders = function() {
@@ -93,7 +94,7 @@ exports.fromWireOld = function(amqpMsg) {
     }
     logger.trace('demessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     var message = {
-        payload: payload,
+        data: payload,
         headers: headers
     }
     return message;
