@@ -2,7 +2,7 @@ var uuid = require('node-uuid');
 var Joi = require('joi');
 require('sexylog');
 
-
+// Regular expressions for transport message format:
 var reply_queue_regex = /[a-z0-9\-]\.reply\.[a-zA-Z0-9\-]/;
 var listen_queue_regex = /[a-z0-9\-]\.listen\.[a-zA-Z0-9\-]/;
 var protocol_regex = /^(rpc|request|streaming|event|cqrs)$/;

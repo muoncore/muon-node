@@ -54,7 +54,7 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
 
      serverStackChannel.listen(function(event) {
             logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event to queue " + send_queue + ": %s", JSON.stringify(event));
-            amqpApi.outbound(send_queue).send({headers: {protocol: event.headers.protocol}, data: event});
+            amqpApi.outbound(send_queue).send({headers: {}, data: event});
      });
 
 }

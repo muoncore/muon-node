@@ -10,19 +10,17 @@ var stackTrace = require('stack-trace');
 var schema = Joi.object().keys({
    id: Joi.string().guid().required(),
    created: Joi.date().timestamp('javascript'),
+   target_service: Joi.string().min(3).required(),
+   origin_service: Joi.string().min(3).required(),
+   url: Joi.string().uri().required(),
+   protocol: Joi.string().min(3).regex(/(request|streaming|event|error)/).required(),
+   step: Joi.string().min(3).required(),
+   provenance_id: Joi.string().guid().optional(),
+   content_type: Joi.string().min(3).required(),
+   status: Joi.array().optional(),
    payload: Joi.any().required(),
-   headers:  Joi.object({
-       origin_id: Joi.string().guid().optional(),
-       event_type: Joi.string().min(3).regex(/(handshake|request|error|exception)\.[a-z]/).required(),
-       event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).required(),
-       protocol:  Joi.string().min(3).regex(/(request|streaming|event|error)/).required(),
-       target_service: Joi.string().min(3).required(),
-       origin_service: Joi.string().min(3).required(),
-       url: Joi.string().uri().required(),
-       channel_op: Joi.string().min(3).regex(/(normal|closed|shutdown)/).required(),
-       content_type: Joi.string().min(3).required(),
-       content_types: Joi.array().required()
-   }).required()
+   channel_op: Joi.string().min(3).regex(/(normal|closed|shutdown)/).required(),
+   event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).optional()
 });
 
 
@@ -64,10 +62,9 @@ exports.rpcMessage = function(payload, sourceService, remoteServiceUrl) {
     //logger.trace('********************************* arguments.callee.caller=' + callingObject());
 
     var headers = {
-          event_type: "request.made",
+          step: "request.made",
           protocol: "request",
           event_source: callingObject(),
-          event_subtype: 'ok',
           target_service: serviceRequest.hostname,
           origin_service: sourceService,
           url: remoteServiceUrl
@@ -93,30 +90,26 @@ function createMessage(payload, headers, source) {
     if (! payload) payload = {};
     if (! headers.channel_op) headers.channel_op = 'normal';
     if (! headers.content_type) headers.content_type = 'application/json';
-    if (! headers.content_types) headers.content_types = ['application/json'];
-    if (! headers.origin_id) headers.origin_id = uuid.v4();
     if (source) headers.event_source = source;
     if (! headers.event_source) headers.event_source = callingObject();
-    if (! headers.url) headers.url = 'muon://n/a';
     if (! headers.channel_op) headers.channel_op = 'normal';
 
-     var message = {
-         id: uuid.v4(),
-         created: new Date().getTime(),
-         payload: payload,
-         headers: {
-              origin_id: headers.origin_id,
-              event_type: headers.event_type,
-              protocol: headers.protocol,
-              target_service: headers.target_service,
-              origin_service: headers.origin_service,
-              event_source: headers.event_source,
-              url: headers.url,
-              channel_op: headers.channel_op,
-              content_type: headers.content_type,
-              content_types: headers.content_types
-         },
-     };
+     var message =  {
+       id: uuid.v4(),
+       created: new Date().getTime(),
+       target_service:  headers.target_service,
+       origin_service: headers.origin_service,
+       url: headers.url,
+       protocol: headers.protocol,
+       step:  headers.step,
+       provenance_id: headers.provenance_id,
+       content_type: headers.content_type,
+       status: headers.status,
+       payload: payload,
+       channel_op:  headers.channel_op,
+       event_source: headers.event_source
+     }
+
      logger.trace('createMessage() return message='  + JSON.stringify(message));
     return message;
 }

@@ -26,14 +26,14 @@ ServerStacks.prototype.openChannel = function(protocol) {
     clientChannel.leftConnection().listen(function(event) {
 
       var serverResponseCallback = function(serverResposne) {
-              var respondMessage = messages.rpcMessage(serverResposne, event.headers.origin_service, event.headers.url);
+              var respondMessage = messages.rpcMessage(serverResposne, event.origin_service, event.url);
              clientChannel.leftConnection().send(respondMessage);
          };
 
 
 
         logger.debug('[*** API ***] incoming event: ' + JSON.stringify(event));
-        var endpoint = event.headers.url;
+        var endpoint = event.url;
         var handler = handlerMappings[endpoint];
         if (! handler) {
 
@@ -41,7 +41,7 @@ ServerStacks.prototype.openChannel = function(protocol) {
                //TODO return message with error
             serverStackChannel.leftConnection().send(event);
         } else {
-            logger.info('[*** API ***] Handler found for endpoint "'+ event.headers.url + '" event.id=' + event.id);
+            logger.info('[*** API ***] Handler found for endpoint "'+ event.url + '" event.id=' + event.id);
             handler(event, serverResponseCallback);
         }
 

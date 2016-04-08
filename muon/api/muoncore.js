@@ -26,7 +26,7 @@ exports.create = function(serviceName, url) {
 
            var event = messages.rpcMessage(payload, serviceName, remoteServiceUrl);
 
-           var transChannel = infrastructure.transport.openChannel(event.headers.target_service, 'request');
+           var transChannel = infrastructure.transport.openChannel(event.target_service, 'request');
            var clientChannel = channel.create("client-api");
            var rpcProtocolHandler = rpcProtocol.newHandler();
            clientChannel.rightHandler(rpcProtocolHandler);

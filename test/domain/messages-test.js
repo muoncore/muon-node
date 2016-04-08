@@ -13,9 +13,9 @@ describe("test messages:", function () {
           console.log('valid message: ');
           console.dir(msg);
           assert.equal(msg.payload, 'PING');
-          assert.equal(msg.headers.origin_service, 'testclient');
-          assert.equal(msg.headers.target_service, 'testserver');
-          assert.equal(msg.headers.url, 'muon://testserver/ping');
+          assert.equal(msg.origin_service, 'testclient');
+          assert.equal(msg.target_service, 'testserver');
+          assert.equal(msg.url, 'muon://testserver/ping');
           done();
     });
 
@@ -36,17 +36,15 @@ describe("test messages:", function () {
           var msg =     {
                 id: '696f4064-2cc5-44c2-a4dd-6c61bdb1e799',
                 created: new Date(),
-                headers:
-                 { origin_id: '696f4064-2cc5-44c2-a4dd-6c61bdb1e799',
-                   event_type: 'request.made',
-                   protocol: 'request',
-                   event_source: arguments.callee.caller.name,
-                   target_service: 'server1',
-                   origin_service: 'client1',
-                   url: 'muon://server1/ping',
-                   channel_op: 'normal',
-                   content_type: 'application/json',
-                   content_types: [ 'application/json' ] },
+                provenance_id: '696f4064-2cc5-44c2-a4dd-6c61bdb1e799',
+                step: 'request.made',
+                protocol: 'request',
+                event_source: arguments.callee.caller.name,
+                target_service: 'server1',
+                origin_service: 'client1',
+                url: 'muon://server1/ping',
+                channel_op: 'normal',
+                content_type: 'application/json',
                 payload: 'PING'
           };
 
