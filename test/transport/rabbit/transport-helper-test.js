@@ -46,6 +46,52 @@ describe("transport helper test", function () {
           done();
     });
 
+    it("validate handshake message", function (done) {
+          var handshake = {
+            headers: {
+                 protocol: 'handshake.initiated',
+                 server_reply_q: 'server.reply.ABCDEF-1234567890',
+                 server_listen_q: 'server.listen.ABCDEF-1234567890',
+            },
+            data: {}
+          }
+          var message = helper.validateMessage(handshake);
+          done();
+    });
+
+    it("catch invalid handshake initiate message", function () {
+          var handshake = {
+            headers: {
+                 protocol: 'handshake.initiated',
+                 server_reply_q: '',
+                 server_listen_q: 'server.listen.ABCDEF-1234567890',
+            },
+            data: {}
+          }
+           expect(function() { helper.validateMessage(handshake) }).to.throwException(/ValidationError/);
+    });
+
+    it("catch invalid handshake accept message", function () {
+          var handshake = {
+            headers: {
+                 protocol: 'herdshake.accepted',
+            },
+            data: {}
+          }
+           expect(function() { helper.validateMessage(handshake) }).to.throwException(/ValidationError/);
+    });
+
+    it("catch invalid payload message", function () {
+          var handshake = {
+            headers: {
+                 protocol: 'rpc',
+                 content_type: "application/json"
+            },
+            payload: {}
+          }
+           expect(function() { helper.validateMessage(handshake) }).to.throwException(/ValidationError/);
+    });
+
 
 });
 

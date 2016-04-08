@@ -2,7 +2,16 @@ var uuid = require('node-uuid');
 var Joi = require('joi');
 require('sexylog');
 
-
+var transportMessageSchema = Joi.object().keys({
+   data: Joi.object().required(),
+   properties: Joi.object().optional(),
+   headers:  Joi.object({
+       protocol: Joi.string().min(3).regex(/(rpc|request|streaming|event|cqrs|handshake)/).required(),
+       server_reply_q: Joi.string().min(3).optional(),
+       server_listen_q: Joi.string().min(3).optional(),
+       content_type: Joi.string().min(10).regex(/[a-z\.]\/[a-z\.]/).optional(),
+   }).required()
+});
 
 exports.serviceNegotiationQueueName = function(serviceName) {
 
@@ -101,7 +110,7 @@ exports.fromWire = function(msg) {
         }
         var message = {
             headers: headers,
-            payload: contents
+            data: contents
         };
         logger.trace('messages.fromWire() return message='  + JSON.stringify(message) );
        return message;
@@ -114,3 +123,20 @@ exports.fromWire = function(msg) {
 }
 
 
+exports.validateMessage = function(msg) {
+    return validate(msg);
+}
+
+
+function validate(message) {
+
+     var validatedMessage = Joi.validate(message, transportMessageSchema);
+        if (validatedMessage.error) {
+            logger.warn('invalid transport message: "' + JSON.stringify(message) + '"');
+            logger.info('invalid joi schema for transport message! details: ' + JSON.stringify(validatedMessage.error.details));
+             logger.error(new Error().stack);
+           throw new Error('Error! problem validating transport message schema: ' + JSON.stringify(validatedMessage.error));
+        }
+        return message;
+
+}

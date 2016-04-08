@@ -3,7 +3,7 @@ var assert = require('assert');
 var expect = require('expect.js');
 var messageHelper = require('../../../muon/domain/messages.js');
 
-describe("amqp api test", function () {
+describe("amqp api test:", function () {
 
     this.timeout(8000);
 
@@ -27,7 +27,7 @@ describe("amqp api test", function () {
                    console.log('waiting for message');
                    amqpApi.inbound('api_test_queue').listen(function(message) {
                        console.log('message received: ' + JSON.stringify(message));
-                       assert.equal(message.payload.text, payload.text);
+                       assert.equal(message.data.text, payload.text);
                        messageCount++;
                        if (messageCount == numMessages) {
                             done();
@@ -37,7 +37,12 @@ describe("amqp api test", function () {
                   console.log('sending payload');
                   for (var i = 0 ; i < numMessages ; i++) {
                             payload.id = i;
-                            var message = messageHelper.rpcMessage(payload, 'testclient', 'muon://testserver/ping');
+                            var message = {
+                                data: payload,
+                                headers: {
+                                    protocol: 'rpc'
+                                }
+                            }
                             amqpApi.outbound('api_test_queue').send(message);
                   }
 
