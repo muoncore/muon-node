@@ -2,6 +2,7 @@ var amqp = require('../../../muon/transport/rabbit/amqp-api.js');
 var assert = require('assert');
 var expect = require('expect.js');
 var messageHelper = require('../../../muon/domain/messages.js');
+require('sexylog');
 
 describe("amqp api test:", function () {
 
@@ -11,15 +12,13 @@ describe("amqp api test:", function () {
 
       });
 
-    it("send and receive a simple message", function (done) {
+    it("send and receive arbitrary number of messages", function (done) {
             var url = "amqp://muon:microservices@localhost";
-            var numMessages = 1;
+            var numMessages = 50;
             var messageCount = 0;
 
-            console.log('connecting via amqp api');
             var amqpConnect = amqp.connect(url);
 
-            console.log('connect.tehn()...');
              amqpConnect.then(function (amqpApi) {
 
                    var payload = {text: "amqp_api_test_message"};
@@ -53,6 +52,36 @@ describe("amqp api test:", function () {
                console.log("amqp-api-test.js connection.then() error!!!!!: " + error);
                 throw new Error('error in return muon promise in amqp-api-test-test.js', error);
                 assert.ok(false);
+            });
+
+    });
+
+
+    it("sending invalid message schema throws exception on channel", function (done) {
+            var url = "amqp://muon:microservices@localhost";
+            var payload = {id: 'A', text: "a_sample_test_message"};
+
+            var invalidMessage = {
+                payload: payload,
+                headers: {
+                    protocol: 'rpc'
+                }
+            }
+
+            var amqpConnect = amqp.connect(url);
+             amqpConnect.then(function (amqpApi) {
+                   amqpApi.inbound('api_test_queue').listen(function(message) {
+                   });
+                    amqpApi.outbound('api_test_queue').send(invalidMessage);
+            }, function (err) {
+                // this is not currrently expected to trigger with an invalid message, but could be considered as a nice alternative
+                done(err);
+            }).catch(function(err) {
+               if (err.toString().indexOf('Problem validating transport message schema') > -1) {
+                 done();
+               } else {
+                 done(err);
+               }
             });
 
     });

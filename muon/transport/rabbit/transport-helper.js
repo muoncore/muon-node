@@ -138,10 +138,10 @@ function validate(message) {
 
      var validatedMessage = Joi.validate(message, transportMessageSchema);
         if (validatedMessage.error) {
-            logger.warn('invalid transport message: "' + JSON.stringify(message) + '"');
-            logger.info('invalid joi schema for transport message! details: ' + JSON.stringify(validatedMessage.error.details));
-             logger.error(new Error().stack);
-           throw new Error('Error! problem validating transport message schema: ' + JSON.stringify(validatedMessage.error));
+            logger.info('invalid transport message: "' + JSON.stringify(message) + '"');
+            logger.warn('invalid joi schema for transport message! details: ' + JSON.stringify(validatedMessage.error.details));
+            logger.error(new Error(JSON.stringify(validatedMessage.error)).stack);
+            throw new Error('Problem validating transport message schema: ' +JSON.stringify(validatedMessage.error));
         }
         return message;
 
