@@ -13,7 +13,7 @@ var config = {
 };
 
 logger.info('starting muon dev tools server...');
-muon = muoncore.create("muon-dev-tools", config);
+muon = muoncore.create("muon-dev-tools", amqpurl);
 
 
 
