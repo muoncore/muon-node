@@ -30,16 +30,13 @@ ServerStacks.prototype.openChannel = function(protocol) {
              clientChannel.leftConnection().send(respondMessage);
          };
 
-
-
         logger.debug('[*** API ***] incoming event: ' + JSON.stringify(event));
         var endpoint = event.url;
         var handler = handlerMappings[endpoint];
         if (! handler) {
-
-               logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + event.id);
-               //TODO return message with error
-            serverStackChannel.leftConnection().send(event);
+            logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + event.id);
+            var return404msg = messages.return404(event);
+            serverStackChannel.leftConnection().send(return404msg);
         } else {
             logger.info('[*** API ***] Handler found for endpoint "'+ event.url + '" event.id=' + event.id);
             handler(event, serverResponseCallback);

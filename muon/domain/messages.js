@@ -51,6 +51,20 @@ exports.copy = function(json) {
 }
 
 
+exports.return404 = function(message) {
+    var copy =  jsonutil.deepCopy(message);
+    var resource = url.format(message.url).pathname;
+    copy.target_service = message.origin_service;
+    copy.origin_service = message.target_service;
+    copy.status = "404";
+    copy.step = 'request.404.' + resource;
+    copy.provenance_id = message.id;
+    copy.url = message.protocol + '://' + message.origin_service + '/'
+    copy.payload = {status: '404', message: 'no matching resource for url ' + url};
+    return copy;
+}
+
+
 
 exports.muonMessage = function(payload, sourceService, remoteServiceUrl) {
 

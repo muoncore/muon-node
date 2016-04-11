@@ -30,6 +30,21 @@ describe("test messages:", function () {
     });
 
 
+    it("create RPC 404 message", function (done) {
+          var msg =  messages.muonMessage("PING", 'testclient', 'muon://testserver/ping');
+          var returnMessage = messages.return404(msg);
+          //console.log('***** messages-test.js ********************************');
+          //console.dir(returnMessage);
+          assert.equal(returnMessage.origin_service, 'testserver', 'expected return message to swap source/target service');
+          assert.equal(returnMessage.target_service, 'testclient', 'expected return message to swap target/source service');
+          assert.equal(returnMessage.status, '404', 'expected return message to have 404 status');
+          assert.equal(returnMessage.payload.status, '404', 'expected return message to have 404 status');
+          assert.equal(returnMessage.provenance_id, msg.id, 'expected return message provenance_id to have same msg.id');
+          assert.equal(returnMessage.url, 'request://testclient/', 'expected return message url to be substituted');
+          done();
+    });
+
+
 
 
     it("test message validation", function (done) {
