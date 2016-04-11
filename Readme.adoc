@@ -37,3 +37,28 @@ node ./examples/dev-tools-echo-client.js
 node ./examples/dev-tools-ping-client.js
 ```
 
+
+
+### random number service
+
+```
+node ./examples/dev-tools-random-client.js
+```
+
+
+# type id service
+
+```
+node ./examples/dev-tools-type-client.js
+
+```
+
+
+
+
+# uuid service
+
+```
+node ./examples/dev-tools-uuid-client.js
+
+```
