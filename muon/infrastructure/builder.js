@@ -9,7 +9,10 @@ module.exports.build = function(config) {
         config: config,
         discovery: '',
         transport: '',
-        serverStacks: serverStacks
+        serverStacks: serverStacks,
+        shutdown: function() {
+            //shutdown stuff...
+        }
     }
 
     if (config.discovery.type == "browser") {

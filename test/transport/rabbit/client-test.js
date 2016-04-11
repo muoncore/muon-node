@@ -8,7 +8,7 @@ var messages = require('../../../muon/domain/messages.js');
 
 var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
 
-describe("muon client test", function () {
+describe("muon client test:", function () {
 
 
     this.timeout(20000);
@@ -61,21 +61,12 @@ describe("muon client test", function () {
         var url = "amqp://muon:microservices@localhost";
         var discovery = new AmqpDiscovery(url);
 
-        client.onError(function(err) {
-                 console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
-                   console.dir(err);
-                   console.log(typeof err);
-                   assert.ok(err);
-                   assert.ok(err instanceof Error);
-                   expect(err.toString()).to.contain('unable to find muon service');
-                   done();
-        });
-
         var muonClientChannel = client.connect(serverName, 'rpc', url, discovery);
 
 
         muonClientChannel.listen(function(msg){
-
+                 expect(msg.payload.status).to.contain('noserver');
+                 done();
         });
 
 

@@ -35,7 +35,7 @@ ServerStacks.prototype.openChannel = function(protocol) {
         var handler = handlerMappings[endpoint];
         if (! handler) {
             logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + event.id);
-            var return404msg = messages.return404(event);
+            var return404msg = messages.resource404(event);
             serverStackChannel.leftConnection().send(return404msg);
         } else {
             logger.info('[*** API ***] Handler found for endpoint "'+ event.url + '" event.id=' + event.id);

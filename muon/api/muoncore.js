@@ -12,6 +12,8 @@ var ServerStacks = require("../../muon/api/server-stacks");
 var amqpTransport = require('../../muon/transport/rabbit/transport.js');
 var builder = require("../infrastructure/builder");
 
+var TIMEOUT_MS = 10000;
+
 exports.create = function(serviceName, url) {
 
     var config = builder.config(serviceName, url);
@@ -20,7 +22,8 @@ exports.create = function(serviceName, url) {
     var muonApi = {
         discovery: function() { return infrastructure.discovery },
         shutdown: function() {
-            logger.info("Shutting down!! //todo code the logic in");
+            logger.warn("Shutting down muon!");
+            infrastructure.shutdown();
         },
         request: function(remoteServiceUrl, payload, clientCallback) {
 
@@ -33,6 +36,9 @@ exports.create = function(serviceName, url) {
            transChannel.handler(rpcProtocolHandler);
 
            var promise = new RSVP.Promise(function(resolve, reject) {
+
+
+
                 var callback = function(event) {
                         if (! event || event.error) {
                             logger.warn('client-api promise failed check! calling promise.reject()');
@@ -43,6 +49,13 @@ exports.create = function(serviceName, url) {
                         }
                 };
                 if (clientCallback) callback = clientCallback;
+
+                setTimeout(function () {
+                      var timeoutMsg =  messages.clientFailure(event, 'request', 'timeout', 'reach max timeout of ' + TIMEOUT_MS + 'ms requesting url ' + url);
+                      //clientChannel.close();
+                      callback(timeoutMsg);
+                }, TIMEOUT_MS);
+
                 clientChannel.leftConnection().listen(callback);
                 clientChannel.leftConnection().send(event);
             });
