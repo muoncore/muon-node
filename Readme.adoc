@@ -1,2 +1,39 @@
 
 # Muon Core - NodeJS
+
+
+NodeJS implementation of Muon
+
+
+
+
+
+# Examples
+
+
+open a terminal and run the exmaples service:
+
+```
+node examples/muon-dev-tools-server.js
+
+```
+
+
+
+now open another terminal window and run a client to test some of the exmaple services:
+
+
+### echo service
+
+```
+node ./examples/dev-tools-echo-client.js
+```
+
+
+### ping service
+
+
+```
+node ./examples/dev-tools-ping-client.js
+```
+
