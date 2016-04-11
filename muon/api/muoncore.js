@@ -1,5 +1,5 @@
 
-var url = require("url");
+var nodeUrl = require("url");
 //var RpcProtocol = require('../protocol/rpc-protocol.js');
 var channel = require('../infrastructure/channel.js');
 var uuid = require('node-uuid');
@@ -12,7 +12,7 @@ var ServerStacks = require("../../muon/api/server-stacks");
 var amqpTransport = require('../../muon/transport/rabbit/transport.js');
 var builder = require("../infrastructure/builder");
 
-var TIMEOUT_MS = 10000;
+
 
 exports.create = function(serviceName, url) {
 
@@ -25,22 +25,18 @@ exports.create = function(serviceName, url) {
             logger.warn("Shutting down muon!");
             infrastructure.shutdown();
         },
-        request: function(remoteServiceUrl, payload, clientCallback) {
+        request: function(remoteServiceUrl, data, clientCallback) {
 
-           var event = messages.muonMessage(payload, serviceName, remoteServiceUrl);
-
-           var transChannel = infrastructure.transport.openChannel(event.target_service, 'request');
+           var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
+           var transChannel = infrastructure.transport.openChannel(serviceRequest.hostname, 'request');
            var clientChannel = channel.create("client-api");
-           var rpcProtocolHandler = rpcProtocol.newHandler();
+           var rpcProtocolHandler = rpcProtocol.newHandler(serviceName, remoteServiceUrl);
            clientChannel.rightHandler(rpcProtocolHandler);
            transChannel.handler(rpcProtocolHandler);
 
            var promise = new RSVP.Promise(function(resolve, reject) {
-
-
-
                 var callback = function(event) {
-                        if (! event || event.error) {
+                        if (! event) {
                             logger.warn('client-api promise failed check! calling promise.reject()');
                             reject(event);
                         } else {
@@ -50,14 +46,8 @@ exports.create = function(serviceName, url) {
                 };
                 if (clientCallback) callback = clientCallback;
 
-                setTimeout(function () {
-                      var timeoutMsg =  messages.clientFailure(event, 'request', 'timeout', 'reach max timeout of ' + TIMEOUT_MS + 'ms requesting url ' + url);
-                      //clientChannel.close();
-                      callback(timeoutMsg);
-                }, TIMEOUT_MS);
-
                 clientChannel.leftConnection().listen(callback);
-                clientChannel.leftConnection().send(event);
+                clientChannel.leftConnection().send(data);
             });
 
             return promise;

@@ -17,15 +17,15 @@ module.exports.create = function(n) {
         incoming: function(f) {
             incomingFunction = f;
         },
-        sendDownstream: function(event) {
+        sendDownstream: function(event, accept, reject) {
             logger.debug('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler downstream event.id=' + event.id);
-            var result = outgoingFunction(event);
+            var result = outgoingFunction(event, accept, reject);
             logger.trace('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler downstream event=' + JSON.stringify(event));
             return result;
         },
-        sendUpstream: function(event) {
+        sendUpstream: function(event, accept, reject) {
             logger.debug('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler upstream event.id=' + event.id);
-            var result = incomingFunction(event);
+            var result = incomingFunction(event, accept, reject);
             logger.trace('[*** CSP-CHANNEL ***] ' + name + ' sending event via handler upstream event=' + JSON.stringify(event));
             return result;
         },
@@ -42,6 +42,15 @@ module.exports.create = function(n) {
             } else {
                 logger.trace('[*** CSP-CHANNEL ***] ' + name + ' other connection is upstream: ' + upstreamConnection.name());
                 return upstreamConnection;
+            }
+        },
+        thisConnection(conn) {
+            if (conn === upstreamConnection.name()) {
+                logger.trace('[*** CSP-CHANNEL ***]  ' + name + ' other connection is downstream: ' + downstreamConnection.name());
+                return upstreamConnection;
+            } else {
+                logger.trace('[*** CSP-CHANNEL ***] ' + name + ' other connection is upstream: ' + upstreamConnection.name());
+                return downstreamConnection;
             }
         }
     };

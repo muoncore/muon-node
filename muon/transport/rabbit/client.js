@@ -76,7 +76,7 @@ var findService = function(serviceName, discovery) {
                             logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + "' after " + attempts + " attempts. aborting. reject()");
                             reject(new Error('unable to find muon service ' + serviceName));
                         } else {
-                            logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + "'");
+                            logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
                         }
 
                         if (attempts > maxattempts || serviceFound) {

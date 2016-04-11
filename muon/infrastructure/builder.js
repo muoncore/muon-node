@@ -3,7 +3,7 @@ var ServerStacks = require("../../muon/api/server-stacks");
 
 module.exports.build = function(config) {
 
-    var serverStacks = new ServerStacks();
+    var serverStacks = new ServerStacks(config.serviceName);
 
     var infrastructure = {
         config: config,

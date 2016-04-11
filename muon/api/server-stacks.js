@@ -4,8 +4,8 @@ var rpcProtocol = require('../protocol/rpc-protocol.js');
 var messages = require('../domain/messages.js');
 
 
-var ServerStacks = function (transport) {
-    this.transport = transport;
+var ServerStacks = function (serverName) {
+   this.serverName = serverName;
 };
 
 
@@ -14,32 +14,29 @@ var handlerMappings = {};
 ServerStacks.prototype.openChannel = function(protocol) {
 
      logger.info("[*** API ***] opening muon server stacks channel...");
-     var rpcProtocolHandler = rpcProtocol.newHandler();
       var clientChannel = bichannel.create("serverapi");
        var serverStackChannel = bichannel.create("serverstacks");
+       var rpcProtocolHandler = rpcProtocol.newHandler(this.serverName);
      clientChannel.rightHandler(rpcProtocolHandler);
     serverStackChannel.leftHandler(rpcProtocolHandler);
 
 
-
-
-    clientChannel.leftConnection().listen(function(event) {
+    clientChannel.leftConnection().listen(function(incomingMsg) {
 
       var serverResponseCallback = function(serverResposne) {
-              var respondMessage = messages.muonMessage(serverResposne, event.origin_service, event.url);
-             clientChannel.leftConnection().send(respondMessage);
+             clientChannel.leftConnection().send(serverResposne);
          };
 
-        logger.debug('[*** API ***] incoming event: ' + JSON.stringify(event));
-        var endpoint = event.url;
+        logger.debug('[*** API ***] incoming message: ' + JSON.stringify(incomingMsg));
+        var endpoint = incomingMsg.requestUrl;
         var handler = handlerMappings[endpoint];
         if (! handler) {
-            logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + event.id);
-            var return404msg = messages.resource404(event);
+            logger.warn('[*** API ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMsg.id);
+            var return404msg = messages.rpcServer404(incomingMsg);
             serverStackChannel.leftConnection().send(return404msg);
         } else {
-            logger.info('[*** API ***] Handler found for endpoint "'+ event.url + '" event.id=' + event.id);
-            handler(event, serverResponseCallback);
+            logger.info('[*** API ***] Handler found for endpoint "'+ incomingMsg.requestUrl + '" event.id=' + incomingMsg.id);
+            handler(incomingMsg, serverResponseCallback);
         }
 
     });

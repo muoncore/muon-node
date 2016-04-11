@@ -67,17 +67,17 @@ describe("Bi directional channel test", function () {
     it("compose two channels joined via handler", function (done) {
 
          var reqResHandler = handler.create();
-         reqResHandler.outgoing(function(event){
+         reqResHandler.outgoing(function(event, accept, reject){
                 if (! event) {
                     throw new Error('reqResHandler: event is null');
                 }
-                return event;
+                accept(event);
          });
-         reqResHandler.incoming(function(event){
+         reqResHandler.incoming(function(event, accept, reject){
                  if (! event) {
                      throw new Error('reqResHandler: event is null');
                  }
-                 return event;
+                 accept(event);
           });
 
 
@@ -107,20 +107,18 @@ describe("Bi directional channel test", function () {
     it("null event triggers handler to throw error", function (done) {
 
          var reqResHandler = handler.create();
-         reqResHandler.outgoing(function(event){
+         reqResHandler.outgoing(function(event, accept, reject){
                 if (! event.id) {
-                    throw new Error('reqResHandler: event is null');
+                   reject({status: 'error'});
                 }
-                return event;
+                accept(event);
          });
-         reqResHandler.incoming(function(event){
+         reqResHandler.incoming(function(event, accept, reject){
                  if (! event.id) {
-                     throw new Error('reqResHandler: event is null');
+                     reject({status: 'error'});
                  }
-                 return event;
+                 accept(event);
           });
-
-
 
          var channelA = bichannel.create("test3A");
          var channelB = bichannel.create("test3B");

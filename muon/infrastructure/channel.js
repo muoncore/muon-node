@@ -40,7 +40,7 @@ function LeftConnection(name, inbound, outbound, validator) {
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
             logger.debug("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
-            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg='", msg);
+            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg='" + JSON.stringify(msg));
             // validate message
             try {
                if (validator && ! (msg instanceof Error)) {
@@ -100,20 +100,16 @@ function LeftConnection(name, inbound, outbound, validator) {
                         id = value.id;
                     }
                     logger.debug("[***** CHANNEL *****] " + name + ".handler() msg.id=" + id);
-                    if (handler) {
-                        try {
-                            var result = handler.sendUpstream(value);
-                            logger.trace('handler result.id=' + id);
-                            handler.otherConnection(name).send(result);
-                        } catch(err) {
-                            logger.warn(name + ': ' + err);
-                            var reply = {status: 'error'};
-                            handler.otherConnection(name).send(reply);
-                        }
-                    } else {
-                        throw new Error('handler not set');
-                    }
 
+                    var accept = function(result) {
+                        handler.otherConnection(name).send(result);
+                    };
+
+                    var reject = function(result) {
+                        handler.thisConnection(name).send(result);
+                    };
+
+                    handler.sendUpstream(value, accept, reject);
                 }
             });
         },
@@ -209,22 +205,16 @@ function RightConnection(name, inbound, outbound, validator) {
                         id = value.id;
                     }
                      logger.debug("[***** CSP-CHANNEL *****] " + name + ".handler() msg.id=" + id);
-                    if (handler) {
-                        try {
-                            var result = handler.sendDownstream(value);
-                            //logger.trace('handler result=' + JSON.stringify(result));
-                            handler.otherConnection(name).send(result);
-                        } catch(err) {
-                            logger.error(name + ': ' + err);
-                            var reply = {status: 'error'};
-                            logger.warn('[***** CSP-CHANNEL *****] ' + name + ' RightConnection error: returning message back upstream');
-                            csp.putAsync(outbound, reply);
-                        }
 
-                    } else {
-                        throw new Error('handler not set');
-                    }
+                    var accept = function(result) {
+                        handler.otherConnection(name).send(result);
+                    };
 
+                    var reject = function(result) {
+                        handler.thisConnection(name).send(result);
+                    };
+
+                    handler.sendDownstream(value, accept, reject);
                 }
             });
         },

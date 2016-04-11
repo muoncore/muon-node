@@ -21,35 +21,32 @@ describe("Muon core test", function () {
        if (muon2) muon2.shutdown();
     });
 
-    it("full stack send reply to rpc message", function (done) {
+    it("full stack request/response for rpc message", function (done) {
 
 
         muon = muoncore.create(serviceName, amqpurl);
         muon.handle('muon://example-service/tennis', function (event, respond) {
             logger.warn('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.warn('muon://service/tennis server responding to event.id=' + event.id);
+            logger.warn('muon://service/tennis server responding to event=' + JSON.stringify(event));
             respond("pong");
         });
 
         muon2 = muoncore.create("example-client", amqpurl);
 
-
-
         var promise = muon2.request('muon://example-service/tennis', "ping");
 
-        promise.then(function (event) {
-            logger.warn("muon://example-client server response received! event.id=" + event.id);
-            logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
+        promise.then(function (response) {
+            logger.warn("muon://example-client server response received! response=" + JSON.stringify(response));
             logger.warn("muon promise.then() asserting response...");
-            assert(event, "request event is undefined");
-            assert.equal(event.payload, "pong", "expected 'pong' response message from muon://example-service/tennis")
+            assert(response, "request response is undefined");
+            assert.equal(response.body, "pong", "expected 'pong' response message from muon://example-service/tennis")
             done();
         }, function (err) {
-            logger.warn("muon promise.then() error!!!!!");
-            throw new Error('error in return muon promise');
+            logger.error("muon promise.then() error!\n" + err.stack);
+            process.exit(1);
         }).catch(function(error) {
-            logger.warn("muoncore-test.js promise.then() error!!!!!: " + error);
-            throw new Error('error in return muon promise in muoncore-test.js', error);
+            logger.error("muoncore-test.js promise.then() error!:\n" + error.stack);
+            process.exit(1);
 
         });
 
@@ -78,21 +75,19 @@ describe("Muon core test", function () {
             logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.payload.status, "404", "expected '404' response message from muon://example-service/blah");
+            assert.equal(event.status, "404", "expected '404' response message from muon://example-service/blah");
 
-            if (event.payload.status === '404') {
+            if (event.status === '404') {
                 done();
             } else {
                 done(new Error('expected 404'));
             }
 
         }, function (err) {
-            logger.warn("muon promise.then() error!!!!!");
-            throw new Error('error in return muon promise');
+            logger.error("muon promise.then() error!!!!!");
             done(err);
         }).catch(function(error) {
-            logger.warn("muoncore-test.js promise.then() error!!!!!: " + error);
-            throw new Error('error in return muon promise in muoncore-test.js', error);
+            logger.error("muoncore-test.js promise.then() error!!!!!: " + error);
             done(err);
 
         });
@@ -115,22 +110,20 @@ describe("Muon core test", function () {
             logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.payload.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
+            assert.equal(event.body.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
 
-            if (event.payload.status === 'noserver') {
+            if (event.body.status === 'noserver') {
                 done();
             } else {
                 done(new Error('expected noserver error'));
             }
 
         }, function (err) {
-            logger.warn("muon promise.then() error!!!!!");
-            throw new Error('error in return muon promise');
+            logger.error("muon promise.then() error!!!!!");
             done(err);
         }).catch(function(error) {
-            logger.warn("muoncore-test.js promise.then() error!!!!!: " + error);
-            throw new Error('error in return muon promise in muoncore-test.js', error);
-            done(err);
+            logger.error(error);
+            done(error);
 
         });
     });
@@ -142,7 +135,7 @@ describe("Muon core test", function () {
         muon = muoncore.create(serviceName, amqpurl);
         muon.handle('muon://example-service/tennis', function (event, respond) {
             logger.warn('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.warn('muon://service/tennis server responding to event.id=' + event.id);
+            logger.warn('muon://service/tennis server not responding');
             //respond("pong");
         });
 
@@ -155,22 +148,20 @@ describe("Muon core test", function () {
             logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.payload.status, "timeout", "expected 'timeout' message from calling muon://example-service/tennis");
+            assert.equal(event.error.status, "timeout", "expected 'timeout' message from calling muon://example-service/tennis");
 
-            if (event.payload.status === 'timeout') {
+            if (event.error.status === 'timeout') {
                 done();
             } else {
                 done(new Error('timeout exceeded'));
             }
 
         }, function (err) {
-            logger.warn("muon promise.then() error!!!!!");
-            throw new Error('error in return muon promise');
+            logger.error(err);
             done(err);
         }).catch(function(error) {
-            logger.warn("muoncore-test.js promise.then() error!!!!!: " + error);
-            throw new Error('error in return muon promise in muoncore-test.js', error);
-            done(err);
+            logger.error(error);
+            done(error);
 
         });
     });

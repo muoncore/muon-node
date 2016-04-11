@@ -37,7 +37,7 @@ function validateSchema(message) {
         logger.warn('invalid message: \n', message);
         logger.info('invalid joi schema for message! details: ' + JSON.stringify(validatedMessage.error.details));
          logger.error(new Error().stack);
-       throw new Error('Error! problem validating rpc message schema: ' + JSON.stringify(validatedMessage.error));
+       throw new Error('Error! problem validating muon message schema: ' + JSON.stringify(validatedMessage.error));
     }
     return message;
 }
@@ -48,6 +48,19 @@ exports.createMessage = function(payload, headers, source) {
 
 exports.copy = function(json) {
     return jsonutil.deepCopy(json);
+}
+
+
+exports.rpcServer404 = function(rpcMessage) {
+    var copy =  jsonutil.deepCopy(rpcMessage);
+    var resource = url.format(rpcMessage.requestUrl).pathname;
+    copy.target_service = 'unknown';
+    copy.origin_service = 'unknown';
+    copy.status = "failure";
+    copy.step = 'request.invalid';
+    copy.url = rpcMessage.requestUrl;
+    copy.payload = {status: '404', message: 'no matching resource for url ' + url};
+    return copy;
 }
 
 
@@ -77,12 +90,11 @@ exports.serverFailure = function(msg, protocol, status, text) {
     return copy;
 }
 
-exports.clientFailure = function(msg, protocol, status, text) {
-    var copy =  jsonutil.deepCopy(msg);
-    var resource = url.format(msg.url).pathname;
+exports.clientFailure = function(rpcMsg, protocol, status, text) {
+    var copy =  jsonutil.deepCopy(rpcMsg);
     copy.status = "failure";
     copy.step = protocol  + '.' + status;
-    copy.provenance_id = msg.id;
+    copy.provenance_id = rpcMsg.id;
     copy.payload = {status: status, message: text};
     return copy;
 }
@@ -125,7 +137,28 @@ exports.muonMessage = function(payload, sourceService, remoteServiceUrl) {
 
 
 
+exports.responseMessage = function(payload, client, server, originalUrl) {
 
+   logger.trace("messages.muonMessage(payload='" +  payload + "', server='" +  server + "', originalUrl='" +  originalUrl + "')");
+
+    var messageid = uuid.v4();
+
+    var serviceRequest = url.parse(remoteServiceUrl, true);
+    //logger.trace('********************************* arguments.callee.caller=' + callingObject());
+
+    var headers = {
+          step: "request.respone",
+          protocol: "request",
+          event_source: callingObject(),
+          target_service: client,
+          origin_service: server,
+          url: originalUrl
+    };
+
+   var message = createMessage(payload, headers);
+   return validateSchema(message);
+
+};
 
 
 

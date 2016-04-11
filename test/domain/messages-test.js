@@ -91,7 +91,7 @@ describe("test messages:", function () {
             //logger.error(err);
             //logger.error(err.stack);
             expect(err).not.to.be(undefined);
-            expect(err.message).to.contain('Error! problem validating rpc message schema');
+            expect(err.message).to.contain('Error! problem validating muon message schema');
           }
           done();
     });
