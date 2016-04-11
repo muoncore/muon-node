@@ -25,6 +25,8 @@ now open another terminal window and run a client to test some of the exmaple se
 
 ### echo service
 
+this exmaple service endpoint echos back it's given payload.
+
 ```
 node ./examples/dev-tools-echo-client.js
 ```
@@ -32,6 +34,7 @@ node ./examples/dev-tools-echo-client.js
 
 ### ping service
 
+This example service responds to a payload with contents 'ping' with a 'pong' message.
 
 ```
 node ./examples/dev-tools-ping-client.js
@@ -41,12 +44,16 @@ node ./examples/dev-tools-ping-client.js
 
 ### random number service
 
+Generates a random number between 10000 & 99999.
+
 ```
 node ./examples/dev-tools-random-client.js
 ```
 
 
-# type id service
+### type id service
+
+identifies the javascript type of the payload and responds back.
 
 ```
 node ./examples/dev-tools-type-client.js
@@ -56,7 +63,9 @@ node ./examples/dev-tools-type-client.js
 
 
 
-# uuid service
+### uuid service
+
+Generate a uuid
 
 ```
 node ./examples/dev-tools-uuid-client.js
