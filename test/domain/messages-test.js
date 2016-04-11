@@ -9,7 +9,7 @@ describe("test messages:", function () {
 
     it("create muon message with valid headers", function (done) {
            //todo change to muon message
-          var msg = messages.rpcMessage("PING", 'testclient', 'muon://testserver/ping');
+          var msg = messages.muonMessage("PING", 'testclient', 'muon://testserver/ping');
           console.log('valid message: ');
           console.dir(msg);
           assert.equal(msg.payload, 'PING');
@@ -23,7 +23,7 @@ describe("test messages:", function () {
 
 
     it("copy message", function (done) {
-          var msg =  messages.rpcMessage("PING", 'testclient', 'muon://testserver/ping');
+          var msg =  messages.muonMessage("PING", 'testclient', 'muon://testserver/ping');
           var messageCopy = messages.copy(msg);
           assert.deepEqual(msg, messageCopy);
           done();
@@ -56,7 +56,7 @@ describe("test messages:", function () {
 
     it("creating message with invalid headers throws exception", function (done) {
           try {
-            var msg = messages.rpcMessage("PING", 'testclient', '', '');
+            var msg = messages.muonMessage("PING", 'testclient', '', '');
           }
           catch(err) {
             //logger.error(err);

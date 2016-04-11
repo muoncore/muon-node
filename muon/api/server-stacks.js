@@ -26,7 +26,7 @@ ServerStacks.prototype.openChannel = function(protocol) {
     clientChannel.leftConnection().listen(function(event) {
 
       var serverResponseCallback = function(serverResposne) {
-              var respondMessage = messages.rpcMessage(serverResposne, event.origin_service, event.url);
+              var respondMessage = messages.muonMessage(serverResposne, event.origin_service, event.url);
              clientChannel.leftConnection().send(respondMessage);
          };
 

@@ -52,9 +52,9 @@ exports.copy = function(json) {
 
 
 
-exports.rpcMessage = function(payload, sourceService, remoteServiceUrl) {
+exports.muonMessage = function(payload, sourceService, remoteServiceUrl) {
 
-   logger.trace("messages.rpcMessage(payload='" +  payload + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "')");
+   logger.trace("messages.muonMessage(payload='" +  payload + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "')");
 
     var messageid = uuid.v4();
 

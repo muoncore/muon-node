@@ -24,7 +24,7 @@ exports.create = function(serviceName, url) {
         },
         request: function(remoteServiceUrl, payload, clientCallback) {
 
-           var event = messages.rpcMessage(payload, serviceName, remoteServiceUrl);
+           var event = messages.muonMessage(payload, serviceName, remoteServiceUrl);
 
            var transChannel = infrastructure.transport.openChannel(event.target_service, 'request');
            var clientChannel = channel.create("client-api");
