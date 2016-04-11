@@ -17,8 +17,8 @@ describe("Muon core test", function () {
     });
 
     after(function() {
-       muon.shutdown();
-       muon2.shutdown();
+       if (muon) muon.shutdown();
+       if (muon2) muon2.shutdown();
     });
 
     it("full stack send reply to rpc message", function (done) {
@@ -26,8 +26,8 @@ describe("Muon core test", function () {
 
         muon = muoncore.create(serviceName, amqpurl);
         muon.handle('muon://example-service/tennis', function (event, respond) {
-            logger.info('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.debug('muon://service/tennis server responding to event.id=' + event.id);
+            logger.warn('*****  muon://service/tennis: muoncore-test.js *************************************************');
+            logger.warn('muon://service/tennis server responding to event.id=' + event.id);
             respond("pong");
         });
 
@@ -57,13 +57,16 @@ describe("Muon core test", function () {
 
     });
 
-    it("rpc returns 404 message for invaid resource", function (done) {
+
+
+
+    it("rpc returns 404 message for invalid resource", function (done) {
 
 
         muon = muoncore.create(serviceName, amqpurl);
         muon.handle('muon://example-service/tennis', function (event, respond) {
-            logger.info('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.debug('muon://service/tennis server responding to event.id=' + event.id);
+            logger.warn('*****  muon://service/tennis: muoncore-test.js *************************************************');
+            logger.warn('muon://service/tennis server responding to event.id=' + event.id);
             respond("pong");
         });
 
@@ -84,6 +87,46 @@ describe("Muon core test", function () {
                     done();
                 } else {
                     done(new Error('expected 404'));
+                }
+
+            }, function (err) {
+                logger.warn("muon promise.then() error!!!!!");
+                throw new Error('error in return muon promise');
+                done(err);
+            }).catch(function(error) {
+                logger.warn("muoncore-test.js promise.then() error!!!!!: " + error);
+                throw new Error('error in return muon promise in muoncore-test.js', error);
+                done(err);
+
+            });
+
+        }, 1500);
+
+    });
+
+
+
+
+
+    it("transport returns failure message for invalid server name", function (done) {
+
+        muon = muoncore.create("example-client", amqpurl);
+
+        setTimeout(function () {
+
+            var promise = muon.request('muon://invalid-service/blah', "ping");
+
+            promise.then(function (event) {
+                logger.warn("muon://example-client server response received! event.id=" + event.id);
+                logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
+                logger.warn("muon promise.then() asserting response...");
+                assert(event, "request event is undefined");
+                assert.equal(event.payload.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
+
+                if (event.payload.status === 'noserver') {
+                    done();
+                } else {
+                    done(new Error('expected noserver error'));
                 }
 
             }, function (err) {

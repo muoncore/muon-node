@@ -51,20 +51,52 @@ exports.copy = function(json) {
 }
 
 
-exports.return404 = function(message) {
+exports.resource404 = function(message) {
     var copy =  jsonutil.deepCopy(message);
     var resource = url.format(message.url).pathname;
     copy.target_service = message.origin_service;
     copy.origin_service = message.target_service;
-    copy.status = "404";
-    copy.step = 'request.404.' + resource;
+    copy.status = "failure";
+    copy.step = 'request.invalid';
     copy.provenance_id = message.id;
     copy.url = message.protocol + '://' + message.origin_service + '/'
     copy.payload = {status: '404', message: 'no matching resource for url ' + url};
     return copy;
 }
 
+exports.serverFailure = function(msg, protocol, status, text) {
+    var copy =  jsonutil.deepCopy(msg);
+    var resource = url.format(msg.url).pathname;
+    copy.target_service = msg.origin_service;
+    copy.origin_service = msg.target_service;
+    copy.status = "failure";
+    copy.step = protocol  + '.' + status;
+    copy.provenance_id = msg.id;
+    copy.url = msg.protocol + '://' + msg.origin_service + '/'
+    copy.payload = {status: status, message: text};
+    return copy;
+}
 
+exports.clientFailure = function(msg, protocol, status, text) {
+    var copy =  jsonutil.deepCopy(msg);
+    var resource = url.format(msg.url).pathname;
+    copy.status = "failure";
+    copy.step = protocol  + '.' + status;
+    copy.provenance_id = msg.id;
+    copy.payload = {status: status, message: text};
+    return copy;
+}
+
+exports.failure = function(protocol, status, text) {
+    var payload = {status: status, message: text};
+    var headers = {
+
+    };
+    var msg =  createMessage(payload, headers);
+    msg.status = "failure";
+    msg.step = protocol  + '.' + status;
+    return msg;
+}
 
 exports.muonMessage = function(payload, sourceService, remoteServiceUrl) {
 

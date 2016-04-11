@@ -25,9 +25,22 @@ exports.connect = function(serviceName, protocol, url, discovery) {
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
         .then(readyOutboundSocket(serverListenQueueName, protocol, api, clientChannel.rightConnection()))
         .catch(function(err) {
-             var negotiationErr = new Error(err);
-             logger.error(err.stack);
-             errCallback(err);
+            logger.error('catch error: ' + err.message);
+            if (err.message.indexOf('unable to find muon service') > -1) {
+
+                try {
+                    var failureMsg = messages.failure(protocol, 'noserver', 'transport cannot find service "' + serviceName + '"');
+                    clientChannel.rightConnection().send(failureMsg);
+                } catch (err2) {
+                    logger.error(err2.stack);
+                    throw new Error(err2);
+                }
+
+            } else {
+                 var negotiationErr = new Error(err);
+                 logger.error(err.stack);
+                 errCallback(err);
+            }
         });
      }).catch(function(err) {
          logger.error(err.stack);
