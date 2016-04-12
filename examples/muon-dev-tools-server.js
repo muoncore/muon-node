@@ -27,14 +27,14 @@ muon.handle('request://muon-dev-tools/ping', function (event, respond) {
 
 muon.handle('request://muon-dev-tools/echo', function (event, respond) {
     logger.debug('request://muon-dev-tools/echo responding to event.id=' + event.id);
-    respond(event.payload);
+    respond(event.body);
 });
 
 
 
 muon.handle('request://muon-dev-tools/type', function (event, respond) {
     logger.debug('request://muon-dev-tools/type responding to event.id=' + event.id);
-    respond(typeof event.payload);
+    respond(typeof event.body);
 });
 
 
@@ -56,25 +56,17 @@ muon.handle('request://muon-dev-tools/uuid', function (event, respond) {
 
 
 
-muon.handle('request://muon-dev-tools/object', function (event, respond) {
-    logger.debug('request://muon-dev-tools/object responding to event.id=' + event.id);
-    var response = true;
-    if (typeof event.payload != 'object') reponse = false;
-    respond(response);
-});
-
-
 
 muon.handle('request://muon-dev-tools/json', function (event, respond) {
     logger.debug('request://muon-dev-tools/json responding to event.id=' + event.id);
-    respond({message: 'hello, world!', server_url: 'request://muon-dev-tools/json', echo: event.payload});
+    respond({message: 'hello, world!', server_url: 'request://muon-dev-tools/json', echo: event.body});
 });
 
 
 
 muon.handle('request://muon-dev-tools/function', function (event, respond) {
     logger.debug('request://muon-dev-tools/function responding to event.id=' + event.id);
-    var func = new Function(event.payload);
+    var func = new Function(event.body);
     var result = func();
     respond(result);
 });

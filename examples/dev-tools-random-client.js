@@ -14,9 +14,8 @@ var pingPromise = muon.request('request://muon-dev-tools/random', "");
 pingPromise.then(function (event) {
     logger.warn('*****************************************************************************************');
     logger.warn("dev-tools-client server response received! event=" + JSON.stringify(event));
-    logger.warn("dev-tools-client server response received! payload=" + JSON.stringify(event.payload));
-    assert.ok(event.payload > 10000);
-    assert.ok(event.payload < 99999);
+    assert.ok(event.body > 10000);
+    assert.ok(event.body < 99999);
     process.exit(0);
 }, function (err) {
     logger.error("dev-tools-client muon promise.then() error!!!!!");
