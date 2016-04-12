@@ -61,7 +61,7 @@ function LeftConnection(name, inbound, outbound, validator) {
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
-            if (handler) throw new Error(name + ': cannot set listener as handler already set');
+            if (handler) throw new Error(name + ': cannot set LHS listener as handler already set');
             listener = callback;
             //logger.trace(name + " ChannelConnection.send() callback: " + callback);
             return csp.go(function*() {
@@ -167,7 +167,7 @@ function RightConnection(name, inbound, outbound, validator) {
             csp.putAsync(outbound, msg);
         },
         listen: function(callback) {
-            if (handler) throw new Error(name + ': cannot set listener as handler already set');
+            if (handler) throw new Error(name + ': cannot set RHS listener as handler already set');
             listener = callback;
             //logger.trace(name + " ChannelConnection.send() callback: " + callback);
             return csp.go(function*() {
@@ -263,8 +263,14 @@ function Channel(name, validator) {
         leftConnection: function() {
             return leftConnection;
         },
+        leftSend: function(msg) {
+           leftConnection.send(msg);
+         },
         rightConnection: function() {
             return rightConnection;
+        },
+        rightSend: function(msg) {
+            rightConnection.send(msg);
         },
         close: function() {
             inbound.close();
