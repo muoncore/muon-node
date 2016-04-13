@@ -29,7 +29,7 @@ module.exports.build = function(config) {
         var BrowserTransport = require("../../muon/transport/browser/browser-transport");
         infrastructure.transport = new BrowserTransport(config.serviceName, infrastructure.serverStacks, config.transport.url);
     } else {
-        var amqpTransport = require('../../muon/transport/rabbit/transport.js');
+        var amqpTransport = require('../../muon/transport/amqp/transport.js');
         var serviceName = infrastructure.config.serviceName;
         var url = infrastructure.config.transport.url;
         infrastructure.transport = amqpTransport.create(serviceName, url, serverStacks, infrastructure.discovery);

@@ -1,4 +1,4 @@
-var amqp = require('../../../muon/transport/rabbit/amqp-api.js');
+var amqp = require('../../../muon/transport/amqp/amqp-api.js');
 var RSVP = require('rsvp');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var helper = require('./transport-helper.js');

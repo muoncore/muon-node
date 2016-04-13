@@ -1,4 +1,4 @@
-var amqpTransport = require('../../../muon/transport/rabbit/transport.js');
+var amqpTransport = require('../../../muon/transport/amqp/transport.js');
 var assert = require('assert');
 var expect = require('expect.js');
 var messages = require('../../../muon/domain/messages.js');

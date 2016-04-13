@@ -8,7 +8,7 @@ require('sexylog');
 var rpc = require('../protocol/rpc');
 var messages = require('../domain/messages.js');
 var ServerStacks = require("../../muon/api/server-stacks");
-var amqpTransport = require('../../muon/transport/rabbit/transport.js');
+var amqpTransport = require('../../muon/transport/amqp/transport.js');
 var builder = require("../infrastructure/builder");
 
 
@@ -20,7 +20,6 @@ exports.create = function(serviceName, url) {
     var infrastructure = new builder.build(config, rpcApi);
     var rpcApi = rpc.getApi('server', infrastructure.transport);
     infrastructure.serverStacks.rpc(rpcApi);
-
 
     var muonApi = {
         discovery: function() { return infrastructure.discovery },

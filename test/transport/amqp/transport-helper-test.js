@@ -1,4 +1,4 @@
-var helper = require('../../../muon/transport/rabbit/transport-helper.js');
+var helper = require('../../../muon/transport/amqp/transport-helper.js');
 var assert = require('assert');
 var expect = require('expect.js');
 

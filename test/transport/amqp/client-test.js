@@ -1,13 +1,17 @@
 var bichannel = require('../../../muon/infrastructure/channel.js');
-var server = require('../../../muon/transport/rabbit/server.js');
+var client = require('../../../muon/transport/amqp/client.js');
+var server = require('../../../muon/transport/amqp/server.js');
 var assert = require('assert');
 var expect = require('expect.js');
 var uuid = require('node-uuid');
 var messages = require('../../../muon/domain/messages.js');
+
 var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
 
-describe("muon client test", function () {
+describe("muon client test:", function () {
 
+
+    this.timeout(20000);
 
      beforeEach(function() {
         //
@@ -25,22 +29,15 @@ describe("muon client test", function () {
             //shutdown nicely
       });
 
-    it("server amqp url connection error handled gracefully", function (done) {
+    it("client url error handled gracefully", function (done) {
 
         var serverName = 'serverabc123';
         var clientName = 'clientabc123';
         var url = "amqp://";
         var discovery = new AmqpDiscovery(url);
 
-         var fakeServerStackChannel = bichannel.create("fake-serverstacks");
-        var fakeServerStacks = {
-            openChannel: function() {
-                return fakeServerStackChannel.rightConnection();
-            }
-        }
 
-
-        server.onError(function(err) {
+        client.onError(function(err) {
                    console.log('********** client_server-test.js muonClientChannel.onError() error received: ');
                    console.dir(err);
                    console.log(typeof err);
@@ -50,8 +47,31 @@ describe("muon client test", function () {
                    done();
         });
 
-        server.connect(clientName, url, fakeServerStacks, discovery);
+        var muonClientChannel = client.connect(serverName, 'rpc', url, discovery);
+
+        muonClientChannel.listen(function(msg){
+        });
 
     });
+
+    it("client discovery error handled gracefully", function (done) {
+
+        var serverName = 'serverabc123';
+        var clientName = 'clientabc123';
+        var url = "amqp://muon:microservices@localhost";
+        var discovery = new AmqpDiscovery(url);
+
+        var muonClientChannel = client.connect(serverName, 'rpc', url, discovery);
+
+
+        muonClientChannel.listen(function(msg){
+                 expect(msg.payload.status).to.contain('noserver');
+                 done();
+        });
+
+
+
+    });
+
 
 });
