@@ -31,10 +31,14 @@ function discover() {
     var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
     var discovery = new AmqpDiscovery(amqpUrl);
 
-    discovery.discoverServices(function(services) {
-            console.log('services: ' + JSON.stringify(services));
-            exit();
-     });
+    setTimeout(function() {
+            discovery.discoverServices(function(services) {
+                    console.log('services: ' + JSON.stringify(services));
+                    exit();
+             });
+    }, 5000)
+
+
 }
 
 

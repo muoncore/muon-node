@@ -1,6 +1,7 @@
 var _ = require("underscore");
 var AmqpConnection = require('./infra/amqp-connection.js');
 var Broadcast = require('./infra/amqp-broadcast.js');
+require('sexylog');
 
 var AmqpDiscovery = function (url) {
 
