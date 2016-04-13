@@ -1,23 +1,44 @@
 #!/usr/bin/env node
 
 var cli = require('cli').enable('status');
-
+require('sexylog');
 
 var amqpUrl = process.env.MUON_URL;
 
 
 cli.parse({
-    discover:   ['d', 'discover muon services', 'string'],
+    discover:   ['d', 'discover muon services'],
     rpc:  ['rpc', 'remote procedure call url', 'string'],
-    port: ['s', 'Serve static files from PATH', 'number', '8080']
+    stream: ['s', 'print events from stream', 'string']
 });
  
 cli.main(function(args, options) {
 
  
-    this.ok('muon running...');
+    this.ok('muon cli connected: ' + amqpUrl);
  
     this.ok('options: ' + JSON.stringify(options));
- 
-    this.ok('discover options: ' + options.discover);
+
+    if (options.discover) {
+        discover();
+    }
+
 });
+
+
+function discover() {
+
+    var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
+    var discovery = new AmqpDiscovery(amqpUrl);
+
+    discovery.discoverServices(function(services) {
+            console.log('services: ' + JSON.stringify(services));
+            exit();
+     });
+}
+
+
+
+function exit() {
+    process.exit(0);
+}
