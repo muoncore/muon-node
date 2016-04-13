@@ -1,10 +1,12 @@
 
 var callbacks = {};
 
-module.exports.create = function(n) {
+module.exports.create = function(n, handlers) {
 
     if (! n) n = 'default';
     var name = n + '-handler';
+
+    if (handlers) callbacks = handlers;
 
     var outgoingFunction;
     var incomingFunction;
@@ -56,11 +58,13 @@ module.exports.create = function(n) {
             }
         },
         thisConnection(conn) {
-            if (conn === upstreamConnection.name()) {
+            if (upstreamConnection && conn === upstreamConnection.name()) {
                 logger.trace('[*** CSP-CHANNEL:HANDLER ***]  ' + name + ' other connection is downstream: ' + downstreamConnection.name());
                 return upstreamConnection;
             } else {
-                logger.trace('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' other connection is upstream: ' + upstreamConnection.name());
+                var upstreamConnectionName = 'unset';
+                if (upstreamConnection) upstreamConnectionName = upstreamConnection.name();
+                logger.trace('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' other connection is upstream: ' + upstreamConnectionName);
                 return downstreamConnection;
             }
         }

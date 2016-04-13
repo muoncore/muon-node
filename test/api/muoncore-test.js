@@ -4,7 +4,7 @@ var assert = require('assert');
 var muon;
 var muon2;
 
-describe("Muon core test", function () {
+describe("Muon core test:", function () {
 
 
     this.timeout(30000);

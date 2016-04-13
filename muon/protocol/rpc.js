@@ -10,17 +10,17 @@ var messages = require('../domain/messages.js');
 
 var handlerMappings = {};
 var serviceName;
-exports.getApi = function(name) {
+exports.getApi = function(name, transport) {
     serviceName = name;
 
     var api = {
         request: function(remoteServiceUrl, data, clientCallback) {
            var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
-           var transChannel = infrastructure.transport.openChannel(serviceRequest.hostname, 'request');
+           var transChannel = transport.openChannel(serviceRequest.hostname, 'request');
            var clientChannel = channel.create("client-api");
-           var rpcProtocolHandler = rpcProtocol.newHandler(serviceName, remoteServiceUrl);
-           clientChannel.rightHandler(rpcProtocolHandler);
-           transChannel.handler(rpcProtocolHandler);
+           var rpcProtocolClientHandler = clientHandler(remoteServiceUrl);
+           clientChannel.rightHandler(rpcProtocolClientHandler);
+           transChannel.handler(rpcProtocolClientHandler);
 
            var promise = new RSVP.Promise(function(resolve, reject) {
                 var callback = function(event) {
@@ -47,8 +47,8 @@ exports.getApi = function(name) {
         },
         protocolHandler: function() {
             return {
-                server: function(remoteServiceUrl) {
-                    return serverHandler(remoteServiceUrl);
+                server: function() {
+                    return serverHandler();
                 },
                 client: function() {
                     return clientHandler();
@@ -63,51 +63,43 @@ exports.getApi = function(name) {
 
 
 
-function serverHandler(serverChannel) {
+function serverHandler() {
 
-         var rpcProtocolHandler = handler.create('server-rpc');
+         var rpcProtocolHandler = handler.create('server-rpc', handlerMappings);
 
-
+         var incomingMuonMessage;
          //
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
-         rpcProtocolHandler.outgoing(function(requestData, accept, reject) {
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
-                 var muonMessage = messages.muonMessage(requestData, serviceName, remoteServiceUrl);
-                accept(muonMessage);
+         rpcProtocolHandler.outgoing(function(serverResponse, accept, reject, route) {
+                logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponse));
+                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, 'rpc://' + incomingMuonMessage.origin_service + '');
+                accept(outboundMuonMessage);
          });
 
          // INCOMING/UPSTREAM  event handling protocol logic
-         rpcProtocolHandler.incoming(function(muonMessage, accept, reject) {
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming event id=" + muonMessage.id);
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(muonMessage));
+         rpcProtocolHandler.incoming(function(msg, accept, reject, route) {
+                incomingMuonMessage = msg;
+                logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming event id=" + incomingMuonMessage.id);
+                logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
 
-
-
-
-                var endpoint = muonMessage.url;
+                var endpoint = incomingMuonMessage.url;
                 var handler = handlerMappings[endpoint];
                 if (! handler) {
-                    logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMsg.id);
-                    var return404msg = messages.rpcServer404(incomingMsg);
+                    logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMuonMessage.id);
+                    var return404msg = messages.resource404(incomingMuonMessage);
                     reject(return404msg);
                 } else {
-                    logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ muonMessage.url + '" event.id=' + muonMessage.id);
+                    logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ incomingMuonMessage.url + '" event.id=' + incomingMuonMessage.id);
 
-                    var serverResponseCallback = function(serverResposne) {
-                         serverChannel.send(serverResposne);
-                     };
-                    serverChannel.listen(function(request) {
-                           handler(request, serverResponseCallback);
-                     });
-
-                      var incomingRequest = {
-                            status: muonMessage.status,
-                            requestUrl: muonMessage.url,
-                            body: muonMessage.payload,
+                      var rpcMessage = {
+                            status: incomingMuonMessage.status,
+                            requestUrl: incomingMuonMessage.url,
+                            body: incomingMuonMessage.payload,
                             error: ''
                         }
-                      accept(incomingRequest);
+
+                    route(rpcMessage, incomingMuonMessage.url);
 
                 }
          });
@@ -117,14 +109,13 @@ function serverHandler(serverChannel) {
 
 
 
-function clientHandler() {
-
+function clientHandler(remoteServiceUrl) {
+        TIMEOUT_MS = 10000;
         var responseReceived = false;
-         var rpcProtocolHandler = handler.create('server-rpc');
-         if (! remoteServiceUrl) remoteServiceUrl = 'temp://server/url';
+         var rpcProtocolHandler = handler.create('client-rpc');
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
-         rpcProtocolHandler.outgoing(function(requestData, accept, reject) {
+         rpcProtocolHandler.outgoing(function(requestData, accept, reject, route) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
                  var muonMessage = messages.muonMessage(requestData, serviceName, remoteServiceUrl);
                 accept(muonMessage);
@@ -139,7 +130,7 @@ function clientHandler() {
          });
 
          // INCOMING/UPSTREAM  event handling protocol logic
-         rpcProtocolHandler.incoming(function(muonMessage, accept, reject) {
+         rpcProtocolHandler.incoming(function(muonMessage, accept, reject, route) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming event id=" + muonMessage.id);
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(muonMessage));
                 responseReceived = true;
@@ -172,8 +163,8 @@ function clientHandler() {
 function rpcMessage(statusCode, requestUrl, payload, error) {
     if (! payload) payload = {};
     if (! error) error = {};
-    if (! status)  {
-        var error = new Error('rpcMessage() invalid status: "' + status + '"');
+    if (! statusCode)  {
+        var error = new Error('rpcMessage() invalid status: "' + statusCode + '"');
         logger.error(error);
         throw error;
     }
