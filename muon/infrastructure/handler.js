@@ -1,4 +1,6 @@
 
+var callbacks = {};
+
 module.exports.create = function(n) {
 
     if (! n) n = 'default';
@@ -10,6 +12,8 @@ module.exports.create = function(n) {
     var upstreamConnection;
     var downstreamConnection;
 
+
+
     return {
         outgoing: function(f) {
             outgoingFunction = f;
@@ -17,17 +21,18 @@ module.exports.create = function(n) {
         incoming: function(f) {
             incomingFunction = f;
         },
-        sendDownstream: function(event, accept, reject) {
-            logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending event via handler downstream event.id=' + event.id);
-            var result = outgoingFunction(event, accept, reject);
-            logger.trace('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending event via handler downstream event=' + JSON.stringify(event));
-            return result;
+        register(callback, key) {
+            callbacks[key] = callback;
         },
-        sendUpstream: function(event, accept, reject) {
-            logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending event via handler upstream event.id=' + event.id);
-            var result = incomingFunction(event, accept, reject);
-            logger.trace('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending event via handler upstream event=' + JSON.stringify(event));
-            return result;
+        sendDownstream: function(msg, accept, reject) {
+            logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending message via handler downstream msg: ' +  JSON.stringify(msg));
+            var route = createRoute(upstreamConnection, incomingFunction);
+            outgoingFunction(msg, accept, reject, route);
+        },
+        sendUpstream: function(msg, accept, reject) {
+            logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending message via handler upstream event.id=' + JSON.stringify(msg));
+            var route = createRoute(downstreamConnection, outgoingFunction);
+            incomingFunction(msg, accept, reject, route);
         },
         getUpstreamConnection: function() {
             return upstreamConnection;
@@ -60,5 +65,34 @@ module.exports.create = function(n) {
             }
         }
     };
+
+}
+
+
+function createRoute(otherConnection, handlerFunction) {
+
+
+    var route = function(message, key) {
+        var callbackHandler = callbacks[key];
+
+        if (! callbackHandler) throw new Error('unable to find callback handler for key: ' + key);
+
+        var tempCallback = function(response) {
+            logger.trace('[*** CSP-CHANNEL:HANDLER ***] callback handler returned response for key: ' + key);
+            var accept = function(result) {
+                otherConnection.send(result);
+            };
+
+            var reject = function(result) {
+                callbackHandler({}, error);
+            };
+            logger.trace('[*** CSP-CHANNEL:HANDLER ***] calling onward function for key: ' + key);
+            handlerFunction(response, accept, reject);
+        }
+        logger.trace('[*** CSP-CHANNEL:HANDLER ***]  executing routed callback handler for key: ' + key);
+        callbackHandler(message, tempCallback);
+    };
+
+    return route;
 
 }

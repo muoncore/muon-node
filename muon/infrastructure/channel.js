@@ -94,12 +94,8 @@ function LeftConnection(name, inbound, outbound, validator) {
 
             return csp.go(function*() {
                 while(true) {
-                    var value = yield csp.take(inbound);
-                    var id = "unknown";
-                    if (value.id !== undefined) {
-                        id = value.id;
-                    }
-                    logger.debug("[***** CHANNEL *****] " + name + ".handler() msg.id=" + id);
+                    var msg = yield csp.take(inbound);
+                     logger.trace("[***** CSP-CHANNEL *****] " + name + ".handler() msg recevied: " + JSON.stringify(msg));
 
                     var accept = function(result) {
                         handler.otherConnection(name).send(result);
@@ -109,7 +105,7 @@ function LeftConnection(name, inbound, outbound, validator) {
                         handler.thisConnection(name).send(result);
                     };
 
-                    handler.sendUpstream(value, accept, reject);
+                    handler.sendUpstream(msg, accept, reject);
                 }
             });
         },
@@ -199,13 +195,8 @@ function RightConnection(name, inbound, outbound, validator) {
 
             return csp.go(function*() {
                 while(true) {
-                    var value = yield csp.take(inbound);
-                    var id = "unknown";
-                    if (value.id !== undefined) {
-                        id = value.id;
-                    }
-                     logger.debug("[***** CSP-CHANNEL *****] " + name + ".handler() msg.id=" + id);
-
+                    var msg = yield csp.take(inbound);
+                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".handler() msg recevied: " + JSON.stringify(msg));
                     var accept = function(result) {
                         handler.otherConnection(name).send(result);
                     };
@@ -213,8 +204,7 @@ function RightConnection(name, inbound, outbound, validator) {
                     var reject = function(result) {
                         handler.thisConnection(name).send(result);
                     };
-
-                    handler.sendDownstream(value, accept, reject);
+                    handler.sendDownstream(msg, accept, reject);
                 }
             });
         },
