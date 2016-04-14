@@ -21,6 +21,7 @@
     "browserify": "*",
     "console.table": "*",
     "amqplib": "*",
+    "amqp": "*",
     "split": "*",
     "underscore": "*",
     "jsonutil": "*",
