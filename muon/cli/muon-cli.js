@@ -4,8 +4,9 @@ var cli = require('cli').enable('status');
 require('sexylog');
 var url = require('url');
 var Joi = require('joi');
-
-
+var _ = require('underscore');
+var util = require('util');
+var Table = require('cli-table');
 
 
 var amqpUrl = process.env.MUON_URL;
@@ -23,14 +24,15 @@ cli.main(function(args, options) {
 
     if (validAmqpUrl.error) {
         logger.error('amqp env variable url invalid! MUON_URL=' + amqpUrl);
+        logger.error('export MUON_URL=amqp://muon:microservices@localhost:5672');
         exit();
     }
     this.ok('muon cli connected: ' + amqpUrl);
- 
-    this.ok('options: ' + JSON.stringify(options));
 
     if (options.discover) {
         discover();
+    } else {
+       console.log('mli: discovery/-d');
     }
 
 });
@@ -42,10 +44,24 @@ function discover() {
     var discovery = new AmqpDiscovery(amqpUrl);
 
     setTimeout(function() {
+
+            var table = new Table({
+                head: ['SERVICE NAME', 'TAGS', 'CONTENT/TYPE']
+              , colWidths: [30, 30, 30]
+            });
+
             discovery.discoverServices(function(services) {
-                    console.log('services: ' + JSON.stringify(services));
-                    exit();
+                    //console.log(services);
+                    _.each(services.serviceList, function(service) {
+                        table.push(
+                            [service.identifier, service.tags, service.codecs]
+                        );
+                    });
              });
+
+
+             console.log(table.toString());
+             exit();
     }, 5000)
 
 

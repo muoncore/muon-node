@@ -45,6 +45,7 @@
     "joi": "*",
     "stack-trace": "*",
     "sexylog": "*",
+    "string-format": "*",
     "async-rq": "*"
   },
   "devDependencies": {
