@@ -1,7 +1,7 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "author": "Simplicity Itself Ltd",
   "keywords": [
     "muon",
@@ -43,7 +43,6 @@
     "signals": "*",
     "assert": "*",
     "joi": "*",
-    "stack-trace": "*",
     "sexylog": "*",
     "string-format": "*",
     "async-rq": "*"
@@ -64,6 +63,5 @@
     "muon": "muon/cli/muon-cli.js"
   },
   "preferGlobal": "true",
-
   "main": "./muon/api/muoncore"
 }
