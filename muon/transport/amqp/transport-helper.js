@@ -13,8 +13,8 @@ var transportMessageSchema = Joi.object().keys({
    headers:  Joi.object({
        handshake: Joi.string().min(3).regex(/(initiated|accepted)/).optional(),
        protocol: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(protocol_regex).required(), otherwise: Joi.string().regex(protocol_regex).optional() }),
-       server_reply_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(reply_queue_regex).required(), otherwise: Joi.forbidden() }),
-       server_listen_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(listen_queue_regex).required(), otherwise: Joi.forbidden() }),
+       server_reply_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().required(), otherwise: Joi.forbidden() }),
+       server_listen_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().required(), otherwise: Joi.forbidden() }),
        content_type: Joi.string().min(10).regex(/[a-z\.]\/[a-z\.]/).optional(),
    }).required()
 });
@@ -67,6 +67,7 @@ exports.handshakeAcceptHeaders = function() {
 exports.toWire = function(payload, headers) {
      logger.trace('message(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     if (! headers) headers = {};
+    headers["congent_type"]="application/json"
     var payloadString = '-***###-payload-string-undefined-###***-';
     if (typeof payload == 'object') {
        payloadString = JSON.stringify(payload);
@@ -76,7 +77,7 @@ exports.toWire = function(payload, headers) {
     var contents = new Buffer(payloadString);
     var message = {
         payload: contents,
-        headers: headers
+        headers: headers,
     }
     return message;
 }

@@ -12,18 +12,16 @@ var schema = Joi.object().keys({
    created: Joi.date().timestamp('javascript'),
    target_service: Joi.string().min(3).required(),
    origin_service: Joi.string().min(3).required(),
-   url: Joi.string().uri().required(),
-   protocol: Joi.string().min(3).regex(/(request|streaming|event|error)/).required(),
+   // url: Joi.string().uri().required(),
+   protocol: Joi.string().min(3).required(),
    step: Joi.string().min(3).required(),
    provenance_id: Joi.string().guid().optional(),
    content_type: Joi.string().min(3).required(),
-   status: Joi.array().optional(),
+   status: Joi.string().optional(),
    payload: Joi.any().required(),
    channel_op: Joi.string().min(3).regex(/(normal|closed|shutdown)/).required(),
    event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).optional()
 });
-
-
 
 exports.validate = function(message) {
     return validateSchema(message);
@@ -110,7 +108,7 @@ exports.failure = function(protocol, status, text) {
     return msg;
 }
 
-exports.muonMessage = function(payload, sourceService, remoteServiceUrl) {
+exports.muonMessage = function(payload, sourceService, remoteServiceUrl, step) {
 
    logger.trace("messages.muonMessage(payload='" +  payload + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "')");
 
@@ -120,7 +118,7 @@ exports.muonMessage = function(payload, sourceService, remoteServiceUrl) {
     //logger.trace('********************************* arguments.callee.caller=' + callingObject());
 
     var headers = {
-          step: "request.made",
+          step: step,
           protocol: "request",
           event_source: callingObject(),
           target_service: serviceRequest.hostname,
@@ -147,7 +145,7 @@ exports.responseMessage = function(payload, client, server, originalUrl) {
     //logger.trace('********************************* arguments.callee.caller=' + callingObject());
 
     var headers = {
-          step: "request.respone",
+          step: "request.response",
           protocol: "request",
           event_source: callingObject(),
           target_service: client,
@@ -173,18 +171,25 @@ function createMessage(payload, headers, source) {
     if (! headers.event_source) headers.event_source = callingObject();
     if (! headers.channel_op) headers.channel_op = 'normal';
 
+    if (typeof payload === 'object') {
+        payload = JSON.stringify(payload)
+    }
+    
+    if (typeof payload === 'string' || payload instanceof String) {
+        payload = new Buffer(payload)
+    }
+
      var message =  {
        id: uuid.v4(),
        created: new Date().getTime(),
        target_service:  headers.target_service,
        origin_service: headers.origin_service,
-       url: headers.url,
        protocol: headers.protocol,
        step:  headers.step,
        provenance_id: headers.provenance_id,
        content_type: headers.content_type,
        status: headers.status,
-       payload: payload,
+       payload: payload.toJSON().data,
        channel_op:  headers.channel_op,
        event_source: headers.event_source
      }

@@ -73,7 +73,13 @@ function serverHandler() {
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(serverResponse, accept, reject, route) {
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponse));
-                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, 'rpc://' + incomingMuonMessage.origin_service + '');
+                
+                var response = {
+                    payload:serverResponse,
+                    status:200
+                }
+             
+                 var outboundMuonMessage = messages.muonMessage(response, serviceName, 'rpc://' + incomingMuonMessage.origin_service + '', "request.response");
                 accept(outboundMuonMessage);
          });
 
@@ -82,24 +88,27 @@ function serverHandler() {
                 incomingMuonMessage = msg;
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming event id=" + incomingMuonMessage.id);
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
+             
+                var payload = JSON.parse(new Buffer(incomingMuonMessage.payload).toString());
+                logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
 
-                var endpoint = incomingMuonMessage.url;
+                var endpoint = payload.headers.url;
                 var handler = handlerMappings[endpoint];
                 if (! handler) {
                     logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMuonMessage.id);
                     var return404msg = messages.resource404(incomingMuonMessage);
                     reject(return404msg);
                 } else {
-                    logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ incomingMuonMessage.url + '" event.id=' + incomingMuonMessage.id);
+                    logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ endpoint + '" event.id=' + incomingMuonMessage.id);
 
                       var rpcMessage = {
                             status: incomingMuonMessage.status,
-                            requestUrl: incomingMuonMessage.url,
-                            body: incomingMuonMessage.payload,
+                            requestUrl: endpoint,
+                            body: payload,
                             error: ''
                         }
 
-                    route(rpcMessage, incomingMuonMessage.url);
+                    route(rpcMessage, endpoint);
 
                 }
          });
@@ -117,7 +126,7 @@ function clientHandler(remoteServiceUrl) {
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(requestData, accept, reject, route) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
-                 var muonMessage = messages.muonMessage(requestData, serviceName, remoteServiceUrl);
+                 var muonMessage = messages.muonMessage(requestData, serviceName, remoteServiceUrl, "request.made");
                 accept(muonMessage);
 
                 setTimeout(function () {
