@@ -13,7 +13,7 @@ describe("test rpc protocol:", function () {
      var serverName = 'server';
      var requestUrl = 'rpc://server/endpoint';
 
-    it("rpc server api  handler request happy path", function (done) {
+    it("rpc server api inbound/outbound handler happy path", function (done) {
          var rpcApi = rpc.getApi('server');
 
          rpcApi.handle(requestUrl, function(request, respond) {
@@ -45,6 +45,64 @@ describe("test rpc protocol:", function () {
                           assert.equal(responseText, response.body);
                           done();
         });
+
+    });
+
+
+    it("rpc client-server happy path", function (done) {
+         var rpcApi = rpc.getApi('server');
+
+         rpcApi.handle(requestUrl, function(request, respond) {
+              console.log('rpcApi.handle() called');
+             logger.info("request is " + JSON.stringify(request))
+              assert.equal(requestText, request.body);
+              respond(responseText);
+         });
+
+         var serverApiChannel = bichannel.create("serverapi");
+         var serverTransportChannel = bichannel.create("server-transport");
+
+         var rpcServerProtocol = rpcApi.protocolHandler().server();
+         serverApiChannel.rightHandler(rpcServerProtocol);
+         serverTransportChannel.leftHandler(rpcServerProtocol);
+
+
+
+
+        var rpcClientProtocol = rpcApi.protocolHandler().client(requestUrl);
+         var clientApiChannel = bichannel.create("cleintapi");
+         var clientTransportChannel = bichannel.create("client-transport");
+
+          clientApiChannel.rightHandler(rpcClientProtocol);
+          clientTransportChannel.leftHandler(rpcClientProtocol);
+
+
+        clientTransportChannel.rightConnection().listen(function(msg){
+            serverTransportChannel.rightSend(msg);
+        });
+
+
+
+        serverTransportChannel.rightConnection().listen(function(msg) {
+                var response = messages.decode(msg.payload, msg.content_type);
+                assert.equal(responseText, response.body);
+                clientTransportChannel.rightSend(msg);
+        });
+
+
+        clientApiChannel.leftConnection().listen(function(msg) {
+                console.log('****************************** client response:');
+                console.dir(msg);
+                done();
+        });
+
+
+
+        clientApiChannel.leftSend(requestText);
+
+
+
+
 
     });
 

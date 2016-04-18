@@ -49,8 +49,8 @@ exports.getApi = function(name, transport) {
                 server: function() {
                     return serverHandler();
                 },
-                client: function() {
-                    return clientHandler();
+                client: function(remoteServiceUrl) {
+                    return clientHandler(remoteServiceUrl);
                 }
             }
         }
@@ -77,7 +77,7 @@ function serverHandler() {
                       body: serverResponseData,
                       content_type: "application/json"
                     };
-                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, 'rpc://' + incomingMuonMessage.origin_service + '', "request.response");
+                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, 'rpc://temp/blah', "request.response");
                 accept(outboundMuonMessage);
          });
 
