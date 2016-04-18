@@ -41,6 +41,7 @@ describe("test rpc protocol:", function () {
 
 
         serverTransportChannel.rightConnection().listen(function(msg) {
+                          console.dir(msg);
                           var response = messages.decode(msg.payload, msg.content_type);
                           assert.equal(responseText, response.body);
                           done();
@@ -127,6 +128,18 @@ describe("test rpc protocol:", function () {
             }
          }
 
+         var rpcRequest1 = {
+            body: 'blah1 text',
+            url: 'rpc://server/endpoint1',
+            content_type: 'text/plain'
+         }
+
+         var rpcRequest2 = {
+            body: 'blah2 text',
+            url: 'rpc://server/endpoint2',
+            content_type: 'text/plain'
+         }
+
          rpcApi.handle('rpc://server/endpoint1', function(request, response) {
               console.log('rpcApi.handle(rpc://server/endpoint1) called');
               assert.equal('blah1 text', request.body);
@@ -142,11 +155,15 @@ describe("test rpc protocol:", function () {
         var serverTransportChannel1 = bichannel.create("server1-transport");
         var rpcServerProtocol = rpcApi.protocolHandler().server();
         serverTransportChannel1.leftHandler(rpcServerProtocol);
-        var muonMessage1 = messages.muonMessage('blah1 text', clientName, 'rpc://server/endpoint1', "response.sent");
+        var muonMessage1 = messages.muonMessage(rpcRequest1, clientName, 'rpc://server/endpoint1', "response.sent");
         serverTransportChannel1.rightSend(muonMessage1);
 
         serverTransportChannel1.rightConnection().listen(function(msg) {
-                assert.equal(msg.payload, 'reply1');
+                console.log('****** serverTransportChannel1.rightConnection().listen() ');
+
+                var rpcResponse = messages.decode(msg.payload, msg.content_type);
+                console.dir(rpcResponse);
+                assert.equal(rpcResponse.body, 'reply1');
                 calls.endpoint1++;
                 callDone();
         });
@@ -154,12 +171,15 @@ describe("test rpc protocol:", function () {
         var serverTransportChannel2 = bichannel.create("server2-transport");
         var rpcServerProtocol = rpcApi.protocolHandler().server();
         serverTransportChannel2.leftHandler(rpcServerProtocol);
-        var muonMessage2 = messages.muonMessage('blah2 text', clientName, 'rpc://server/endpoint2', "response.sent");
+        var muonMessage2 = messages.muonMessage(rpcRequest2, clientName, 'rpc://server/endpoint2', "response.sent");
         serverTransportChannel2.rightSend(muonMessage2);
 
         serverTransportChannel2.rightConnection().listen(function(msg) {
-                assert.equal(msg.payload, 'reply2');
-                calls.endpoint2++;
+                console.log('****** serverTransportChannel2.rightConnection().listen() ');
+                var rpcResponse = messages.decode(msg.payload, msg.content_type);
+                console.dir(rpcResponse);
+                assert.equal(rpcResponse.body, 'reply2');
+                 calls.endpoint2++;
                 callDone();
         });
 

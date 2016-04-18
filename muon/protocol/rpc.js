@@ -71,7 +71,7 @@ function serverHandler() {
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(serverResponseData, accept, reject, route) {
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponse));
+                logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponseData));
                  var serverResponse = {
                       status: 'success',
                       body: serverResponseData,
