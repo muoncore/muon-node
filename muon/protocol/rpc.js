@@ -33,7 +33,6 @@ exports.getApi = function(name, transport) {
                         }
                 };
                 if (clientCallback) callback = clientCallback;
-
                 clientChannel.leftConnection().listen(callback);
                 clientChannel.leftConnection().send(data);
             });
@@ -75,8 +74,9 @@ function serverHandler() {
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponse));
                 
                 var response = {
-                    payload:serverResponse,
-                    status:200
+                  status: "success",
+                  body: serverResponse,
+                  content_type: "application/json"
                 }
              
                  var outboundMuonMessage = messages.muonMessage(response, serviceName, 'rpc://' + incomingMuonMessage.origin_service + '', "request.response");
@@ -87,12 +87,14 @@ function serverHandler() {
          rpcProtocolHandler.incoming(function(msg, accept, reject, route) {
                 incomingMuonMessage = msg;
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming event id=" + incomingMuonMessage.id);
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
-             
-                var payload = JSON.parse(new Buffer(incomingMuonMessage.payload).toString());
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
+                logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
+                logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
 
-                var endpoint = payload.headers.url;
+             
+                var payload = messages.decode(incomingMuonMessage.payload, incomingMuonMessage.content_type);
+                logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", payload);
+
+                var endpoint = payload.url;
                 var handler = handlerMappings[endpoint];
                 if (! handler) {
                     logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMuonMessage.id);
@@ -101,13 +103,14 @@ function serverHandler() {
                 } else {
                     logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ endpoint + '" event.id=' + incomingMuonMessage.id);
 
+                      if (status != 'success') {
+                        payload = incomingMuonMessage.error;
+                      }
                       var rpcMessage = {
-                            status: incomingMuonMessage.status,
-                            requestUrl: endpoint,
-                            body: payload,
-                            error: ''
-                        }
-
+                        status: incomingMuonMessage.status,
+                        body: payload,
+                        content_type: incomingMuonMessage.content_type
+                      }
                     route(rpcMessage, endpoint);
 
                 }
@@ -123,10 +126,20 @@ function clientHandler(remoteServiceUrl) {
         var responseReceived = false;
          var rpcProtocolHandler = handler.create('client-rpc');
 
+
+
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(requestData, accept, reject, route) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
-                 var muonMessage = messages.muonMessage(requestData, serviceName, remoteServiceUrl, "request.made");
+
+
+
+                 var request = {
+                      url: remoteServiceUrl,
+                      body: requestData,
+                      content_type: "application/json"
+                    };
+                 var muonMessage = messages.muonMessage(request, serviceName, remoteServiceUrl, "request.made");
                 accept(muonMessage);
 
                 setTimeout(function () {
@@ -138,6 +151,9 @@ function clientHandler(remoteServiceUrl) {
                 }, TIMEOUT_MS);
          });
 
+
+
+
          // INCOMING/UPSTREAM  event handling protocol logic
          rpcProtocolHandler.incoming(function(muonMessage, accept, reject, route) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming event id=" + muonMessage.id);
@@ -145,20 +161,15 @@ function clientHandler(remoteServiceUrl) {
                 responseReceived = true;
                if (muonMessage.payload.status === '404') {
                     var errorResponse = {
-                        status: muonMessage.payload.status,
+                        status: muonMessage.status,
                         requestUrl: muonMessage.url,
                         body: {},
                         error: muonMessage.payload
                     }
                     accept(errorResponse);
                 } else {
-                    var response = {
-                        status: muonMessage.status,
-                        requestUrl: muonMessage.url,
-                        body: muonMessage.payload,
-                        error: ''
-                    }
-                    accept(response);
+                    var rpcMessage =  muonMessage.payload;
+                    accept(rpcMessage);
                 }
          });
          //logger.trace('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
@@ -169,8 +180,8 @@ function clientHandler(remoteServiceUrl) {
 
 
 
-function rpcMessage(statusCode, requestUrl, payload, error) {
-    if (! payload) payload = {};
+function rpcMessage(statusCode, url, body, error) {
+    if (! body) body = {};
     if (! error) error = {};
     if (! statusCode)  {
         var error = new Error('rpcMessage() invalid status: "' + statusCode + '"');
@@ -178,10 +189,35 @@ function rpcMessage(statusCode, requestUrl, payload, error) {
         throw error;
     }
     var rpcMsg = {
-        body: payload,
+        body: body,
         statusCode: statusCode,
-         requestUrl: requestUrl,
-        error: error
+        url: url,
+        error: error,
+        endpoint: function() {
+             return nodeUrl.parse(url, true).path;
+        }
     }
     return rpcMsg;
 }
+
+function rpcRequest(statusCode, url, body, error) {
+    if (! body) body = {};
+    if (! error) error = {};
+    if (! statusCode)  {
+        var error = new Error('rpcMessage() invalid status: "' + statusCode + '"');
+        logger.error(error);
+        throw error;
+    }
+    var rpcMsg = {
+        body: body,
+        statusCode: statusCode,
+        url: url,
+        error: error,
+        endpoint: function() {
+             return nodeUrl.parse(url, true).path;
+        }
+    }
+    return rpcMsg;
+}
+
+

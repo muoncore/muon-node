@@ -110,7 +110,7 @@ exports.failure = function(protocol, status, text) {
 
 exports.muonMessage = function(payload, sourceService, remoteServiceUrl, step) {
 
-   logger.trace("messages.muonMessage(payload='" +  payload + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "')");
+   logger.trace("messages.muonMessage(payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "')");
 
     var messageid = uuid.v4();
 
@@ -159,7 +159,34 @@ exports.responseMessage = function(payload, client, server, originalUrl) {
 };
 
 
+exports.decode = function(payload, contentType) {
+    return decode(payload, contentType);
 
+}
+
+function decode(payload, contentType) {
+        logger.trace('decode() ' + contentType + ' payload type: ' + (typeof payload));
+        logger.debug('decode() ' + contentType + ' payload: ' + JSON.stringify(payload));
+       if (contentType == 'application/json') {
+           var string =payload.toString('utf8');
+           logger.debug('decode() payload.data: ' + string);
+           return JSON.parse(string);
+       } else {
+           return payload.toString();
+       }
+}
+
+
+exports.encode = function(payload) {
+return encode(payload);
+
+}
+
+function encode(payload) {
+    var string = JSON.stringify(payload);
+    var buffer = new Buffer(string, 'utf8');
+    return buffer;
+}
 
 
 function createMessage(payload, headers, source) {
@@ -189,7 +216,7 @@ function createMessage(payload, headers, source) {
        provenance_id: headers.provenance_id,
        content_type: headers.content_type,
        status: headers.status,
-       payload: payload.toJSON().data,
+       payload: encode(payload),
        channel_op:  headers.channel_op,
        event_source: headers.event_source
      }

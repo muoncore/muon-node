@@ -29,6 +29,14 @@ describe("test messages:", function () {
           done();
     });
 
+    it("encode/decode message", function (done) {
+         var object = {text: "hello, world!"};
+          var payload =  messages.encode(object);
+          var decoded = messages.decode(payload, 'application/json');
+          assert.deepEqual(object, decoded);
+          done();
+    });
+
 
     it("create resource 404 failure message", function (done) {
           var msg =  messages.muonMessage("PING", 'testclient', 'request://testserver/ping');
