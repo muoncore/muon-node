@@ -103,9 +103,6 @@ function serverHandler() {
                 } else {
                     logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ endpoint + '" event.id=' + incomingMuonMessage.id);
 
-                      if (status != 'success') {
-                        payload = incomingMuonMessage.error;
-                      }
                       var rpcMessage = {
                         status: incomingMuonMessage.status,
                         body: payload,
@@ -155,22 +152,13 @@ function clientHandler(remoteServiceUrl) {
 
 
          // INCOMING/UPSTREAM  event handling protocol logic
-         rpcProtocolHandler.incoming(function(muonMessage, accept, reject, route) {
-                logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming event id=" + muonMessage.id);
-                logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(muonMessage));
+         rpcProtocolHandler.incoming(function(rpcResponse, accept, reject, route) {
+                logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming event id=" + rpcResponse.id);
+                logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(rpcResponse));
                 responseReceived = true;
-               if (muonMessage.payload.status === '404') {
-                    var errorResponse = {
-                        status: muonMessage.status,
-                        requestUrl: muonMessage.url,
-                        body: {},
-                        error: muonMessage.payload
-                    }
-                    accept(errorResponse);
-                } else {
-                    var rpcMessage =  muonMessage.payload;
-                    accept(rpcMessage);
-                }
+                var rpcMessage =  rpcResponse.payload;
+             logger.info ("Sending the response payload " + rpcMessage)
+                accept(rpcMessage);
          });
          //logger.trace('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
          return rpcProtocolHandler;

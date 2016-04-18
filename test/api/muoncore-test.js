@@ -38,6 +38,7 @@ describe("Muon core test:", function () {
         promise.then(function (response) {
             logger.warn("muon://example-client server response received! response=" + JSON.stringify(response));
             logger.warn("muon promise.then() asserting response...");
+            logger.info("Response is " + JSON.stringify(response))
             assert(response, "request response is undefined");
             assert.equal(response.body, "pong", "expected 'pong' response message from muon://example-service/tennis")
             done();
