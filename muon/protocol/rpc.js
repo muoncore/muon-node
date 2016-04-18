@@ -156,7 +156,7 @@ function clientHandler(remoteServiceUrl) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming event id=" + rpcResponse.id);
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(rpcResponse));
                 responseReceived = true;
-                var rpcMessage =  rpcResponse.payload;
+                var rpcMessage =  messages.decode(rpcResponse.payload, rpcResponse.content_type)
              logger.info ("Sending the response payload " + rpcMessage)
                 accept(rpcMessage);
          });
