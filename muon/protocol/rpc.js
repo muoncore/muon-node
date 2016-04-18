@@ -72,14 +72,8 @@ function serverHandler() {
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(serverResponse, accept, reject, route) {
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponse));
-                
-                var response = {
-                  status: "success",
-                  body: serverResponse,
-                  content_type: "application/json"
-                }
-             
-                 var outboundMuonMessage = messages.muonMessage(response, serviceName, 'rpc://' + incomingMuonMessage.origin_service + '', "request.response");
+
+                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, 'rpc://' + incomingMuonMessage.origin_service + '', "request.response");
                 accept(outboundMuonMessage);
          });
 
@@ -103,12 +97,7 @@ function serverHandler() {
                 } else {
                     logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ endpoint + '" event.id=' + incomingMuonMessage.id);
 
-                      var rpcMessage = {
-                        status: incomingMuonMessage.status,
-                        body: payload,
-                        content_type: incomingMuonMessage.content_type
-                      }
-                    route(rpcMessage, endpoint);
+                    route(payload, endpoint);
 
                 }
          });

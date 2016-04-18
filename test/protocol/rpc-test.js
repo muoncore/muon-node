@@ -17,6 +17,7 @@ describe("test rpc protocol:", function () {
 
          rpcApi.handle(requestUrl, function(request) {
               console.log('rpcApi.handle() called');
+             logger.info("request is " + JSON.stringify(request))
               assert.equal(text, request.body);
               done();
          });

@@ -64,6 +64,8 @@ exports.rpcServer404 = function(rpcMessage) {
 
 exports.resource404 = function(message, rpcpayload) {
     var copy =  jsonutil.deepCopy(message);
+    logger.debug("Creating RPC response for MuonMessage " + JSON.stringify(message))
+    logger.debug("Creating RPC response for RPC Request " + JSON.stringify(rpcpayload))
     var resource = url.format(rpcpayload.url).pathname;
     copy.target_service = message.origin_service;
     copy.origin_service = message.target_service;
