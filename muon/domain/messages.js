@@ -62,15 +62,14 @@ exports.rpcServer404 = function(rpcMessage) {
 }
 
 
-exports.resource404 = function(message) {
+exports.resource404 = function(message, rpcpayload) {
     var copy =  jsonutil.deepCopy(message);
-    var resource = url.format(message.url).pathname;
+    var resource = url.format(rpcpayload.url).pathname;
     copy.target_service = message.origin_service;
     copy.origin_service = message.target_service;
     copy.status = "failure";
     copy.step = 'request.invalid';
     copy.provenance_id = message.id;
-    copy.url = message.protocol + '://' + message.origin_service + '/'
     copy.payload = {status: '404', message: 'no matching resource for url ' + url};
     return copy;
 }
@@ -170,7 +169,7 @@ function decode(payload, contentType) {
        if (contentType == 'application/json') {
            var string =payload.toString('utf8');
            logger.debug('decode() payload.data: ' + string);
-           return JSON.parse(string);
+           return JSON.parse(new Buffer(payload).toString('utf8'))
        } else {
            return payload.toString();
        }
@@ -183,6 +182,13 @@ return encode(payload);
 }
 
 function encode(payload) {
+
+    logger.debug("Encoding data " + JSON.stringify(payload))
+    if (payload instanceof Buffer) {
+        logger.debug("is a buffer, returning the bytes")
+        return payload.toJSON().data
+    }
+    logger.debug("Is something else, generating a byte array")
     var string = JSON.stringify(payload);
     var buffer = new Buffer(string, 'utf8');
     return buffer;
@@ -201,7 +207,7 @@ function createMessage(payload, headers, source) {
     if (typeof payload === 'object') {
         payload = JSON.stringify(payload)
     }
-    
+
     if (typeof payload === 'string' || payload instanceof String) {
         payload = new Buffer(payload)
     }

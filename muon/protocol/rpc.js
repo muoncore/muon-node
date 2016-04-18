@@ -92,13 +92,13 @@ function serverHandler() {
 
              
                 var payload = messages.decode(incomingMuonMessage.payload, incomingMuonMessage.content_type);
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", payload);
+                logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
 
                 var endpoint = payload.url;
                 var handler = handlerMappings[endpoint];
                 if (! handler) {
                     logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMuonMessage.id);
-                    var return404msg = messages.resource404(incomingMuonMessage);
+                    var return404msg = messages.resource404(incomingMuonMessage, payload);
                     reject(return404msg);
                 } else {
                     logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ endpoint + '" event.id=' + incomingMuonMessage.id);
