@@ -29,7 +29,6 @@ describe("test rpc protocol:", function () {
             console.log('***** upstreamChannel received message *****');
             console.dir(message);
             assert.equal(message.status, '404');
-            assert.equal(message.requestUrl, 'request://client/');
             assert.deepEqual(message.body, {});
             assert.equal(message.error.message, 'resource not found /ping');
             done();

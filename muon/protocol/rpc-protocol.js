@@ -12,7 +12,7 @@ exports.newHandler = function(serviceName, remoteServiceUrl) {
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(requestData, accept, reject) {
                 logger.info("[*** PROTOCOL:RPC ***] rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
-                 var muonMessage = messages.muonMessage(requestData, serviceName, remoteServiceUrl);
+                 var muonMessage = messages.muonMessage(requestData, serviceName, remoteServiceUrl, "response.sent");
                 accept(muonMessage);
 
                 setTimeout(function () {

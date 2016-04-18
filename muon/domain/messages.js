@@ -70,19 +70,17 @@ exports.resource404 = function(message, rpcpayload) {
     copy.status = "failure";
     copy.step = 'request.invalid';
     copy.provenance_id = message.id;
-    copy.payload = {status: '404', message: 'no matching resource for url ' + url};
+    copy.payload = encode({status: '404', message: 'no matching resource for url ' + url});
     return copy;
 }
 
 exports.serverFailure = function(msg, protocol, status, text) {
     var copy =  jsonutil.deepCopy(msg);
-    var resource = url.format(msg.url).pathname;
     copy.target_service = msg.origin_service;
     copy.origin_service = msg.target_service;
     copy.status = "failure";
     copy.step = protocol  + '.' + status;
     copy.provenance_id = msg.id;
-    copy.url = msg.protocol + '://' + msg.origin_service + '/'
     copy.payload = {status: status, message: text};
     return copy;
 }

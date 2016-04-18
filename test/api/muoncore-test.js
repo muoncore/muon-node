@@ -111,9 +111,9 @@ describe("Muon core test:", function () {
             logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.body.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
+            assert.equal(event.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
 
-            if (event.body.status === 'noserver') {
+            if (event.status === 'noserver') {
                 done();
             } else {
                 done(new Error('expected noserver error'));

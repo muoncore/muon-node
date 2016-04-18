@@ -9,13 +9,11 @@ describe("test messages:", function () {
 
     it("create muon message with valid headers", function (done) {
            //todo change to muon message
-          var msg = messages.muonMessage("PING", 'testclient', 'muon://testserver/ping');
+          var msg = messages.muonMessage("PING", 'testclient', 'muon://testserver/ping', "request.made");
           console.log('valid message: ');
           console.dir(msg);
-          assert.equal(msg.payload, 'PING');
           assert.equal(msg.origin_service, 'testclient');
           assert.equal(msg.target_service, 'testserver');
-          assert.equal(msg.url, 'muon://testserver/ping');
           done();
     });
 
@@ -23,7 +21,7 @@ describe("test messages:", function () {
 
 
     it("copy message", function (done) {
-          var msg =  messages.muonMessage("PING", 'testclient', 'muon://testserver/ping');
+          var msg =  messages.muonMessage("PING", 'testclient', 'muon://testserver/ping', "request.made");
           var messageCopy = messages.copy(msg);
           assert.deepEqual(msg, messageCopy);
           done();
@@ -39,7 +37,7 @@ describe("test messages:", function () {
 
 
     it("create resource 404 failure message", function (done) {
-          var msg =  messages.muonMessage("PING", 'testclient', 'request://testserver/ping');
+          var msg =  messages.muonMessage("PING", 'testclient', 'request://testserver/ping', "request.made");
           var returnMessage = messages.serverFailure(msg, 'request', '404', 'resource not found /ping');
           //console.log('***** messages-test.js ********************************');
           //console.dir(returnMessage);
@@ -48,13 +46,12 @@ describe("test messages:", function () {
           assert.equal(returnMessage.status, 'failure', 'expected return message to have 404 status');
           assert.equal(returnMessage.payload.status, '404', 'expected return message to have 404 status');
           assert.equal(returnMessage.provenance_id, msg.id, 'expected return message provenance_id to have same msg.id');
-          assert.equal(returnMessage.url, 'request://testclient/', 'expected return message url to be substituted');
           done();
     });
 
     it("create server discovery failure message", function (done) {
-          var msg =  messages.muonMessage("PING", 'testclient', 'request://testserver/ping');
-          var returnMessage =  messages.clientFailure(msg, 'request', 'noserver', 'service "testserver" not found ');
+          var msg =  messages.muonMessage("PING", 'testclient', 'request://testserver/ping', "request.made");
+          var returnMessage =  messages.clientFailure(msg, 'request', 'noserver', 'service "testserver" not found ', "request.made");
           //console.log('***** messages-test.js ********************************');
           //console.dir(returnMessage);
           assert.equal(returnMessage.origin_service, 'testclient', 'expected return message to swap source/target service');
@@ -62,7 +59,6 @@ describe("test messages:", function () {
           assert.equal(returnMessage.status, 'failure', 'expected return message to have 404 status');
           assert.equal(returnMessage.payload.status, 'noserver', 'expected return message to have 404 status');
           assert.equal(returnMessage.provenance_id, msg.id, 'expected return message provenance_id to have same msg.id');
-          assert.equal(returnMessage.url, 'request://testserver/ping', 'expected return message url to be substituted');
           done();
     });
 
@@ -79,7 +75,6 @@ describe("test messages:", function () {
                 event_source: arguments.callee.caller.name,
                 target_service: 'server1',
                 origin_service: 'client1',
-                url: 'muon://server1/ping',
                 channel_op: 'normal',
                 content_type: 'application/json',
                 payload: 'PING'
