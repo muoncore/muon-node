@@ -40,14 +40,14 @@ describe("Muon core test:", function () {
             logger.warn("muon promise.then() asserting response...");
             logger.info("Response is " + JSON.stringify(response))
             assert(response, "request response is undefined");
-            assert.equal(response.body, "pong", "expected 'pong' response message from muon://example-service/tennis")
+            assert.equal(response.body, "pong", "expected 'pong' but was " + response.body)
             done();
         }, function (err) {
             logger.error("muon promise.then() error!\n" + err.stack);
-            process.exit(1);
+            done(err);
         }).catch(function(error) {
             logger.error("muoncore-test.js promise.then() error!:\n" + error.stack);
-            process.exit(1);
+            done(error);
 
         });
 

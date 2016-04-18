@@ -7,19 +7,20 @@ var messages = require('../../muon/domain/messages.js');
 
 describe("test rpc protocol:", function () {
 
-    var text = 'Hello, world!';
+    var requestText = 'Hello, world!';
+    var responseText = 'Goodbye, world!';
     var clientName = 'client';
      var serverName = 'server';
      var requestUrl = 'rpc://server/endpoint';
 
-    it("rpc api handler happy path", function (done) {
+    it("rpc server api  handler request happy path", function (done) {
          var rpcApi = rpc.getApi('server');
 
-         rpcApi.handle(requestUrl, function(request) {
+         rpcApi.handle(requestUrl, function(request, respond) {
               console.log('rpcApi.handle() called');
              logger.info("request is " + JSON.stringify(request))
-              assert.equal(text, request.body);
-              done();
+              assert.equal(requestText, request.body);
+              respond(responseText);
          });
 
          var serverApiChannel = bichannel.create("serverapi");
@@ -30,7 +31,7 @@ describe("test rpc protocol:", function () {
          serverTransportChannel.leftHandler(rpcServerProtocol);
 
         var rpcClientRequest = {
-            body: text,
+            body: requestText,
             url: requestUrl,
             content_type: 'text/plain',
 
@@ -38,7 +39,20 @@ describe("test rpc protocol:", function () {
         var muonMessage = messages.muonMessage(rpcClientRequest, clientName, requestUrl, "response.sent");
         serverTransportChannel.rightSend(muonMessage);
 
+
+        serverTransportChannel.rightConnection().listen(function(msg) {
+                          var response = messages.decode(msg.payload, msg.content_type);
+                          assert.equal(responseText, response.body);
+                          done();
+        });
+
     });
+
+
+
+
+
+
 
     it("rpc serverside protocol with two endpoint handlers", function (done) {
          var rpcApi = rpc.getApi('server');
