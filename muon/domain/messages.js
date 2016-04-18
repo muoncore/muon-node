@@ -167,8 +167,12 @@ function decode(payload, contentType) {
        if (contentType == 'application/json') {
            var string =payload.toString('utf8');
            logger.debug('decode() payload.data: ' + string);
-           return JSON.parse(new Buffer(payload).toString('utf8'))
-       } else {
+           return JSON.parse(new Buffer(payload).toString('utf8'));
+       } else if (contentType == 'text/plain') {
+           var string = payload.toString('utf8');
+           logger.debug('decode() payload.data: ' + string);
+           return new Buffer(payload).toString('utf8');
+       }else {
            return payload.toString();
        }
 }
@@ -196,8 +200,20 @@ function encode(payload) {
 function createMessage(payload, headers, source) {
     logger.trace('createMessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     if (! payload) payload = {};
+
+    if (typeof payload == 'object') {
+        headers.content_type = "application/json";
+    } else if (typeof payload == 'string') {
+        headers.content_type = "text/plain";
+    } else if (! headers.content_type) {
+        headers.content_type = "text/plain";
+    } else {
+        //do nothing?
+    }
+
+
+
     if (! headers.channel_op) headers.channel_op = 'normal';
-    if (! headers.content_type) headers.content_type = 'application/json';
     if (source) headers.event_source = source;
     if (! headers.event_source) headers.event_source = callingObject();
     if (! headers.channel_op) headers.channel_op = 'normal';

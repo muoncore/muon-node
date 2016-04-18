@@ -28,8 +28,13 @@ describe("test rpc protocol:", function () {
          serverApiChannel.rightHandler(rpcServerProtocol);
          serverTransportChannel.leftHandler(rpcServerProtocol);
 
+        var rpcClientRequest = {
+            body: text,
+            url: requestUrl,
+            content_type: 'text/plain',
 
-        var muonMessage = messages.muonMessage(text, clientName, requestUrl, "response.sent");
+        }
+        var muonMessage = messages.muonMessage(rpcClientRequest, clientName, requestUrl, "response.sent");
         serverTransportChannel.rightSend(muonMessage);
 
     });
