@@ -1,6 +1,7 @@
 var uuid = require('node-uuid');
 var Joi = require('joi');
 require('sexylog');
+var messages = require('../../domain/messages.js');
 
 // Regular expressions for transport message format:
 var reply_queue_regex = /[a-z0-9\-]\.reply\.[a-zA-Z0-9\-]/;
@@ -67,49 +68,39 @@ exports.handshakeAcceptHeaders = function() {
 exports.toWire = function(payload, headers) {
      logger.trace('message(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     if (! headers) headers = {};
-    headers["congent_type"]="application/json"
-    var payloadString = '-***###-payload-string-undefined-###***-';
-    if (typeof payload == 'object') {
-       payloadString = JSON.stringify(payload);
-    } else {
-        payloadString = payload.toString();
-    }
-    var contents = new Buffer(payloadString);
+    // if (! headers.content_type) headers["content_type"]=text/plain"
+    var contents = messages.encode(payload);
     var message = {
-        payload: contents,
+        data: contents,
         headers: headers,
     }
     return message;
 }
 
 
-exports.fromWireOld = function(amqpMsg) {
-    logger.trace('demessage(amqpMsg='  + JSON.stringify(amqpMsg) + ')');
-    var headers = amqpMsg.properties.headers;
-    var payload = JSON.parse(amqpMsg.content).data;
-    if (! headers) headers = {};
-    if (headers['Content-type'] == 'application/json') {
-        payload = JSON.parse(new Buffer(payload).toString());
+
+exports.encode = function(data) {
+    if (typeof data === 'string') {
+        return new Buffer(data);
+    } else if(typeof data === 'object') {
+         return new Buffer(JSON.stringify(data));
     } else {
-        payload = new Buffer(payload).toString();
+        return new Buffer(data.toString());
     }
-    logger.trace('demessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
-    var message = {
-        data: payload,
-        headers: headers
-    }
-    return message;
 }
 
+exports.decode = function(buffer) {
+    return JSON.parse(buffer.toString());
+}
 
 
 exports.fromWire = function(msg) {
     try {
-        logger.trace('messages.fromWire('  + JSON.stringify(msg) + ')');
         //console.dir(msg);
         var headers = msg.properties.headers;
-        var contents = msg.content.toString();
-        logger.trace("messages.fromWire() contents: '" + contents + "'");
+        var contents = messages.decode(msg.content);
+        logger.trace('messages.fromWire(headers='  + JSON.stringify(headers) + ')');
+        logger.trace("messages.fromWire(contents=" + contents + ")");
         try {
             contents = JSON.parse(contents);
         } catch (err) {

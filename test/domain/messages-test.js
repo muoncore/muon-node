@@ -27,13 +27,91 @@ describe("test messages:", function () {
           done();
     });
 
-    it("encode/decode message", function (done) {
+    it("encode/decode object payload", function (done) {
          var object = {text: "hello, world!"};
           var payload =  messages.encode(object);
           var decoded = messages.decode(payload, 'application/json');
           assert.deepEqual(object, decoded);
           done();
     });
+
+    it("encode/decode string payload", function (done) {
+         var object = "hello, world!";
+          var payload =  messages.encode(object);
+          var decoded = messages.decode(payload);
+          assert.equal(object, decoded);
+          done();
+    });
+
+
+
+    it("encode/decode muon message json payload", function (done) {
+         var rpcMsg = {
+            url: 'rpc://client1/ping',
+            body: "PING",
+            content_type: 'text/plain'
+        }
+        var muonMessage = messages.muonMessage(rpcMsg, 'cleint', 'rpc://server1/ping', "request.made");
+
+          var decoded = messages.decode(muonMessage.payload, 'application/json');
+          assert.deepEqual(rpcMsg, decoded);
+          done();
+    });
+
+    it("encode/decode muon message string payload", function (done) {
+        var muonMessage = messages.muonMessage('PING', 'cleint', 'rpc://server1/ping', "request.made");
+          var decoded = messages.decode(muonMessage.payload, 'text/plain');
+          assert.equal('PING', decoded);
+          done();
+    });
+
+
+    it("encode/decode buffer message payload", function (done) {
+         var rpcMsg = {
+            url: 'rpc://client1/ping',
+            body: new Buffer("PING"),
+            content_type: 'text/plain'
+        };
+        var muonMessage = messages.muonMessage(rpcMsg, 'cleint', 'rpc://server1/ping', "request.made");
+          var decoded = messages.decode(muonMessage.payload);
+          console.dir(decoded);
+          assert.equal('PING', new Buffer(decoded.body).toString());
+          done();
+    });
+
+    it("buffer/unbuffer", function (done) {
+         var buffer = new Buffer('PING');
+
+         console.log('buffer.toJSON(): ' + buffer.toJSON());
+         console.log('buffer2.toJSON().stringify(): ' + JSON.stringify(buffer.toJSON()));
+         console.log('buffer.toJSON().data: ' + buffer.toJSON().data);
+
+         var json = buffer.toJSON();
+         var jsonData  = json.data;
+
+         assert.equal('PING', buffer.toString());
+         assert.equal('PING', new Buffer(jsonData).toString());
+         done();
+    });
+
+
+    it("buffer/unbuffer with nested buffer in object", function (done) {
+
+         var buffer = new Buffer('PING');
+
+         console.log('buffer.toJSON(): ' + buffer.toJSON());
+         console.log('buffer2.toJSON().stringify(): ' + JSON.stringify(buffer.toJSON()));
+         console.log('buffer.toJSON().data: ' + buffer.toJSON().data);
+
+         var json = buffer.toJSON();
+         var jsonData  = json.data;
+
+         assert.equal('PING', buffer.toString());
+         assert.equal('PING', new Buffer(jsonData).toString());
+         done();
+    });
+
+
 
 
     it("create resource 404 failure message", function (done) {

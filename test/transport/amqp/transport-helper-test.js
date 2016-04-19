@@ -1,4 +1,5 @@
 var helper = require('../../../muon/transport/amqp/transport-helper.js');
+var messages = require('../../../muon/domain/messages.js');
 var assert = require('assert');
 var expect = require('expect.js');
 
@@ -11,6 +12,18 @@ describe("transport helper test", function () {
       after(function() {
             //bi-channel.closeAll();
       });
+
+
+     it("encode/decode for wire", function (done) {
+           var msg = {text: 'test'};
+           var encoded = helper.encode(msg);
+           console.log('encoded message: ');
+           var decoded = helper.decode(encoded);
+           assert.equal(decoded.text, 'test');
+           done();
+     });
+
+
 
     it("create handshake request headers", function () {
         var headers = helper.handshakeRequestHeaders("rpc", "listenq", "replyq");
@@ -26,7 +39,6 @@ describe("transport helper test", function () {
     });
 
     it("create string from wire message payload", function (done) {
-
           var amqpMsg = amqpMessage('PING');
           var message = helper.fromWire(amqpMsg);
           console.log('valid message: ');
@@ -37,11 +49,17 @@ describe("transport helper test", function () {
     });
 
     it("create object from wire message payload", function (done) {
-          var amqpMsg = amqpMessage({text: 'PING'});
+
+          var wireMsg = helper.toWire({text: 'PING'});
+          //console.dir(wireMsg);
+          var amqpMsg = amqpMessage(wireMsg.data);
+          //console.dir(amqpMsg);
           var message = helper.fromWire(amqpMsg);
+          var buffer = new Buffer(message.data);
+          var object = messages.decode(buffer);
           console.log('valid message: ');
-          console.dir(message);
-          assert.equal(message.data.text, 'PING');
+          console.dir(object);
+          assert.equal(object.text, 'PING');
           done();
     });
 
@@ -72,18 +90,7 @@ describe("transport helper test", function () {
            expect(function() { helper.validateMessage(handshake) }).to.throwException(/ValidationError/);
     });
 
-    it("catch invalid handshake listen queue name message", function () {
-          var handshake = {
-            headers: {
-                 protocol: 'rpc',
-                 handshake: 'initiated',
-                 server_reply_q: 'server.reply',
-                 server_listen_q: 'server.listen',
-            },
-            data: ''
-          }
-           expect(function() { helper.validateMessage(handshake) }).to.throwException("message\":\"\"server_reply_q\" with value \"server.reply\" fails to match the required pattern");
-    });
+
 
     it("catch invalid handshake accept message", function () {
           var handshake = {
@@ -149,7 +156,7 @@ function amqpMessage(payload) {
                appId: undefined,
                clusterId: undefined
         },
-        content:  new Buffer(payload)
+        content: payload
     }
 
     return amqpMsg;

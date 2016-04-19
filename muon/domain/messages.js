@@ -163,20 +163,34 @@ exports.decode = function(payload, contentType) {
 
 }
 
-function decode(payload, contentType) {
-        logger.trace('decode() ' + contentType + ' payload type: ' + (typeof payload));
-        logger.debug('decode() ' + contentType + ' payload: ' + JSON.stringify(payload));
-       if (contentType == 'application/json') {
-           var string =payload.toString('utf8');
-           logger.debug('decode() payload.data: ' + string);
-           return JSON.parse(new Buffer(payload).toString('utf8'));
-       } else if (contentType == 'text/plain') {
-           var string = payload.toString('utf8');
-           logger.debug('decode() payload.data: ' + string);
-           return new Buffer(payload).toString('utf8');
-       }else {
-           return payload.toString();
+function decode(payload) {
+
+
+       if (! payload) {
+         throw new Error('cannot decode undefined payload!');
        }
+
+       logger.debug('decode() payload type: ' + (typeof payload));
+       logger.debug('decode() payload instanceof array: ' + (payload instanceof Array));
+       logger.debug('decode() payload array constructor: ' + (payload.constructor === Array));
+       logger.trace('decode() payload: ' + JSON.stringify(payload));
+
+       if ( ! payload instanceof Array ) {
+            logger.error('payload to decode is not of expected type: ' + JSON.stringify(payload));
+            throw new Error('can only decode payloads as byte array of type Buffer');
+       }
+
+       var buffer = new Buffer(payload);
+       logger.trace('BUFFER DECODE: ' + buffer.toString());
+       var value;
+       try {
+            var value = JSON.parse(buffer.toString());
+       } catch (err) {
+            value = buffer.toString();
+        }
+
+       return value;
+
 }
 
 
@@ -186,16 +200,15 @@ return encode(payload);
 }
 
 function encode(payload) {
-
-    logger.debug("Encoding data " + JSON.stringify(payload))
-    if (payload instanceof Buffer) {
-        logger.debug("is a buffer, returning the bytes")
-        return payload.toJSON().data
-    }
-    logger.debug("Is something else, generating a byte array")
-    var string = JSON.stringify(payload);
-    var buffer = new Buffer(string, 'utf8');
-    return buffer;
+    var encoded;
+     if (typeof payload === 'string') {
+        encoded = new Buffer(payload, 'utf8').toJSON().data;
+     } else if (typeof payload === 'object'){
+        encoded = new Buffer(JSON.stringify(payload), 'utf8').toJSON().data;
+     } else {
+        encoded = new Buffer(payload.toString(), 'utf8').toJSON().data;
+     }
+    return encoded;
 }
 
 
@@ -213,20 +226,10 @@ function createMessage(payload, headers, source) {
         //do nothing?
     }
 
-
-
     if (! headers.channel_op) headers.channel_op = 'normal';
     if (source) headers.event_source = source;
     if (! headers.event_source) headers.event_source = callingObject();
     if (! headers.channel_op) headers.channel_op = 'normal';
-
-    if (typeof payload === 'object') {
-        payload = JSON.stringify(payload)
-    }
-
-    if (typeof payload === 'string' || payload instanceof String) {
-        payload = new Buffer(payload)
-    }
 
      var message =  {
        id: uuid.v4(),
