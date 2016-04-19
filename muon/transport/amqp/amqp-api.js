@@ -164,6 +164,12 @@ function publish(amqpChannel, queueName, message) {
 function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
+       logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message.data: ", JSON.stringify(amqpMsg));
+       if (amqpMsg == undefined || amqpMsg == null) {
+           logger.warn("Received a null message over the queue")
+           // amqpChannel.ack(amqpMsg);
+            return
+       }
        var message = helper.fromWire(amqpMsg);
        logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.data: ", message.data);
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: ", message.headers);
