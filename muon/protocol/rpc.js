@@ -73,8 +73,8 @@ function serverHandler() {
          rpcProtocolHandler.outgoing(function(serverResponseData, accept, reject, route) {
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponseData));
                  var serverResponse = {
-                      status: 'success',
-                      body: serverResponseData,
+                      status: 200,
+                      body: messages.encode(serverResponseData),
                       content_type: "application/json"
                     };
                  var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, 'rpc://temp/blah', "request.response");
@@ -93,9 +93,12 @@ function serverHandler() {
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
 
                 var endpoint = payload.url;
+                payload.body = messages.decode(payload.body, payload.content_type)
+
                 var handler = handlerMappings[endpoint];
                 if (! handler) {
                     logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMuonMessage.id);
+                    payload.status = 404
                     var return404msg = messages.resource404(incomingMuonMessage, payload);
                     reject(return404msg);
                 } else {
@@ -121,11 +124,11 @@ function clientHandler(remoteServiceUrl) {
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(requestData, accept, reject, route) {
-                logger.info("[*** PROTOCOL:CLIENT:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
+                logger.info("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
 
                  var request = {
                       url: remoteServiceUrl,
-                      body: requestData,
+                      body: messages.encode(requestData),
                       content_type: "application/json"
                     };
                  var muonMessage = messages.muonMessage(request, serviceName, remoteServiceUrl, "request.made");
@@ -149,6 +152,9 @@ function clientHandler(remoteServiceUrl) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(rpcResponse));
                 responseReceived = true;
                 var rpcMessage =  messages.decode(rpcResponse.payload, rpcResponse.content_type)
+                if (rpcMessage.body != undefined) {
+                    rpcMessage.body = messages.decode(rpcMessage.body, rpcMessage.content_type)
+                }
              logger.info ("Sending the response payload " + rpcMessage)
                 accept(rpcMessage);
          });

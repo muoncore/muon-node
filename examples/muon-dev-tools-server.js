@@ -18,14 +18,14 @@ muon = muoncore.create("muon-dev-tools", amqpurl);
 
 
 
-muon.handle('/ping', function (event, respond) {
+muon.handle('request://muon-dev-tools/ping', function (event, respond) {
     logger.debug('request://muon-dev-tools/ping responding to event.id=' + event.id);
     respond("pong");
 });
 
 
 
-muon.handle('/echo', function (event, respond) {
+muon.handle('request://muon-dev-tools/echo', function (event, respond) {
     logger.debug('request://muon-dev-tools/echo responding to event.id=' + event.id);
     respond(event.body);
 });

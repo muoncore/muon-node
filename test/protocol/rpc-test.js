@@ -31,7 +31,7 @@ describe("test rpc protocol:", function () {
          serverTransportChannel.leftHandler(rpcServerProtocol);
 
         var rpcClientRequest = {
-            body: requestText,
+            body: messages.encode(requestText),
             url: requestUrl,
             content_type: 'text/plain',
 
@@ -43,7 +43,8 @@ describe("test rpc protocol:", function () {
         serverTransportChannel.rightConnection().listen(function(msg) {
                           console.dir(msg);
                           var response = messages.decode(msg.payload, msg.content_type);
-                          assert.equal(responseText, response.body);
+                          var responseBody = messages.decode(response.body, msg.content_type)
+                          assert.equal(responseText, responseBody);
                           done();
         });
 
@@ -86,7 +87,8 @@ describe("test rpc protocol:", function () {
 
         serverTransportChannel.rightConnection().listen(function(msg) {
                 var response = messages.decode(msg.payload, msg.content_type);
-                assert.equal(responseText, response.body);
+                var responseBody = messages.decode(response.body, response.content_type)
+                assert.equal(responseText, responseBody);
                 clientTransportChannel.rightSend(msg);
         });
 
@@ -129,13 +131,13 @@ describe("test rpc protocol:", function () {
          }
 
          var rpcRequest1 = {
-            body: 'blah1 text',
+            body: messages.encode('blah1 text'),
             url: 'rpc://server/endpoint1',
             content_type: 'text/plain'
          }
 
          var rpcRequest2 = {
-            body: 'blah2 text',
+            body: messages.encode('blah2 text'),
             url: 'rpc://server/endpoint2',
             content_type: 'text/plain'
          }
@@ -162,8 +164,9 @@ describe("test rpc protocol:", function () {
                 console.log('****** serverTransportChannel1.rightConnection().listen() ');
 
                 var rpcResponse = messages.decode(msg.payload, msg.content_type);
+                var responseBody = messages.decode(rpcResponse.body, rpcResponse.content_type)
                 console.dir(rpcResponse);
-                assert.equal(rpcResponse.body, 'reply1');
+                assert.equal(responseBody, 'reply1');
                 calls.endpoint1++;
                 callDone();
         });
@@ -177,8 +180,9 @@ describe("test rpc protocol:", function () {
         serverTransportChannel2.rightConnection().listen(function(msg) {
                 console.log('****** serverTransportChannel2.rightConnection().listen() ');
                 var rpcResponse = messages.decode(msg.payload, msg.content_type);
+                var responseBody = messages.decode(rpcResponse.body, rpcResponse.content_type)
                 console.dir(rpcResponse);
-                assert.equal(rpcResponse.body, 'reply2');
+                assert.equal(responseBody, 'reply2');
                  calls.endpoint2++;
                 callDone();
         });
