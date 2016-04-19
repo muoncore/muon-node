@@ -156,7 +156,7 @@ function publish(amqpChannel, queueName, message) {
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' headers: ", headers);
     amqpChannel.assertQueue(queueName, queueSettings);
     var buffer = helper.encode(data);
-    console.dir(buffer);
+    //console.dir(buffer);
     amqpChannel.sendToQueue(queueName, new Buffer(buffer), {persistent: false, headers: headers});
 
 }

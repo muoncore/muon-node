@@ -8,7 +8,7 @@ var messages = require('../../../muon/domain/messages.js');
 
 var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
 
-describe("muon client test:", function () {
+describe("client test:", function () {
 
 
     this.timeout(20000);
@@ -49,8 +49,7 @@ describe("muon client test:", function () {
 
         var muonClientChannel = client.connect(serverName, 'rpc', url, discovery);
 
-        muonClientChannel.listen(function(msg){
-        });
+        muonClientChannel.listen(function(msg){   });
 
     });
 
@@ -65,7 +64,9 @@ describe("muon client test:", function () {
 
 
         muonClientChannel.listen(function(msg){
-                 expect(msg.payload.status).to.contain('noserver');
+                 expect(msg.status).to.contain('failure');
+                 var payload = messages.decode(msg.payload);
+                 expect(payload.status).to.contain('noserver');
                  done();
         });
 
