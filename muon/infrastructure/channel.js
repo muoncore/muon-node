@@ -49,7 +49,6 @@ function LeftConnection(name, inbound, outbound, validator) {
                }
             } catch(err) {
                 logger.warn('invalid message received on channel "' + name + '" sending to error listener');
-                console.dir(errCallback);
                 if (errCallback) {
                     errCallback(err); // invalid send it back
                     return;
@@ -152,7 +151,6 @@ function RightConnection(name, inbound, outbound, validator) {
                }
             } catch(err) {
                logger.warn('invalid message received on channel "' + name + '" sending to error listener');
-                console.dir(errCallback);
                 if (errCallback) {
                     errCallback(err); // invalid send it back
                     return;

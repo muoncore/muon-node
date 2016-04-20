@@ -73,7 +73,6 @@ AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
                                     logger.trace("Broadcast payload: " + payload);
                                 } catch (error) {
                                     logger.error("Failed to understand broadcast message");
-                                    //console.dir(message);
                                 }
                             }
 

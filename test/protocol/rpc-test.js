@@ -36,7 +36,7 @@ describe("test rpc protocol:", function () {
             content_type: 'text/plain',
 
         }
-        var muonMessage = messages.muonMessage(rpcClientRequest, clientName, requestUrl, "response.sent");
+        var muonMessage = messages.muonMessage(rpcClientRequest, clientName, 'server', "response.sent");
         serverTransportChannel.rightSend(muonMessage);
 
 
@@ -157,7 +157,7 @@ describe("test rpc protocol:", function () {
         var serverTransportChannel1 = bichannel.create("server1-transport");
         var rpcServerProtocol = rpcApi.protocolHandler().server();
         serverTransportChannel1.leftHandler(rpcServerProtocol);
-        var muonMessage1 = messages.muonMessage(rpcRequest1, clientName, 'rpc://server/endpoint1', "response.sent");
+        var muonMessage1 = messages.muonMessage(rpcRequest1, clientName, 'server', "response.sent");
         serverTransportChannel1.rightSend(muonMessage1);
 
         serverTransportChannel1.rightConnection().listen(function(msg) {
@@ -174,7 +174,7 @@ describe("test rpc protocol:", function () {
         var serverTransportChannel2 = bichannel.create("server2-transport");
         var rpcServerProtocol = rpcApi.protocolHandler().server();
         serverTransportChannel2.leftHandler(rpcServerProtocol);
-        var muonMessage2 = messages.muonMessage(rpcRequest2, clientName, 'rpc://server/endpoint2', "response.sent");
+        var muonMessage2 = messages.muonMessage(rpcRequest2, clientName, 'server', "response.sent");
         serverTransportChannel2.rightSend(muonMessage2);
 
         serverTransportChannel2.rightConnection().listen(function(msg) {

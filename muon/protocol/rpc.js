@@ -77,7 +77,7 @@ function serverHandler() {
                       body: messages.encode(serverResponseData),
                       content_type: "application/json"
                     };
-                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, 'rpc://temp/blah', "request.response");
+                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, "request.response");
                 accept(outboundMuonMessage);
          });
 
@@ -120,6 +120,7 @@ function clientHandler(remoteServiceUrl) {
         TIMEOUT_MS = 10000;
         var responseReceived = false;
          var rpcProtocolHandler = handler.create('client-rpc');
+         var remoteService = nodeUrl.parse(remoteServiceUrl, true).hostname;
 
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
@@ -131,7 +132,7 @@ function clientHandler(remoteServiceUrl) {
                       body: messages.encode(requestData),
                       content_type: "application/json"
                     };
-                 var muonMessage = messages.muonMessage(request, serviceName, remoteServiceUrl, "request.made");
+                 var muonMessage = messages.muonMessage(request, serviceName, remoteService, "request.made");
                 accept(muonMessage);
 
                 setTimeout(function () {

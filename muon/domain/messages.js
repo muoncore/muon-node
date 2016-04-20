@@ -1,7 +1,6 @@
 var Joi = require('joi');
 var uuid = require('node-uuid');
 require('sexylog');
-var url = require("url");
 var jsonutil = require('jsonutil');
 var stackTrace = require('stack-trace');
 
@@ -51,12 +50,11 @@ exports.copy = function(json) {
 
 exports.rpcServer404 = function(rpcMessage) {
     var copy =  jsonutil.deepCopy(rpcMessage);
-    var resource = url.format(rpcMessage.requestUrl).pathname;
+    var resource = url.format(rpcMessage.url).pathname;
     copy.target_service = 'unknown';
     copy.origin_service = 'unknown';
     copy.status = "failure";
     copy.step = 'request.invalid';
-    copy.url = rpcMessage.requestUrl;
     copy.payload = {status: '404', message: 'no matching resource for url ' + url};
     return copy;
 }
@@ -66,13 +64,12 @@ exports.resource404 = function(message, rpcpayload) {
     var copy =  jsonutil.deepCopy(message);
     logger.debug("Creating RPC response for MuonMessage " + JSON.stringify(message))
     logger.debug("Creating RPC response for RPC Request " + JSON.stringify(rpcpayload))
-    var resource = url.format(rpcpayload.url).pathname;
     copy.target_service = message.origin_service;
     copy.origin_service = message.target_service;
     copy.status = "failure";
     copy.step = 'request.invalid';
     copy.provenance_id = message.id;
-    copy.payload = encode({status: '404', message: 'no matching resource for url ' + url});
+    copy.payload = encode({status: '404', message: 'no matching resource for url ' + rpcpayload.url});
     return copy;
 }
 
@@ -107,22 +104,18 @@ exports.failure = function(protocol, status, text) {
     return msg;
 }
 
-exports.muonMessage = function(payload, sourceService, remoteServiceUrl, step) {
+exports.muonMessage = function(payload, sourceService, targetService, step) {
 
-   logger.trace("messages.muonMessage(payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "', remoteServiceUrl='" +  remoteServiceUrl + "')");
+   logger.trace("messages.muonMessage(payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "')");
 
     var messageid = uuid.v4();
-
-    var serviceRequest = url.parse(remoteServiceUrl, true);
-    //logger.trace('********************************* arguments.callee.caller=' + callingObject());
 
     var headers = {
           step: step,
           protocol: "request",
           event_source: callingObject(),
-          target_service: serviceRequest.hostname,
+          target_service: targetService,
           origin_service: sourceService,
-          url: remoteServiceUrl
     };
 
    var message = createMessage(payload, headers);
@@ -134,14 +127,11 @@ exports.muonMessage = function(payload, sourceService, remoteServiceUrl, step) {
 
 
 
-exports.responseMessage = function(payload, client, server, originalUrl) {
+exports.responseMessage = function(payload, client, server) {
 
-   logger.trace("messages.muonMessage(payload='" +  payload + "', server='" +  server + "', originalUrl='" +  originalUrl + "')");
+   logger.trace("messages.muonMessage(payload='" +  payload + "', server='" +  server + "')");
 
     var messageid = uuid.v4();
-
-    var serviceRequest = url.parse(remoteServiceUrl, true);
-    //logger.trace('********************************* arguments.callee.caller=' + callingObject());
 
     var headers = {
           step: "request.response",
@@ -149,7 +139,6 @@ exports.responseMessage = function(payload, client, server, originalUrl) {
           event_source: callingObject(),
           target_service: client,
           origin_service: server,
-          url: originalUrl
     };
 
    var message = createMessage(payload, headers);
@@ -170,10 +159,10 @@ function decode(payload) {
          throw new Error('cannot decode undefined payload!');
        }
 
-       logger.debug('decode() payload type: ' + (typeof payload));
-       logger.debug('decode() payload instanceof array: ' + (payload instanceof Array));
-       logger.debug('decode() payload array constructor: ' + (payload.constructor === Array));
-       logger.trace('decode() payload: ' + JSON.stringify(payload));
+       //logger.trace('decode() payload type: ' + (typeof payload));
+       //logger.trace('decode() payload instanceof array: ' + (payload instanceof Array));
+       //logger.trace('decode() payload array constructor: ' + (payload.constructor === Array));
+       //logger.trace('decode() payload: ' + JSON.stringify(payload));
 
        if ( ! payload instanceof Array ) {
             logger.error('payload to decode is not of expected type: ' + JSON.stringify(payload));

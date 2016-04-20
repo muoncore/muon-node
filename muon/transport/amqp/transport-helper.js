@@ -96,7 +96,6 @@ exports.decode = function(buffer) {
 
 exports.fromWire = function(msg) {
     try {
-        //console.dir(msg);
         var headers = msg.properties.headers;
         var contents = messages.decode(msg.content);
         logger.trace('messages.fromWire(headers='  + JSON.stringify(headers) + ')');

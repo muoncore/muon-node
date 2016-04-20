@@ -20,7 +20,6 @@ var BrowserDiscovery = function (url) {
             }
         } catch (err) {
             console.warn("Had issues parsing ... ");
-            console.dir(err);
         }
     };
 };

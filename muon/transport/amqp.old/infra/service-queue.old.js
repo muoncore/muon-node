@@ -15,19 +15,15 @@ var ServiceQueue = function (serviceName, serverStacks, connection) {
 
         var serverChannel = serverStacks.openChannel(protocol);
 
-        console.dir(serverStacks);
-
         //open a listener on the receive queue. pass all messages into tserverStacks.openChannelhe channel
         var q = this.queues.listen(receiveQueue, function(data) {
             //transform to transport payload?
             logger.info("Received data on the Channel Receive Queue");
-            console.dir(data);
             serverChannel.send(data);
         });
 
         serverChannel.listen(function(data) {
             logger.info("CHANNEL SEND");
-            console.dir(data);
             if (data == "poison") {
                 q.shutdown();
             } else {
@@ -49,7 +45,6 @@ ServiceQueue.prototype.onHandshake = function(callback) {
     //listen on queue.
     this.queues.listen("service." + this.serviceName, function(message) {
         logger.info("GOT DATA ON Service queue!!!");
-        console.dir(message);
         callback(message)
     });
 };

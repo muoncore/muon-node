@@ -87,11 +87,9 @@ BrowserTransport.prototype.openChannel = function(serviceName, protocolName) {
                 var out = JSON.stringify(message);
 
                 logger.info("[***** TRANSPORT *****] Sending event outbound to browser transport " + out);
-                console.dir(msg);
                 transport.ws.send(out);
             } catch (err) {
                 console.log("ERROROROR");
-                console.dir(err);
             }
         }
     };
@@ -106,7 +104,6 @@ BrowserTransport.prototype.openChannel = function(serviceName, protocolName) {
             channelConnection.shutdown();
             return;
         }
-        //console.dir(msg);
         if(channelConnection.channelOpen) {
             channelConnection.send(msg);
         } else {

@@ -50,7 +50,7 @@ exports.connect = function(url) {
                           outbound: function(queueName) {
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName, channelValidator);
                             clientChannel.rightConnection().listen(function(msg) {
-                                 logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received outbound message: ', msg);
+                                 logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received outbound message: ' + JSON.stringify(msg));
                                  publish(amqpChannel, queueName, msg);
                             });
                             return clientChannel.leftConnection();
@@ -58,7 +58,7 @@ exports.connect = function(url) {
                           inbound: function(queueName) {
                             var clientChannel = bichannel.create("amqp-api-inbound-" + queueName, channelValidator);
                             consume(amqpChannel, queueName, function(msg) {
-                                    logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] send message up stream: ', msg);
+                                    logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] send message up stream: ' + JSON.stringify(msg));
                                     clientChannel.rightConnection().send(msg);
                             });
                             return clientChannel.leftConnection();
@@ -156,7 +156,6 @@ function publish(amqpChannel, queueName, message) {
     logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' headers: ", headers);
     amqpChannel.assertQueue(queueName, queueSettings);
     var buffer = helper.encode(data);
-    //console.dir(buffer);
     amqpChannel.sendToQueue(queueName, new Buffer(buffer), {persistent: false, headers: headers});
 
 }

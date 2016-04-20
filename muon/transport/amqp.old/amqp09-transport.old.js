@@ -62,7 +62,6 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
             };
 
             logger.info("SENDING MESSAGE!");
-            console.dir(msg);
 
             transport.queues.send(this.sendQueue, amqpMessage);
         }
@@ -76,7 +75,6 @@ Amqp09Transport.prototype.openChannel = function(serviceName, protocolName) {
             channelConnection.shutdown();
             return;
         }
-        console.dir(msg);
         if(channelConnection.channelOpen) {
             channelConnection.send(msg);
         } else {
@@ -94,7 +92,6 @@ Amqp09Transport.prototype.startHandshake = function(channelConnection) {
     channelConnection.receiveQueue = "node-service-recieve";
 
     channelConnection.listener = this.queues.listen(channelConnection.receiveQueue, function(message) {
-        console.dir(message);
         if (channelConnection.channelOpen == false) {
             channelConnection.drainQueue();
             channelConnection.channelOpen = true;
