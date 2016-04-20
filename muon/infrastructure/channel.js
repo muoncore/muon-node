@@ -39,8 +39,8 @@ function LeftConnection(name, inbound, outbound, validator) {
         send: function(msg) {
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
-            logger.debug("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
-            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg='" + JSON.stringify(msg));
+            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
+            //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg='" + JSON.stringify(msg));
             // validate message
             try {
                if (validator && ! (msg instanceof Error)) {
@@ -66,16 +66,14 @@ function LeftConnection(name, inbound, outbound, validator) {
             return csp.go(function*() {
                 while(true) {
                     var msg = yield csp.take(inbound);
-                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=", msg);
+                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     var id = msg.id || "unknown";
-                    logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
                     // deal with errors
                     if (msg instanceof Error && errCallback) {
                         logger.warn('error message received on channel ' + name);
                         if (errCallback) errCallback(msg);
                         return;
                     }
-                    logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
                     if (callback) {
                         callback(msg);
                     } else {
@@ -142,7 +140,7 @@ function RightConnection(name, inbound, outbound, validator) {
         send: function(msg) {
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg=" + typeof msg);
             var id = msg.id || "unknown";
-            logger.debug("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
+            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
            // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);
             try {
                if (validator && ! (msg instanceof Error)) {
@@ -168,15 +166,14 @@ function RightConnection(name, inbound, outbound, validator) {
                 while(true) {
                     var msg = yield csp.take(inbound);
                     var id = msg.id || "unknown";
-                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg type=" + typeof msg);
-                    logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
+                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     // deal with errors
                     if (msg instanceof Error && errCallback) {
                         logger.warn('error message received on channel ' + name);
                         errCallback(msg);
                         return;
                     }
-                    logger.debug("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
+                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
                     if (callback) {
                         callback(msg);
                     } else {
@@ -222,7 +219,7 @@ function Channel(name, validator) {
     var leftConnection = new LeftConnection(name, inbound, outbound, validator);
     var rightConnection = new RightConnection(name, outbound, inbound, validator);
 
-    logger.debug('[***** CSP-CHANNEL *****] Created csp bi-channel with name="' + name + '"');
+    logger.trace('[***** CSP-CHANNEL *****] Created csp bi-channel with name="' + name + '"');
     return {
         leftEndpoint: function(object, ioFunctionName) {
             leftConnection.listen(function(args) {

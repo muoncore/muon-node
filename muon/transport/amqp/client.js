@@ -67,7 +67,7 @@ var findService = function(serviceName, discovery) {
                 logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] searching for muon service '" + serviceName + "' attempt " + attempts);
                 discovery.discoverServices(function(services) {
                         var service = services.find(serviceName);
-                        logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] found services: '" + JSON.stringify(services) + "'");
+                        logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] found services: '" + JSON.stringify(services) + "'");
                         if (service) {
                             logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] found service: '" + JSON.stringify(service) + "'");
                             serviceFound = true;
@@ -111,7 +111,7 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
 
      return function(prevResult) {
         var promise = new RSVP.Promise(function(resolve, reject) {
-            logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
+            logger.trace("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
 
             amqpApi.inbound(recvQueueName).listen(function(message) {
                  if ( helper.isHandshakeAccept(message)) {

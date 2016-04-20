@@ -33,13 +33,13 @@ describe("muon client/server transport test", function () {
 
             transportChannel.send(event);
 
-             console.log('wait for response from remote service ' + server);
+             console.log('test: wait for response from remote service ' + server);
             fakeServerStackChannel.leftConnection().listen(function(event){
                 console.log('********** transport.js transportChannel.listen() event received ' + JSON.stringify(event));
                 var payload = messages.decode(event.payload);
 
 
-                console.log('typeof event.payload: ' + (typeof event.payload));
+                console.log('test: typeof event.payload: ' + (typeof event.payload));
                 assert.equal(payload, 'PING');
                 done();
             });

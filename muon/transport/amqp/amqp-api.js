@@ -80,7 +80,7 @@ exports.connect = function(url) {
 
 function amqpConnect(url, callback) {
 
-    logger.debug("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] connecting to amqp " + url);
+    logger.trace("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] connecting to amqp " + url);
     amqp.connect(url, function(err, amqpConnection) {
         if (err) {
             logger.error("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] error connecting to amqp: " + err);
@@ -163,15 +163,14 @@ function publish(amqpChannel, queueName, message) {
 function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
-       logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message.data: ", JSON.stringify(amqpMsg));
+       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message.data: ", JSON.stringify(amqpMsg));
        if (amqpMsg == undefined || amqpMsg == null) {
            logger.warn("Received a null message over the queue")
            // amqpChannel.ack(amqpMsg);
             return
        }
        var message = helper.fromWire(amqpMsg);
-       logger.debug("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.data: ", message.data);
-       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: ", message.headers);
+       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.headers));
        logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
        logger.trace(message);
        callback(message);
