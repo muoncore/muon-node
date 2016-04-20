@@ -10,7 +10,7 @@ var errCallback;
 exports.connect = function(serviceName, url, serverStacks, discovery) {
 
 
-    logger.info("[*** TRANSPORT:SERVER:BOOTSTRAP ***] advertise service on muon discovery '" + serviceName + "'");
+    logger.info("[*** TRANSPORT:SERVER:BOOTSTRAP ***] advertising service '" + serviceName + "' on muon discovery");
     discovery.advertiseLocalService({
         identifier: serviceName,
         tags: ["node", serviceName],

@@ -80,7 +80,7 @@ exports.connect = function(url) {
 
 function amqpConnect(url, callback) {
 
-    logger.info("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] connecting to amqp " + url);
+    logger.debug("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] connecting to amqp " + url);
     amqp.connect(url, function(err, amqpConnection) {
         if (err) {
             logger.error("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] error connecting to amqp: " + err);

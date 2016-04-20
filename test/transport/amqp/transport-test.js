@@ -37,6 +37,9 @@ describe("muon client/server transport test", function () {
             fakeServerStackChannel.leftConnection().listen(function(event){
                 console.log('********** transport.js transportChannel.listen() event received ' + JSON.stringify(event));
                 var payload = messages.decode(event.payload);
+
+
+                console.log('typeof event.payload: ' + (typeof event.payload));
                 assert.equal(payload, 'PING');
                 done();
             });

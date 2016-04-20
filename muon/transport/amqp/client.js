@@ -56,7 +56,7 @@ exports.onError = function(callback) {
 
 
 var findService = function(serviceName, discovery) {
-  logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] preparing to find service '" + serviceName + "'");
+  logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
   return function(prevResult) {
      var promise = new RSVP.Promise(function(resolve, reject) {
         var attempts = 0;
@@ -64,7 +64,7 @@ var findService = function(serviceName, discovery) {
                 attempts++;
                 var maxattempts = 5;
                 var serviceFound = false;
-                logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] looking for muon service '" + serviceName + "' attempts=" + attempts);
+                logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] searching for muon service '" + serviceName + "' attempt " + attempts);
                 discovery.discoverServices(function(services) {
                         var service = services.find(serviceName);
                         logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] found services: '" + JSON.stringify(services) + "'");
@@ -76,7 +76,7 @@ var findService = function(serviceName, discovery) {
                             logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + "' after " + attempts + " attempts. aborting. reject()");
                             reject(new Error('unable to find muon service ' + serviceName));
                         } else {
-                            logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
+                            logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
                         }
 
                         if (attempts > maxattempts || serviceFound) {
@@ -140,7 +140,7 @@ var readyOutboundSocket = function(serviceQueueName, protocol, amqpApi, clientCh
                 logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
                 amqpApi.outbound(serviceQueueName).send({headers: {protocol: protocol}, data: message});
             });
-            logger.info('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
+            logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
             resolve();
          });
          logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] outbound socket ready on amqp queue  '%s'", serviceQueueName);
