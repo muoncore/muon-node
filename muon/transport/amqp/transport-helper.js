@@ -98,8 +98,8 @@ exports.fromWire = function(msg) {
     try {
         var headers = msg.properties.headers;
         var contents = messages.decode(msg.content);
-        logger.trace('messages.fromWire(headers='  + JSON.stringify(headers) + ')');
-        logger.trace("messages.fromWire(contents=" + contents + ")");
+        //logger.trace('messages.fromWire(headers='  + JSON.stringify(headers) + ')');
+        //logger.trace("messages.fromWire(contents=" + contents + ")");
         try {
             contents = JSON.parse(contents);
         } catch (err) {
@@ -109,7 +109,7 @@ exports.fromWire = function(msg) {
             headers: headers,
             data: contents
         };
-        logger.trace('messages.fromWire() return message='  + JSON.stringify(message) );
+        //logger.trace('messages.fromWire() return message='  + JSON.stringify(message) );
        return message;
    } catch (err) {
         logger.error('error converting amqp wire format message to muon event message');

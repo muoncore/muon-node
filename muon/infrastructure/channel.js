@@ -39,12 +39,12 @@ function LeftConnection(name, inbound, outbound, validator) {
         send: function(msg) {
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
-            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
+            //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg='" + JSON.stringify(msg));
             // validate message
             try {
                if (validator && ! (msg instanceof Error)) {
-                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() validating msg");
+                    //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() validating msg");
                     validator(msg);
                }
             } catch(err) {
@@ -66,7 +66,7 @@ function LeftConnection(name, inbound, outbound, validator) {
             return csp.go(function*() {
                 while(true) {
                     var msg = yield csp.take(inbound);
-                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
+                    //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     var id = msg.id || "unknown";
                     // deal with errors
                     if (msg instanceof Error && errCallback) {
@@ -140,11 +140,11 @@ function RightConnection(name, inbound, outbound, validator) {
         send: function(msg) {
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg=" + typeof msg);
             var id = msg.id || "unknown";
-            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
+            //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
            // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);
             try {
                if (validator && ! (msg instanceof Error)) {
-                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() validating msg");
+                    //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() validating msg");
                     validator(msg);
                }
             } catch(err) {
@@ -166,14 +166,14 @@ function RightConnection(name, inbound, outbound, validator) {
                 while(true) {
                     var msg = yield csp.take(inbound);
                     var id = msg.id || "unknown";
-                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
+                    //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     // deal with errors
                     if (msg instanceof Error && errCallback) {
                         logger.warn('error message received on channel ' + name);
                         errCallback(msg);
                         return;
                     }
-                    logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
+                    //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg.id=" + id);
                     if (callback) {
                         callback(msg);
                     } else {

@@ -12,7 +12,7 @@ exports.connect = function(serviceName, protocol, url, discovery) {
     var clientChannel = bichannel.create(serviceName + "-amqp-transport-client");
 
     amqp.connect(url).then(function(api) {
-        logger.debug('[*** TRANSPORT:CLIENT:BOOTSTRAP ***] connected to amqp-api');
+        //logger.trace('[*** TRANSPORT:CLIENT:BOOTSTRAP ***] connected to amqp-api');
         var handshakeId = uuid.v4();
         var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
         var serverListenQueueName = serviceName + ".listen." + handshakeId;
@@ -76,7 +76,7 @@ var findService = function(serviceName, discovery) {
                             logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + "' after " + attempts + " attempts. aborting. reject()");
                             reject(new Error('unable to find muon service ' + serviceName));
                         } else {
-                            logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
+                            //logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
                         }
 
                         if (attempts > maxattempts || serviceFound) {
@@ -140,10 +140,10 @@ var readyOutboundSocket = function(serviceQueueName, protocol, amqpApi, clientCh
                 logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
                 amqpApi.outbound(serviceQueueName).send({headers: {protocol: protocol}, data: message});
             });
-            logger.debug('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
+            //logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
             resolve();
          });
-         logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] outbound socket ready on amqp queue  '%s'", serviceQueueName);
+         logger.trace("[*** TRANSPORT:CLIENT:OUTBOUND ***] outbound socket ready on amqp queue  '%s'", serviceQueueName);
          return promise;
       }
 }

@@ -106,7 +106,7 @@ exports.failure = function(protocol, status, text) {
 
 exports.muonMessage = function(payload, sourceService, targetService, step) {
 
-   logger.trace("messages.muonMessage(payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "')");
+   //logger.trace("messages.muonMessage(payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "')");
 
     var messageid = uuid.v4();
 
@@ -170,7 +170,6 @@ function decode(payload) {
        }
 
        var buffer = new Buffer(payload);
-       logger.trace('BUFFER DECODE: ' + buffer.toString());
        var value;
        try {
             var value = JSON.parse(buffer.toString());
@@ -202,7 +201,7 @@ function encode(payload) {
 
 
 function createMessage(payload, headers, source) {
-    logger.trace('createMessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
+    //logger.trace('createMessage(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     if (! payload) payload = {};
 
     if (typeof payload == 'object') {
@@ -235,7 +234,7 @@ function createMessage(payload, headers, source) {
        event_source: headers.event_source
      }
 
-     logger.trace('createMessage() return message='  + JSON.stringify(message));
+    // logger.trace('createMessage() return message='  + JSON.stringify(message));
     return message;
 }
 

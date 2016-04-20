@@ -58,7 +58,7 @@ exports.connect = function(url) {
                           inbound: function(queueName) {
                             var clientChannel = bichannel.create("amqp-api-inbound-" + queueName, channelValidator);
                             consume(amqpChannel, queueName, function(msg) {
-                                    logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] send message up stream: ' + JSON.stringify(msg));
+                                    //logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] send message up stream: ' + JSON.stringify(msg));
                                     clientChannel.rightConnection().send(msg);
                             });
                             return clientChannel.leftConnection();
@@ -97,7 +97,7 @@ function amqpConnect(url, callback) {
                 callback(err);
             } else {
                 amqpChannelOk = true;
-                logger.trace("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] amqp comms channel created successfully");
+                logger.trace("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] amqp comms channel to " + url + " created successfully");
                 handleChannelEvents(amqpChannel);
                 callback(null, amqpConnection, amqpChannel);
             }
@@ -152,8 +152,8 @@ function handleChannelEvents(amqpChannel) {
 function publish(amqpChannel, queueName, message) {
     var data = message.data;
     var headers = message.headers;
-    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' data: ", data);
-    logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' headers: ", headers);
+    //logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' data: ", data);
+    //logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' headers: ", headers);
     amqpChannel.assertQueue(queueName, queueSettings);
     var buffer = helper.encode(data);
     amqpChannel.sendToQueue(queueName, new Buffer(buffer), {persistent: false, headers: headers});
@@ -163,16 +163,16 @@ function publish(amqpChannel, queueName, message) {
 function consume(amqpChannel, queueName, callback) {
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
-       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message.data: ", JSON.stringify(amqpMsg));
+       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message: ", JSON.stringify(amqpMsg.properties.headers));
        if (amqpMsg == undefined || amqpMsg == null) {
            logger.warn("Received a null message over the queue")
            // amqpChannel.ack(amqpMsg);
             return
        }
        var message = helper.fromWire(amqpMsg);
-       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.headers));
-       logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
-       logger.trace(message);
+       //logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.headers));
+       //logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
+       //logger.trace(message);
        callback(message);
        amqpChannel.ack(amqpMsg);
    }, {noAck: false});
