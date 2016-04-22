@@ -1,5 +1,5 @@
 var ServerStacks = require("../../muon/api/server-stacks");
-
+var url = require("url");
 
 module.exports.build = function(config) {
 
@@ -15,41 +15,45 @@ module.exports.build = function(config) {
         }
     }
 
-    if (config.discovery.type == "browser") {
-        logger.info("Using BROWSER")
-        var BrowserDiscovery = require("../../muon/discovery/browser/browser-discovery");
-        infrastructure.discovery = new BrowserDiscovery(config.discovery.url);
-    } else {
-        logger.info("Using AMQP");
-        var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
-        infrastructure.discovery = new AmqpDiscovery(config.discovery.url);
+
+    try {
+      var AmqpDiscovery = require('../../muon/discovery/' + config.discoveryProtocol() + '/discovery.js');
+      infrastructure.discovery = new AmqpDiscovery(config.discovery_url);
+    } catch (err) {
+      logger.error('unable to find discovery component for url: ""' + config.discovery_url + '""');
+      logger.error(err.stack);
+      throw new Error('unable to find discovery component for url: ""' + config.discovery_url + '""');
     }
 
-    if (config.transport.type == "browser") {
-        var BrowserTransport = require("../../muon/transport/browser/browser-transport");
-        infrastructure.transport = new BrowserTransport(config.serviceName, infrastructure.serverStacks, config.transport.url);
-    } else {
-        var amqpTransport = require('../../muon/transport/amqp/transport.js');
-        var serviceName = infrastructure.config.serviceName;
-        var url = infrastructure.config.transport.url;
-        infrastructure.transport = amqpTransport.create(serviceName, url, serverStacks, infrastructure.discovery);
+    try {
+      var amqpTransport = require('../../muon/transport/' + config.transportProtocol() + '/transport.js');
+      var serviceName = infrastructure.config.serviceName;
+      var transportUrl = infrastructure.config.transport_url;
+      infrastructure.transport = amqpTransport.create(serviceName, transportUrl, serverStacks, infrastructure.discovery);
+    } catch (err) {
+      logger.error('unable to find transport component for url: ""' + config.transport_url + '""');
+      logger.error(err.stack);
+      throw new Error('unable to find transport component for url: ""' + config.transport_url + '""');
     }
+
+
+
 
     return infrastructure;
 }
 
-module.exports.config = function(serviceName, url, type) {
-    if (! type) type = "amqp";
-    var config = {
-        serviceName: serviceName,
-        discovery:{
-            type: type,
-            url: url
-        },
-        transport:{
-            type: type,
-            url: url
-        }
+module.exports.config = function(serviceName, transportUrl, discoveryUrl) {
+  if (! discoveryUrl) discoveryUrl = transportUrl;
+  var config = {
+      serviceName: serviceName,
+      discovery_url: discoveryUrl,
+      transport_url: transportUrl,
+      transportProtocol: function() {
+          return url.parse(transportUrl).protocol.split(':')[0];
+      },
+      discoveryProtocol: function() {
+        return url.parse(discoveryUrl).protocol.split(':')[0];
+      }
     };
     return config;
 }

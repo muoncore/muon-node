@@ -13,12 +13,12 @@ var builder = require("../infrastructure/builder");
 
 
 
-exports.create = function(serviceName, url) {
+exports.create = function(serviceName, transportUrl, discoveryUrl) {
 
-    var config = builder.config(serviceName, url);
+    var config = builder.config(serviceName, transportUrl, discoveryUrl);
 
     var infrastructure = new builder.build(config, rpcApi);
-    var rpcApi = rpc.getApi('server', infrastructure.transport);
+    var rpcApi = rpc.getApi(serviceName, infrastructure.transport);
     infrastructure.serverStacks.rpc(rpcApi);
 
     var muonApi = {
@@ -36,4 +36,3 @@ exports.create = function(serviceName, url) {
     };
     return muonApi;
 }
-

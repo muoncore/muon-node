@@ -1,5 +1,6 @@
 var muoncore = require('../../muon/api/muoncore.js');
 var assert = require('assert');
+var expect = require('expect.js');
 
 var muon;
 var muon2;
@@ -166,8 +167,26 @@ describe("Muon core test:", function () {
 
         });
     });
+
+
+
+
+    it("handles missing transport component error graefully", function () {
+
+         expect(function() {
+            muoncore.create(serviceName, 'http://blah/blah/blah', amqpurl)
+          }).to.throwException(/unable to find transport component for url/);
+
+    });
+
+
+        it("handles missing discovery component error graefully", function () {
+
+              expect(function() {
+                 muoncore.create(serviceName, amqpurl, 'http://blah/blah/blah')
+               }).to.throwException(/unable to find discovery component for url/);
+
+        });
+
+
 });
-
-
-
-
