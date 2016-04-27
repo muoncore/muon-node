@@ -1,3 +1,2 @@
-#!/bin/bash
-
-mocha -R spec test/*
+#!/bin/sh
+mocha --recursive
