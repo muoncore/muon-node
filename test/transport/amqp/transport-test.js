@@ -4,7 +4,7 @@ var expect = require('expect.js');
 var messages = require('../../../muon/domain/messages.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var builder = require("../../../muon/infrastructure/builder");
- var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
+ var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
 
 
 describe("muon client/server transport test", function () {

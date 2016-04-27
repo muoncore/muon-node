@@ -65,6 +65,17 @@ exports.handshakeAcceptHeaders = function() {
 }
 
 
+exports.handshakeRejectHeaders = function(message) {
+
+  var headers = {
+     handshake: "rejected",
+     message: message
+   };
+   return headers;
+
+}
+
+
 exports.toWire = function(payload, headers) {
      logger.trace('message(payload='  + JSON.stringify(payload) + ', headers='  + JSON.stringify(headers) +  ')');
     if (! headers) headers = {};

@@ -19,7 +19,7 @@ exports.create = function(serviceName, transportUrl, discoveryUrl) {
 
     var infrastructure = new builder.build(config, rpcApi);
     var rpcApi = rpc.getApi(serviceName, infrastructure.transport);
-    infrastructure.serverStacks.rpc(rpcApi);
+    infrastructure.serverStacks.addProtocol(rpcApi);
 
     var muonApi = {
         discovery: function() { return infrastructure.discovery },

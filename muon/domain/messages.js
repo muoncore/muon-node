@@ -112,7 +112,7 @@ exports.muonMessage = function(payload, sourceService, targetService, step) {
 
     var headers = {
           step: step,
-          protocol: "request",
+          protocol: "rpc",
           event_source: callingObject(),
           target_service: targetService,
           origin_service: sourceService,
@@ -135,7 +135,7 @@ exports.responseMessage = function(payload, client, server) {
 
     var headers = {
           step: "request.response",
-          protocol: "request",
+          protocol: "rpc",
           event_source: callingObject(),
           target_service: client,
           origin_service: server,

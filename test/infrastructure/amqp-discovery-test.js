@@ -5,7 +5,7 @@ var assert = require('assert');
 var url = require('url');
 var expect = require('expect.js');
 var _ = require('underscore');
-var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery.js");
+var AmqpDiscovery = require("../../muon/discovery/amqp/discovery.js");
 require('sexylog');
 
 var discovery1;

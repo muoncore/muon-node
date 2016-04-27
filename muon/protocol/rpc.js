@@ -10,13 +10,17 @@ var messages = require('../domain/messages.js');
 
 var handlerMappings = {};
 var serviceName;
+var protocolName = 'rpc';
 exports.getApi = function(name, transport) {
     serviceName = name;
 
     var api = {
+        name: function() {
+            return protocolName;
+        },
         request: function(remoteServiceUrl, data, clientCallback) {
            var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
-           var transChannel = transport.openChannel(serviceRequest.hostname, 'request');
+           var transChannel = transport.openChannel(serviceRequest.hostname, protocolName);
            var clientChannel = channel.create("client-api");
            var rpcProtocolClientHandler = clientHandler(remoteServiceUrl);
            clientChannel.rightHandler(rpcProtocolClientHandler);
@@ -88,7 +92,7 @@ function serverHandler() {
                 logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
                 logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
 
-             
+
                 var payload = messages.decode(incomingMuonMessage.payload, incomingMuonMessage.content_type);
                 logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
 
@@ -206,5 +210,3 @@ function rpcRequest(statusCode, url, body, error) {
     }
     return rpcMsg;
 }
-
-

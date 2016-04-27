@@ -6,7 +6,7 @@ var expect = require('expect.js');
 var uuid = require('node-uuid');
 var messages = require('../../../muon/domain/messages.js');
 
-var AmqpDiscovery = require("../../../muon/discovery/amqp/amqp-discovery");
+var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
 
 describe("client test:", function () {
 
