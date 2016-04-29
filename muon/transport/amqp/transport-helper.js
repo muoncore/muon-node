@@ -6,14 +6,13 @@ var messages = require('../../domain/messages.js');
 // Regular expressions for transport message format:
 var reply_queue_regex = /[a-z0-9\-]\.reply\.[a-zA-Z0-9\-]/;
 var listen_queue_regex = /[a-z0-9\-]\.listen\.[a-zA-Z0-9\-]/;
-var protocol_regex = /^(rpc|request|streaming|event|cqrs)$/;
 
 var transportMessageSchema = Joi.object().keys({
    data: Joi.any().required(),
    properties: Joi.object().optional(),
    headers:  Joi.object({
        handshake: Joi.string().min(3).regex(/(initiated|accepted)/).optional(),
-       protocol: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().regex(protocol_regex).required(), otherwise: Joi.string().regex(protocol_regex).optional() }),
+       protocol: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().required(), otherwise: Joi.string().optional() }),
        server_reply_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().required(), otherwise: Joi.forbidden() }),
        server_listen_q: Joi.alternatives().when('handshake', { is: 'initiated', then: Joi.string().required(), otherwise: Joi.forbidden() }),
        content_type: Joi.string().min(10).regex(/[a-z\.]\/[a-z\.]/).optional(),
