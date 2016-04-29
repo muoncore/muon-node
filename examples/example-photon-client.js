@@ -10,7 +10,7 @@ var amqpurl = "amqp://tfadmin:techfutu13@msg.cistechfutures.net";
 logger.info('starting muon...');
 muon = muoncore.create("test-photon-client", amqpurl);
 // or request://photon/projection-keys
-var promise = muon.request('rpc://photon/projection-keys', {msg: 'hi!'});
+var promise = muon.request('rpc://photon/projection', {"projection-name": "__streams__"});
 
 promise.then(function (event) {
     logger.info('*****************************************************************************************');
