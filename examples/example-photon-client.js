@@ -2,24 +2,15 @@ var muoncore = require('../muon/api/muoncore.js');
 
 
 //
-var amqpurl = "amqp://muon:microservices@localhost";
+var amqpurl = "amqp://tfadmin:techfutu13@msg.cistechfutures.net";
 //var amqpurl = 'amqp://guest:guest@conciens.mooo.com';
 
-var config = {
-    discovery:{
-        type:"amqp",
-        url:amqpurl
-    },
-    transport:{
-        type:"amqp",
-        url:amqpurl
-    }
-};
+
 
 logger.info('starting muon...');
-muon = muoncore.create("nodejs-client", config);
+muon = muoncore.create("test-photon-client", amqpurl);
 // or request://photon/projection-keys
-var promise = muon.request('request://example-service/', "ping");
+var promise = muon.request('request://photon/projection-keys', {msg: 'hi!'});
 
 promise.then(function (event) {
     logger.info('*****************************************************************************************');
@@ -33,8 +24,3 @@ promise.then(function (event) {
     throw new Error('nodejs-client error in return muon promise in muoncore-test.js', error);
     process.exit(0);
 });
-
-
-
-
-

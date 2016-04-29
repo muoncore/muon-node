@@ -115,6 +115,7 @@ var readyInboundSocket = function(recvQueueName, amqpApi, clientChannel) {
 
             amqpApi.inbound(recvQueueName).listen(function(message) {
                  if ( helper.isHandshakeAccept(message)) {
+
                     // we're got a handshake confirmation and are now connected to the remote service
                      logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", JSON.stringify(message));
                      logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully");
@@ -138,7 +139,7 @@ var readyOutboundSocket = function(serviceQueueName, protocol, amqpApi, clientCh
             clientChannel.listen(function(message){
                 messages.validate(message);
                 logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
-                amqpApi.outbound(serviceQueueName).send({headers: {protocol: protocol}, data: message});
+                amqpApi.outbound(serviceQueueName).send({headers: {protocol: protocol, content_type: message.content_type}, data: message});
             });
             //logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
             resolve();
@@ -147,7 +148,3 @@ var readyOutboundSocket = function(serviceQueueName, protocol, amqpApi, clientCh
          return promise;
       }
 }
-
-
-
-

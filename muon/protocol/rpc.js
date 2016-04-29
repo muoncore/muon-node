@@ -75,13 +75,14 @@ function serverHandler() {
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(serverResponseData, accept, reject, route) {
-                logger.info("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponseData));
+                logger.debug("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing requestData=%s", JSON.stringify(serverResponseData));
                  var serverResponse = {
                       status: 200,
                       body: messages.encode(serverResponseData),
                       content_type: "application/json"
                     };
                  var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, "request.response");
+                 logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol outgoing muonMessage=" + JSON.stringify(outboundMuonMessage));
                 accept(outboundMuonMessage);
          });
 
@@ -129,7 +130,7 @@ function clientHandler(remoteServiceUrl) {
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
          rpcProtocolHandler.outgoing(function(requestData, accept, reject, route) {
-                logger.info("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
+                logger.debug("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing requestData=%s", JSON.stringify(requestData));
 
                  var request = {
                       url: remoteServiceUrl,
@@ -137,6 +138,7 @@ function clientHandler(remoteServiceUrl) {
                       content_type: "application/json"
                     };
                  var muonMessage = messages.muonMessage(request, serviceName, remoteService, "request.made");
+                 logger.trace("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing muonMessage=%s", JSON.stringify(muonMessage));
                 accept(muonMessage);
 
                 setTimeout(function () {
@@ -154,7 +156,7 @@ function clientHandler(remoteServiceUrl) {
          // INCOMING/UPSTREAM  event handling protocol logic
          rpcProtocolHandler.incoming(function(rpcResponse, accept, reject, route) {
                 logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming event id=" + rpcResponse.id);
-                logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(rpcResponse));
+                logger.debug("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(rpcResponse));
                 responseReceived = true;
                 var rpcMessage =  messages.decode(rpcResponse.payload, rpcResponse.content_type)
                 if (rpcMessage.body != undefined) {
