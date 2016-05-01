@@ -13,11 +13,16 @@ var amqpUrl = process.env.MUON_URL;
 
 
 cli.parse({
-    discover:   ['d', 'discover muon services'],
-    rpc:  ['rpc', 'remote procedure call url', 'string'],
-    stream: ['s', 'print events from stream', 'string']
-});
- 
+        // discover:   ['d', 'discover muon services'],
+        // rpc:  ['rpc', 'remote procedure call url', 'string'],
+        // stream: ['s', 'print events from stream', 'string'],
+        // introspect: ['i', 'introspect a service', 'string']
+    },
+    {
+        "introspect":"Tap into a remote stream exposed by a service and output to standard out",
+        "discover":"Tap into a remote stream exposed by a service and output to standard out"
+    });
+
 cli.main(function(args, options) {
 
     var validAmqpUrl =  Joi.validate(amqpUrl,  Joi.string().uri().required());
@@ -29,39 +34,41 @@ cli.main(function(args, options) {
     }
     this.ok('muon cli connected: ' + amqpUrl);
 
-    if (options.discover) {
-        discover();
-    } else {
-       console.log('mli: discovery/-d');
-    }
+    switch(cli.command) {
+        case "discover":
+            discover();
+            break;
+        default:
+            logger.error("Unknown command " + cli.command);
 
+    }
 });
 
 
 function discover() {
 
-    var AmqpDiscovery = require("../../muon/discovery/amqp/amqp-discovery");
+    var AmqpDiscovery = require("../discovery/amqp/discovery");
     var discovery = new AmqpDiscovery(amqpUrl);
 
     setTimeout(function() {
 
-            var table = new Table({
-                head: ['SERVICE NAME', 'TAGS', 'CONTENT/TYPE']
-              , colWidths: [30, 30, 30]
+        var table = new Table({
+            head: ['SERVICE NAME', 'TAGS', 'CONTENT/TYPE']
+            , colWidths: [30, 30, 30]
+        });
+
+        discovery.discoverServices(function(services) {
+            //console.log(services);
+            _.each(services.serviceList, function(service) {
+                table.push(
+                    [service.identifier, service.tags, service.codecs]
+                );
             });
-
-            discovery.discoverServices(function(services) {
-                    //console.log(services);
-                    _.each(services.serviceList, function(service) {
-                        table.push(
-                            [service.identifier, service.tags, service.codecs]
-                        );
-                    });
-             });
+        });
 
 
-             console.log(table.toString());
-             exit();
+        console.log(table.toString());
+        exit();
     }, 5000)
 
 
