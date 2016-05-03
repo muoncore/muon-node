@@ -61,10 +61,7 @@
   "engines": {
     "node": "*"
   },
-  "bin": {
-    "muon": "muon/cli/muon-cli.js"
-  },
   "license": "Apache-2.0",
-  "preferGlobal": "true",
+  "preferGlobal": "false",
   "main": "./muon/api/muoncore"
 }
