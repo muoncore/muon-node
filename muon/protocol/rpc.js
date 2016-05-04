@@ -144,7 +144,7 @@ function clientHandler(remoteServiceUrl) {
                 setTimeout(function () {
                     if (! responseReceived) {
                           logger.info('[*** PROTOCOL:CLIENT:RPC ***] timeout reached responding with timeout message');
-                          var timeoutMsg = rpcMessage("timeout", remoteServiceUrl, {}, {status: 'timeout', message: 'rpc response timeout exceeded'});
+                          var timeoutMsg = rpcMessage("timeout", remoteServiceUrl, {}, {status: 'timeout', body: 'rpc response timeout exceeded'});
                           reject(timeoutMsg);
                     }
                 }, TIMEOUT_MS);
@@ -183,7 +183,7 @@ function rpcMessage(statusCode, url, body, error) {
     }
     var rpcMsg = {
         body: body,
-        statusCode: statusCode,
+        status: statusCode,
         url: url,
         error: error,
         endpoint: function() {
@@ -203,7 +203,7 @@ function rpcRequest(statusCode, url, body, error) {
     }
     var rpcMsg = {
         body: body,
-        statusCode: statusCode,
+        status: statusCode,
         url: url,
         error: error,
         endpoint: function() {
