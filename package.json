@@ -1,8 +1,8 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "7.0.5",
-  "author": "Simplicity Itself Ltd",
+  "version": "7.0.7",
+  "author": "Muon Core Ltd",
   "keywords": [
     "muon",
     "microservices",
@@ -37,6 +37,7 @@
     "callsite": "*",
     "stack-trace": "*",
     "cli": "0.6.6",
+    "cli-table": "*",
     "rx": "*",
     "es6-promise": "*",
     "rsvp": "*",
@@ -44,7 +45,7 @@
     "signals": "*",
     "assert": "*",
     "joi": "*",
-    "sexylog": "*",
+    "sexylog": "0.0.3",
     "string-format": "*",
     "async-rq": "*"
   },
@@ -60,9 +61,7 @@
   "engines": {
     "node": "*"
   },
-  "bin": {
-    "muon": "muon/cli/muon-cli.js"
-  },
-  "preferGlobal": "true",
+  "license": "Apache-2.0",
+  "preferGlobal": "false",
   "main": "./muon/api/muoncore"
 }

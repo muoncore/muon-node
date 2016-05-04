@@ -17,7 +17,7 @@ module.exports.build = function(config) {
 
 
     try {
-      var AmqpDiscovery = require('../../muon/discovery/' + config.discoveryProtocol() + '/discovery.js');
+      var AmqpDiscovery = require('../discovery/' + config.discoveryProtocol() + '/discovery.js');
       infrastructure.discovery = new AmqpDiscovery(config.discovery_url);
     } catch (err) {
       logger.error('unable to find discovery component for url: ""' + config.discovery_url + '""');
@@ -26,7 +26,7 @@ module.exports.build = function(config) {
     }
 
     try {
-      var amqpTransport = require('../../muon/transport/' + config.transportProtocol() + '/transport.js');
+      var amqpTransport = require('../transport/' + config.transportProtocol() + '/transport.js');
       var serviceName = infrastructure.config.serviceName;
       var transportUrl = infrastructure.config.transport_url;
       infrastructure.transport = amqpTransport.create(serviceName, transportUrl, serverStacks, infrastructure.discovery);
