@@ -55,7 +55,7 @@ exports.rpcServer404 = function(rpcMessage) {
     copy.origin_service = 'unknown';
     copy.status = "failure";
     copy.step = 'request.invalid';
-    copy.payload = {status: '404', message: 'no matching resource for url ' + url};
+    copy.payload = {status: '404', body: 'no matching resource for url ' + url};
     return copy;
 }
 
