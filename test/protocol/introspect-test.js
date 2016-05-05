@@ -32,7 +32,7 @@ describe("test introspection client protocol:", function () {
         clientTransportChannel.rightConnection().listen(function(msg) {
                           console.log("introspect-test.js response: ");
                           console.dir(msg);
-                          assert.equal(msg.protocol, 'introspection');
+                          assert.equal(msg.protocol, 'introspect');
                           assert.equal(msg.step, 'introspectionRequested');
                           done();
         });

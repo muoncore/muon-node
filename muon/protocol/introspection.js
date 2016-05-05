@@ -9,7 +9,7 @@ var messages = require('../domain/messages.js');
 
 
 var serviceName;
-var protocolName = 'introspection';
+var protocolName = 'introspect';
 exports.getApi = function (name, transport) {
     serviceName = name;
 
