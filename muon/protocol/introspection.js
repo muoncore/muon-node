@@ -74,7 +74,7 @@ function clientHandler(remoteService) {
         setTimeout(function () {
             if (!responseReceived) {
                 logger.info('[*** PROTOCOL:CLIENT:INTROSPECT ***] timeout reached responding with timeout message');
-                var timeoutMsg = introspectionRequest("timeout", remoteServiceUrl, {}, {
+                var timeoutMsg = introspectionRequest("timeout", remoteService, {}, {
                     status: 'timeout',
                     message: 'response timeout exceeded'
                 });
