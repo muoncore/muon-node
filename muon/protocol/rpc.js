@@ -81,7 +81,7 @@ function serverHandler() {
                       body: messages.encode(serverResponseData),
                       content_type: "application/json"
                     };
-                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, "request.response");
+                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, protocolName, "request.response");
                  logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol outgoing muonMessage=" + JSON.stringify(outboundMuonMessage));
                 accept(outboundMuonMessage);
          });
@@ -137,7 +137,7 @@ function clientHandler(remoteServiceUrl) {
                       body: messages.encode(requestData),
                       content_type: "application/json"
                     };
-                 var muonMessage = messages.muonMessage(request, serviceName, remoteService, "request.made");
+                 var muonMessage = messages.muonMessage(request, serviceName, remoteService, protocolName, "request.made");
                  logger.trace("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing muonMessage=%s", JSON.stringify(muonMessage));
                 accept(muonMessage);
 

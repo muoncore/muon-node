@@ -19,7 +19,7 @@ describe("muon client/server transport test", function () {
             var server = 'transport-test-server';
             var url = "amqp://muon:microservices@localhost";
 
-             var event = messages.muonMessage("PING", 'testclient', 'server', "request.made");
+             var event = messages.muonMessage("PING", 'testclient', 'server',  'rpc', "request.made");
 
             var fakeServerStackChannel = bichannel.create("fake-serverstacks");
             var fakeServerStacks = {

@@ -104,15 +104,15 @@ exports.failure = function(protocol, status, text) {
     return msg;
 }
 
-exports.muonMessage = function(payload, sourceService, targetService, step) {
+exports.muonMessage = function(payload, sourceService, targetService, protocol, step) {
 
-   //logger.trace("messages.muonMessage(payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "')");
+   //logger.trace("messages.payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "')");
 
     var messageid = uuid.v4();
 
     var headers = {
           step: step,
-          protocol: "rpc",
+          protocol: protocol,
           event_source: callingObject(),
           target_service: targetService,
           origin_service: sourceService,

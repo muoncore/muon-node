@@ -9,7 +9,7 @@ var messages = require('../domain/messages.js');
 
 
 var serviceName;
-var protocolName = 'introspect';
+var protocolName = 'introspection';
 exports.getApi = function (name, transport) {
     serviceName = name;
 
@@ -68,7 +68,7 @@ function clientHandler(remoteService) {
         logger.info("[*** PROTOCOL:CLIENT:INTROSPECT ***] client protocol outgoing requestData=%s", JSON.stringify(requestData));
 
         var request = {};
-        var muonMessage = messages.muonMessage(request, serviceName, remoteService, "introspectionRequested");
+        var muonMessage = messages.muonMessage(request, serviceName, remoteService, protocolName, "introspectionRequested");
         accept(muonMessage);
 
         setTimeout(function () {
@@ -114,7 +114,7 @@ function clientHandler(remoteService) {
                       body: messages.encode(serverResponseData),
                       content_type: "application/json"
                     };
-                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, "request.response");
+                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, protocolName, "request.response");
                 accept(outboundMuonMessage);
          });
 

@@ -9,7 +9,7 @@ describe("test messages:", function () {
 
     it("create muon message with valid headers", function (done) {
            //todo change to muon message
-          var msg = messages.muonMessage("PING", 'testclient', 'testserver', "request.made");
+          var msg = messages.muonMessage("PING", 'testclient', 'testserver', 'rpc', "request.made");
           console.log('valid message: ');
           console.dir(msg);
           assert.equal(msg.origin_service, 'testclient');
@@ -21,7 +21,7 @@ describe("test messages:", function () {
 
 
     it("copy message", function (done) {
-          var msg =  messages.muonMessage("PING", 'testclient', 'testserver', "request.made");
+          var msg =  messages.muonMessage("PING", 'testclient', 'testserver',  'rpc', "request.made");
           var messageCopy = messages.copy(msg);
           assert.deepEqual(msg, messageCopy);
           done();
@@ -51,7 +51,7 @@ describe("test messages:", function () {
             body: "PING",
             content_type: 'text/plain'
         }
-        var muonMessage = messages.muonMessage(rpcMsg, 'client1', 'server1', "request.made");
+        var muonMessage = messages.muonMessage(rpcMsg, 'client1', 'server1',  'rpc',"request.made");
 
           var decoded = messages.decode(muonMessage.payload, 'application/json');
           assert.deepEqual(rpcMsg, decoded);
@@ -59,7 +59,7 @@ describe("test messages:", function () {
     });
 
     it("encode/decode muon message string payload", function (done) {
-        var muonMessage = messages.muonMessage('PING', 'client1', 'server1', "request.made");
+        var muonMessage = messages.muonMessage('PING', 'client1', 'server1',  'rpc', "request.made");
           var decoded = messages.decode(muonMessage.payload, 'text/plain');
           assert.equal('PING', decoded);
           done();
@@ -72,7 +72,7 @@ describe("test messages:", function () {
             body: new Buffer("PING"),
             content_type: 'text/plain'
         };
-        var muonMessage = messages.muonMessage(rpcMsg, 'client1', 'server1', "request.made");
+        var muonMessage = messages.muonMessage(rpcMsg, 'client1', 'server1',  'rpc', "request.made");
           var decoded = messages.decode(muonMessage.payload);
           console.dir(decoded);
           assert.equal('PING', new Buffer(decoded.body).toString());
@@ -115,7 +115,7 @@ describe("test messages:", function () {
 
 
     it("create resource 404 failure message", function (done) {
-          var msg =  messages.muonMessage("PING", 'testclient', 'testserver', "request.made");
+          var msg =  messages.muonMessage("PING", 'testclient', 'testserver',  'rpc', "request.made");
           var returnMessage = messages.serverFailure(msg, 'request', '404', 'resource not found /ping');
           //console.log('***** messages-test.js ********************************');
           //console.dir(returnMessage);
@@ -128,7 +128,7 @@ describe("test messages:", function () {
     });
 
     it("create server discovery failure message", function (done) {
-          var msg =  messages.muonMessage("PING", 'testclient', 'testserver', "request.made");
+          var msg =  messages.muonMessage("PING", 'testclient', 'testserver',  'rpc', "request.made");
           var returnMessage =  messages.clientFailure(msg, 'request', 'noserver', 'service "testserver" not found ', "request.made");
           //console.log('***** messages-test.js ********************************');
           //console.dir(returnMessage);
@@ -166,7 +166,7 @@ describe("test messages:", function () {
 
     it("creating message with invalid headers throws exception", function (done) {
           try {
-            var msg = messages.muonMessage("PING", 'testclient', '', '');
+            var msg = messages.muonMessage("PING", 'testclient',  'rpc', '', '');
           }
           catch(err) {
             //logger.error(err);
@@ -179,4 +179,3 @@ describe("test messages:", function () {
 
 
 });
-
