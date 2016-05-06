@@ -10,7 +10,7 @@ describe("test introspection client protocol:", function () {
     var clientName = 'client';
      var serverName = 'server';
 
-    it("can call introspect", function (done) {
+    it("can request introspection", function (done) {
          var introApi = introspection.getApi('client');
 
 
