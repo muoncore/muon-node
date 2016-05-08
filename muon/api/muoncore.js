@@ -57,5 +57,4 @@ var api = function( serviceName,  infrastructure) {
             return introspectionApi.introspect(remoteName, callback);
         }
     };
-    return muonApi;
 }
