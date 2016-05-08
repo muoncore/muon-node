@@ -1,12 +1,14 @@
 var ServerStacks = require('../../muon/api/server-stacks.js');
 var handler = require('../../muon/infrastructure/handler.js');
-
+var assert = require('assert');
 
 describe("serverStacks test:", function () {
 
 
-  it("does server stack things", function (done) {
+  it("does the server stack thing", function (done) {
       var serverStacks = new ServerStacks('test-server');
+
+      var message = 'this is a test message';
 
 
       var stubProtocol = {
@@ -21,7 +23,7 @@ describe("serverStacks test:", function () {
                 });
                 protocolHandler.incoming(function(data, accept, reject, route) {
                     console.log('server incoming data: ' + data);
-                    accept(data);
+                    reject(data);
                 });
                 return protocolHandler;
               },
@@ -43,9 +45,24 @@ describe("serverStacks test:", function () {
 
       var channel = serverStacks.openChannel('stub');
 
-      channel.send('test message');
+      channel.send(message);
 
+      channel.listen(function(data) {
+          assert.equal(message, data);
+                done();
+      });
+
+
+  });
+
+
+
+  it("handles missing protocol gracefully", function (done) {
+      var serverStacks = new ServerStacks('test-server');
+      var channel = serverStacks.openChannel('non-existant-protocol');
+      assert.equal(null, channel);
       done();
   });
+
 
 });

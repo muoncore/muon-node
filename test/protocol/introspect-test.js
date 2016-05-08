@@ -13,8 +13,6 @@ describe("test introspection client protocol:", function () {
     it("can request introspection", function (done) {
          var introApi = introspection.getApi('client');
 
-
-
          var clientApiChannel = bichannel.create("clientapi");
          var clientTransportChannel = bichannel.create("client-transport");
 
@@ -33,7 +31,7 @@ describe("test introspection client protocol:", function () {
                           console.log("introspect-test.js response: ");
                           console.dir(msg);
                           assert.equal(msg.protocol, 'introspect');
-                          assert.equal(msg.step, 'introspectionRequested');
+                          assert.equal(msg.step, 'introspectionRequested', 'message protocol step expected to be "introspectionRequested"');
                           done();
         });
 

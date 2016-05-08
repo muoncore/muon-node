@@ -17,7 +17,9 @@ var ServerStacks = function (serverName) {
 ServerStacks.prototype.openChannel = function(protocol) {
     logger.info("[*** API ***] opening muon server stacks channel...");
     var serverStacksChannel = bichannel.create("serverstacks");
-    var protocolServerHandler = this.protocols[protocol].protocolHandler().server();
+    var protocol = this.protocols[protocol];
+    if (! protocol) return null;
+    var protocolServerHandler = protocol.protocolHandler().server();
     serverStacksChannel.leftHandler(protocolServerHandler);
     return serverStacksChannel.rightConnection();
 };

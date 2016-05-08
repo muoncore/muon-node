@@ -67,7 +67,9 @@ describe("muon client/server transport test: ", function () {
         var muonClientChannel = client.connect(serverName, "rpc", url, discovery);
         muonClientChannel.listen(function(event){
             console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
+            //console.dir(event);
             var responseData = messages.decode(event.payload, 'application/json');
+            console.dir(responseData);
             assert.equal(responseData.body, 'PONG');
             done();
         });
