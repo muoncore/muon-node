@@ -27,7 +27,7 @@ exports.channel = function() {
     return channel;
 }
 
-//exports.ServerStacks=ServerStacks //todo eh? whhyyyyyyy!? noooooo!
+exports.ServerStacks=ServerStacks
 
 var api = function( serviceName,  infrastructure) {
     var rpcApi = rpc.getApi(serviceName, infrastructure.transport);
