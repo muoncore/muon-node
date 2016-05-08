@@ -72,7 +72,7 @@ function clientHandler(remoteService) {
         logger.info("[*** PROTOCOL:CLIENT:INTROSPECT ***] client protocol outgoing requestData=%s", JSON.stringify(requestData));
 
         var request = {};
-        var muonMessage = messages.muonMessage(request, serviceName, remoteService, protocolName, "Requested");
+        var muonMessage = messages.muonMessage(request, serviceName, remoteService, protocolName, "introspectionRequested");
         accept(muonMessage);
 
         setTimeout(function () {
