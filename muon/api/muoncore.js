@@ -20,7 +20,7 @@ exports.create = function(serviceName, transportUrl, discoveryUrl) {
 
     var infrastructure = new builder.build(config);
 
-    return api(serviceName, infrastructure)
+    return this.api(serviceName, infrastructure)
 }
 
 exports.channel = function() {
@@ -29,7 +29,7 @@ exports.channel = function() {
 
 exports.ServerStacks=ServerStacks
 
-var api = function( serviceName,  infrastructure) {
+exports.api = function( serviceName,  infrastructure) {
     var rpcApi = rpc.getApi(serviceName, infrastructure.transport);
     var introspectionApi = introspection.getApi(serviceName, infrastructure.transport);
 
