@@ -58,34 +58,21 @@ exports.onError = function(callback) {
 var findService = function(serviceName, discovery) {
   logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
   return function(prevResult) {
-     var promise = new RSVP.Promise(function(resolve, reject) {
-        var attempts = 0;
-        var serviceFinder = setInterval(function () {
-                attempts++;
-                var maxattempts = 5;
-                var serviceFound = false;
-                logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] searching for muon service '" + serviceName + "' attempt " + attempts);
-                discovery.discoverServices(function(services) {
-                        var service = services.find(serviceName);
-                        logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] found services: '" + JSON.stringify(services) + "'");
-                        if (service) {
-                            logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] found service: '" + JSON.stringify(service) + "'");
-                            serviceFound = true;
-                            resolve(service);
-                        } else if (attempts > maxattempts) {
-                            logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + "' after " + attempts + " attempts. aborting. reject()");
-                            reject(new Error('unable to find muon service ' + serviceName));
-                        } else {
-                            //logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
-                        }
-
-                        if (attempts > maxattempts || serviceFound) {
-                            clearInterval(serviceFinder);
-                        }
-                 });
-
-        }, 1000);
-
+      var promise = new RSVP.Promise(function(resolve, reject) {
+      var serviceFound = false;
+      logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] searching for muon service '" + serviceName);
+      discovery.discoverServices(function(services) {
+            var service = services.find(serviceName);
+            logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] found services: '" + JSON.stringify(services) + "'");
+            if (service) {
+                logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] found service: '" + JSON.stringify(service) + "'");
+                serviceFound = true;
+                resolve(service);
+            } else {
+                logger.warn("[*** TRANSPORT:CLIENT:DISCOVERY ***] unable to find service '" + serviceName + " aborting. reject()");
+                reject(new Error('unable to find muon service ' + serviceName));
+            }
+       });
      });
      return promise;
   }

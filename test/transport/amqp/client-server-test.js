@@ -55,7 +55,7 @@ describe("muon client/server transport test: ", function () {
                     body: "PONG",
                     content_type: 'text/plain'
                 }
-                var reply = messages.muonMessage(rpcResponseMsg, clientName, 'client1', "request.made");
+                var reply = messages.muonMessage(rpcResponseMsg, clientName, 'client1',  'rpc', "request.made");
                 messages.validate(reply);
                 serverChannel.leftConnection().send(reply);
         });
@@ -77,7 +77,7 @@ describe("muon client/server transport test: ", function () {
             body: "PING",
             content_type: 'text/plain'
         }
-        var event = messages.muonMessage(rpcMsg, clientName, 'server1', "request.made");
+        var event = messages.muonMessage(rpcMsg, clientName, 'server1',  'rpc', "request.made");
         muonClientChannel.send(event);
 
     });
@@ -101,7 +101,7 @@ describe("muon client/server transport test: ", function () {
 
                    logger.warn('********** client_server-test.js serverChannel.leftConnection().listen() reply with PONG');
 
-                    var reply = messages.muonMessage('PONG', clientName, 'client1', "request.made");
+                    var reply = messages.muonMessage('PONG', clientName, 'client1',  'rpc', "request.made");
                     messages.validate(reply);
                     serverChannel.leftConnection().send(reply);
             });
@@ -118,7 +118,7 @@ describe("muon client/server transport test: ", function () {
             });
             console.log('sending muon event via client..');
 
-            var event = messages.muonMessage("PING", clientName, 'server1', "request.made");
+            var event = messages.muonMessage("PING", clientName, 'server1',  'rpc', "request.made");
             muonClientChannel.send(event);
 
         });

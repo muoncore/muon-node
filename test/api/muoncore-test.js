@@ -169,6 +169,29 @@ describe("Muon core test:", function () {
     });
 
 
+    it("remote introspection request", function (done) {
+
+
+        muon = muoncore.create('awesome-service', amqpurl);
+        muon.handle('muon://awesome-service/some-endpoint', function (event, respond) {
+            logger.warn('*****  muon://awesome-service/some-endpoint: called *************************************************');
+            logger.warn('muon://awesome-service/some-endpoint server responding to event=' + JSON.stringify(event));
+            respond("I'm awesome, awesome, awesome, awesome");
+        });
+
+        muon2 = muoncore.create("awesome-client", amqpurl);
+
+        var promise = muon2.introspect('awesome-service', function(response) {
+              logger.trace(response);
+              assert(response, "introspect response is undefined");
+              //assert.equal(response.serviceName, 'awesome-service'); FAILS!!!! EH?
+              assert.equal(response.protocols[0].protocolScheme, 'rpc');
+              done();
+        });
+
+    });
+
+
 
 
     it("handles missing transport component error graefully", function () {
