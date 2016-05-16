@@ -241,7 +241,7 @@ function createMessage(payload, headers, source) {
 
 function callingObject() {
 
-    if (window != undefined && window.location != undefined) {
+    if (typeof window != 'undefined' && typeof window.location != undefined) {
         logger.debug("Running in a browser context, not collecting calling object")
         return null
     }
