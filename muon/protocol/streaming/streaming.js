@@ -1,14 +1,17 @@
+
 var nodeUrl = require("url");
 var channel = require('../../infrastructure/channel');
 var uuid = require('node-uuid');
 var RSVP = require('rsvp');
 require('sexylog');
 var handler = require('../../infrastructure/handler');
-var messages = require('./messages');
+
+var proto = require("./client-protocol")
+var simpleapi = require("./client-simple-api")
 
 var serviceName;
 var protocols = [];
-var protocolName = 'streaming';
+var protocolName = 'reactive-stream';
 
 
 /**
@@ -36,23 +39,31 @@ exports.getApi = function (name, transport) {
         name: function () {
             return protocolName;
         },
-        subscribe: function (remoteService, clientCallback, errorCallback) {
+        subscribe: function (remoteServiceUrl, clientCallback, errorCallback) {
 
-            /** wiring **/
-
-            var transChannel = transport.openChannel(remoteService, protocolName);
-            var clientChannel = channel.create("client-api");
-            var rpcProtocolClientHandler = clientHandler(remoteService);
-            clientChannel.rightHandler(rpcProtocolClientHandler);
-            transChannel.handler(rpcProtocolClientHandler);
-
-            /** end wire **/
-
-            //todo, create protocol instance and hook in between clientChannel and transChannel
-            //todo, add an API to return.
-
+            var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
+            var targetService = serviceRequest.hostname
             
+            var transChannel = transport.openChannel(targetService, protocolName);
+
+            var subscriber = simpleapi.subscriber(clientCallback, errorCallback, function() {
+                logger.info("Stream subscription is complete, the remote has no more data")
+            })
+
+            var targetStream = serviceRequest.path
+            var args = {}
+
+            var protocol = proto.create(
+                subscriber, 
+                transChannel,
+                targetService,
+                serviceName,
+                targetStream,
+                args)
             
+            protocol.start()
+
+            return subscriber.control
         },
         protocols: function (ps) {
             protocols = ps;

@@ -10,15 +10,4 @@ layout: documentation
 
 # Muon JavaScript
 
-Muon JavaScript is the implementation of Muon in pure JavaScript. It can run in two environments, Node.js and in Browser [Muon.JS], wth a supporting gateway.
-
-Both implementations are equivalent in functionality. Muon.JS can have it's functionality restricted by the server side gateway as required.
-
-Read more on setting up :-
-
-* Muon Node - link:muonnode.html[read more]
-* Muon.JS - link:muonjs.html[read more]
-
-Once you have a working service, whether Node or Browser based, read on!
-
 include::node/latest/intro.adoc[leveloffset=+1]

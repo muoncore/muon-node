@@ -1,5 +1,5 @@
 var muoncore = require('../muon/api/muoncore.js');
-var amqpurl = "amqp://muon:microservices@localhost";
+var amqpurl = "amqp://muon:microservices@192.168.99.100";
 var uuid = require('node-uuid');
 
 var config = {

@@ -2,25 +2,39 @@ var muoncore = require('../muon/api/muoncore.js');
 
 
 //
-var amqpurl = "amqp://tfadmin:techfutu13@msg.cistechfutures.net";
+var amqpurl = "amqp://muon:microservices@192.168.99.100";
 //var amqpurl = 'amqp://guest:guest@conciens.mooo.com';
 
-
-
 logger.info('starting muon...');
-muon = muoncore.create("test-photon-client", amqpurl);
-// or request://photon/projection-keys
-var promise = muon.request('rpc://photon/projection', {"projection-name": "__streams__"});
+muon = muoncore.create("test-client", amqpurl);
 
-promise.then(function (event) {
-    logger.info('*****************************************************************************************');
-    logger.info("nodejs-client response received! event=" + JSON.stringify(event));
-    process.exit(0);
-}, function (err) {
-    logger.error("nodejs-client muon promise.then() error!!!!!");
-    throw new Error('nodejs-client error in return muon promise');
-}).catch(function(error) {
-    logger.error("nodejs-client promise.then() error!!!!!: " + error);
-    throw new Error('nodejs-client error in return muon promise in muoncore-test.js', error);
-    process.exit(0);
-});
+
+setTimeout(function() {
+    var then = new Date().getTime()
+    console.log("Starting request!")
+    
+    muon.subscribe("stream://tckservice/myStream", 
+        function(data) {
+            logger.error("Data...")
+            console.dir(data)
+        },
+        function(error) {
+            logger.error("Errored...")
+            console.dir(error)
+        }, 
+        function() {
+            logger.warn("COMPLETED STREAM")
+        }
+    )
+    
+    
+    // var promise = muon.request('rpc://muon-dev-tools/echo', {"search": "red"});
+    //
+    // promise.then(function (event) {
+    //     var now = new Date().getTime()
+    //     console.log("Latency is " + (now - then))
+    //     process.exit(0);
+    // });
+
+
+}, 5000)
