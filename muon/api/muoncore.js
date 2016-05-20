@@ -53,8 +53,8 @@ exports.api = function( serviceName,  infrastructure) {
         introspect: function(remoteName, callback) {
             return introspectionApi.introspect(remoteName, callback);
         },
-        subscribe: function(remoteurl, callback) {
-            return streamingApi.subscribe(remoteurl, callback);
+        subscribe: function(remoteurl, callback, errorCallback, completeCallback) {
+            return streamingApi.subscribe(remoteurl, callback, errorCallback, completeCallback);
         }
     };
 }

@@ -39,16 +39,14 @@ exports.getApi = function (name, transport) {
         name: function () {
             return protocolName;
         },
-        subscribe: function (remoteServiceUrl, clientCallback, errorCallback) {
+        subscribe: function (remoteServiceUrl, clientCallback, errorCallback, completeCallback) {
 
             var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
             var targetService = serviceRequest.hostname
             
             var transChannel = transport.openChannel(targetService, protocolName);
 
-            var subscriber = simpleapi.subscriber(clientCallback, errorCallback, function() {
-                logger.info("Stream subscription is complete, the remote has no more data")
-            })
+            var subscriber = simpleapi.subscriber(clientCallback, errorCallback, completeCallback)
 
             var targetStream = serviceRequest.path
             var args = {}
