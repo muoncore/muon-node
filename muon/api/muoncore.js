@@ -27,7 +27,7 @@ exports.ServerStacks=ServerStacks
 exports.api = function( serviceName,  infrastructure) {
     var rpcApi = rpc.getApi(serviceName, infrastructure.transport);
     var introspectionApi = introspection.getApi(serviceName, infrastructure.transport);
-    var streamingApi = streaming.getApi(serviceName, infrastructure.transport);
+    var streamingApi = streaming.getApi(serviceName, infrastructure);
 
     introspectionApi.protocols([rpcApi]);
     infrastructure.serverStacks.addProtocol(rpcApi);
@@ -53,8 +53,11 @@ exports.api = function( serviceName,  infrastructure) {
         introspect: function(remoteName, callback) {
             return introspectionApi.introspect(remoteName, callback);
         },
-        subscribe: function(remoteurl, callback, errorCallback, completeCallback) {
-            return streamingApi.subscribe(remoteurl, callback, errorCallback, completeCallback);
+        replay: function(remoteurl, config, callback, errorCallback, completeCallback) {
+            return streamingApi.replay(remoteurl, config, callback, errorCallback, completeCallback);
+        },
+        subscribe: function(remoteurl, params, callback, errorCallback, completeCallback) {
+            return streamingApi.subscribe(remoteurl, params, callback, errorCallback, completeCallback);
         }
     };
 }

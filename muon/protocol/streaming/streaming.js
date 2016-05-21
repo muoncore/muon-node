@@ -4,8 +4,7 @@ var channel = require('../../infrastructure/channel');
 var uuid = require('node-uuid');
 var RSVP = require('rsvp');
 require('sexylog');
-var handler = require('../../infrastructure/handler');
-
+var _ = require("underscore")
 var proto = require("./client-protocol")
 var simpleapi = require("./client-simple-api")
 
@@ -32,14 +31,36 @@ var protocolName = 'reactive-stream';
  */
 
 
-exports.getApi = function (name, transport) {
+exports.getApi = function (name, infra) {
     serviceName = name;
+    var transport = infra.transport
 
     var api = {
         name: function () {
             return protocolName;
         },
-        subscribe: function (remoteServiceUrl, clientCallback, errorCallback, completeCallback) {
+
+        replay: function(streamName, config, clientCallback, errorCallback, completeCallback) {
+            var ret = {}
+            var muon = this
+            infra.discovery.discoverServices(function(services) {
+                var store = _.find(services.serviceList, function (it) {
+                    logger.info ("checking " + JSON.stringify(it))
+                    return _.contains(it.tags, "eventstore")
+                })
+
+                config['stream-name'] = streamName
+
+                logger.info("eventstore = " +JSON.stringify(store))
+
+                var subscriber = muon.subscribe("stream://" + store.identifier + "/stream", config, clientCallback, errorCallback, completeCallback)
+
+                ret.cancel = subscriber.cancel
+            })
+            return ret
+        },
+
+        subscribe: function (remoteServiceUrl, params, clientCallback, errorCallback, completeCallback) {
 
             var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
             var targetService = serviceRequest.hostname
@@ -49,7 +70,7 @@ exports.getApi = function (name, transport) {
             var subscriber = simpleapi.subscriber(clientCallback, errorCallback, completeCallback)
 
             var targetStream = serviceRequest.path
-            var args = {}
+            var args = params
 
             var protocol = proto.create(
                 subscriber, 
