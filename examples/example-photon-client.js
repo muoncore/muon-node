@@ -13,7 +13,8 @@ setTimeout(function() {
     var then = new Date().getTime()
     console.log("Starting request!")
     
-    muon.subscribe("stream://tckservice/myStream", 
+    muon.replay("something",
+        {"stream-type":"hot-cold"},
         function(data) {
             logger.error("Data...")
             console.dir(data)
@@ -37,4 +38,4 @@ setTimeout(function() {
     // });
 
 
-}, 5000)
+}, 6000)

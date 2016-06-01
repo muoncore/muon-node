@@ -28,6 +28,8 @@ module.exports.create = function(
     localService,
     targetStream,
     args) {
+
+    if (! args) args = {};
     
     transportchannel.listen(function(data) {
        switch(data.step) {
@@ -56,6 +58,9 @@ module.exports.create = function(
                break
            case "Completed":
                subscriber.onComplete()
+               break
+           case "ChannelFailure":
+               subscriber.onError("The connection to the remote has failed, the channel has shutdown unexpectedly")
                break
            default:
                logger.warn("Reactive Stream Client: Unknown step '" + data.step + "'")
