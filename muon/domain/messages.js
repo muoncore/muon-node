@@ -19,7 +19,7 @@ var schema = Joi.object().keys({
    status: Joi.string().optional(),
    payload: Joi.any().required(),
    channel_op: Joi.string().min(3).regex(/(normal|closed|shutdown)/).required(),
-   event_source: Joi.string().min(3).regex(/[a-zA-Z0-9\.-_]/).optional()
+   event_source: Joi.string().regex(/[a-zA-Z0-9\.-_]/).optional()
 });
 
 exports.validate = function(message) {
