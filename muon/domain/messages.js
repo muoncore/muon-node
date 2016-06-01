@@ -243,7 +243,7 @@ function callingObject() {
 
     if (typeof window != 'undefined' && typeof window.location != undefined) {
         logger.debug("Running in a browser context, not collecting calling object")
-        return null
+        return ""
     }
     var err = new Error('something went wrong');
     var trace = stackTrace.parse(err);
