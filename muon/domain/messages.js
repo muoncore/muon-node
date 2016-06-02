@@ -19,7 +19,7 @@ var schema = Joi.object().keys({
    status: Joi.string().optional(),
    payload: Joi.any().required(),
    channel_op: Joi.string().min(3).regex(/(normal|closed|shutdown)/).required(),
-   event_source: Joi.string().regex(/[a-zA-Z0-9\.-_]/).optional()
+   event_source: Joi.string().optional()
 });
 
 exports.validate = function(message) {
@@ -243,7 +243,7 @@ function callingObject() {
 
     if (typeof window != 'undefined' && typeof window.location != undefined) {
         logger.debug("Running in a browser context, not collecting calling object")
-        return ""
+        return "web"
     }
     var err = new Error('something went wrong');
     var trace = stackTrace.parse(err);
