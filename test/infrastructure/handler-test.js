@@ -155,5 +155,3 @@ describe("Handler test:", function () {
 
 
 });
-
-
