@@ -35,13 +35,13 @@ class Handler {
 
   sendDownstream(msg, accept, reject) {
       logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + this.name + ' sending message via handler downstream msg: ' +  JSON.stringify(msg));
-      var route = createRoute(this.upstreamConnection, this.incomingFunction);
+      var route = this.createRoute(this.upstreamConnection, this.incomingFunction);
       this.outgoingFunction(msg, accept, reject, route);
   }
 
   sendUpstream(msg, accept, reject) {
       logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + this.name + ' sending message via handler upstream event.id=' + JSON.stringify(msg));
-      var route = createRoute(this.downstreamConnection, this.outgoingFunction);
+      var route = this.createRoute(this.downstreamConnection, this.outgoingFunction);
       this.incomingFunction(msg, accept, reject, route);
   }
 
@@ -83,37 +83,40 @@ class Handler {
       }
   }
 
+
+  createRoute(otherConnection, handlerFunction) {
+      var _callbacks = this.callbacks;
+
+
+      var route = function(message, key) {
+          var callbackHandler = _callbacks[key];
+          if (! callbackHandler) throw new Error('unable to find callback handler for key: ' + key);
+
+          var tempCallback = function(response) {
+              logger.trace('[*** CSP-CHANNEL:HANDLER ***] callback handler returned response for key: ' + key);
+              var accept = function(result) {
+                  otherConnection.send(result);
+              };
+
+              var reject = function(result) {
+                  callbackHandler({}, error);
+              };
+              logger.trace('[*** CSP-CHANNEL:HANDLER ***] calling onward function for key: ' + key);
+              handlerFunction(response, accept, reject);
+          }
+          logger.trace('[*** CSP-CHANNEL:HANDLER ***]  executing routed callback handler for key: ' + key);
+          callbackHandler(message, tempCallback);
+      };
+
+      return route;
+
+  }
+
 }
 
 
 
-function createRoute(otherConnection, handlerFunction) {
 
-
-    var route = function(message, key) {
-        var callbackHandler = this.callbacks[key];
-
-        if (! this.callbackHandler) throw new Error('unable to find callback handler for key: ' + key);
-
-        var tempCallback = function(response) {
-            logger.trace('[*** CSP-CHANNEL:HANDLER ***] callback handler returned response for key: ' + key);
-            var accept = function(result) {
-                this.otherConnection.send(result);
-            };
-
-            var reject = function(result) {
-                callbackHandler({}, error);
-            };
-            logger.trace('[*** CSP-CHANNEL:HANDLER ***] calling onward function for key: ' + key);
-            handlerFunction(response, accept, reject);
-        }
-        logger.trace('[*** CSP-CHANNEL:HANDLER ***]  executing routed callback handler for key: ' + key);
-        callbackHandler(message, tempCallback);
-    };
-
-    return route;
-
-}
 
 
 module.exports = Handler;
