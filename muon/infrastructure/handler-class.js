@@ -6,17 +6,27 @@ class Handler {
 
 
   constructor(n, handlers) {
+    if (this.incomingFunction === undefined) {
+      throw new TypeError("Must override method incomingFunction()");
+    }
+
+    if (this.outgoingFunction === undefined) {
+      throw new TypeError("Must override method outgoingFunction()");
+    }
+
     if (! n) n = 'default';
     this.name = n + '-handler';
-    if (handlers) this.callbacks = handlers;
+    if (handlers) {
+      this.callbacks = handlers;
+    } else {
+      this.callbacks = {};
+    }
 
-    this.callbacks = {};
-    this.name;
-    this.outgoingFunction = function() {console.log('DEFUALT OUTGOING HANDLER FUNCTON NOT SET')};
-    this.incomingFunction = function() {console.log('DEFUALT INCOMING HANDLER FUNCTON NOT SET')};;
+    //this.upstreamConnection = {};
+    //this.downstreamConnection = {};
 
-    this.upstreamConnection;
-    this.downstreamConnection;
+
+
   }
 
 
@@ -53,11 +63,15 @@ class Handler {
       return this.downstreamConnection;
   }
 
-  upstreamConnection(c) {
+  setUpstreamConnection(c) {
+      //logger.error(this.name + ' setUpstreamConnection(c=' +  JSON.stringify(c) + ')');
+      //console.dir(c);
       this.upstreamConnection = c;
   }
 
-  downstreamConnection(c) {
+  setDownstreamConnection(c) {
+      //logger.error(this.name + ' setDownstreamConnection(c=' +  JSON.stringify(c) + ')');
+      //console.dir(c);
       this.downstreamConnection = c;
   }
 
@@ -72,6 +86,11 @@ class Handler {
   }
 
   thisConnection(conn) {
+      //logger.error('this.upstreamConnection=' +  JSON.stringify(this.upstreamConnection));
+      //logger.error('this.upstreamConnection=', this.upstreamConnection);
+      //console.dir(this.upstreamConnection);
+      //logger.error('this.downstreamConnection=' +  JSON.stringify(this.downstreamConnection));
+      //console.dir(this.downstreamConnection);
       if (this.upstreamConnection && conn === this.upstreamConnection.name()) {
           logger.trace('[*** CSP-CHANNEL:HANDLER ***]  ' + this.name + ' other connection is downstream: ' + this.downstreamConnection.name());
           return this.upstreamConnection;
@@ -86,7 +105,6 @@ class Handler {
 
   createRoute(otherConnection, handlerFunction) {
       var _callbacks = this.callbacks;
-
 
       var route = function(message, key) {
           var callbackHandler = _callbacks[key];

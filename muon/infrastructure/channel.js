@@ -86,7 +86,7 @@ function LeftConnection(name, inbound, outbound, validator) {
             if (listener) throw new Error('cannot set handler as listener already set');
             if (handler) throw new Error('left handler already set on channel "' + name + '"');
             handler = h;
-            handler.downstreamConnection(this);
+            handler.setDownstreamConnection(this);
 
 
             return csp.go(function*() {
@@ -186,7 +186,7 @@ function RightConnection(name, inbound, outbound, validator) {
             if (listener) throw new Error('cannot set handler as listener already set');
             if (handler) throw new Error('right handler already set on channel "' + name + '"');
             handler = h;
-            handler.upstreamConnection(this);
+            handler.setUpstreamConnection(this);
 
             return csp.go(function*() {
                 while(true) {
@@ -264,10 +264,3 @@ function Channel(name, validator) {
     }
 
 }
-
-
-
-
-
-
-

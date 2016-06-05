@@ -1,7 +1,13 @@
 
 var callbacks = {};
 
+logger.error('handler.js DEPRICATED!!! Use handler-class.js instead (@see handler-class-test.js)');
+
 module.exports.create = function(n, handlers) {
+    logger.warn('***** DEPRICATED!!! ********************************************************************************');
+    logger.warn('handler.js DEPRICATED!!! Use handler-class.js instead (@see handler-class-test.js)');
+    logger.warn('****************************************************************************************************');
+
 
     if (! n) n = 'default';
     var name = n + '-handler';
@@ -42,10 +48,10 @@ module.exports.create = function(n, handlers) {
         getDownstreamConnection: function() {
             return downstreamConnection;
         },
-        upstreamConnection: function(c) {
+        setUpstreamConnection: function(c) {
             upstreamConnection = c;
         },
-        downstreamConnection: function(c) {
+        setDownstreamConnection: function(c) {
             downstreamConnection = c;
         },
         otherConnection(conn) {

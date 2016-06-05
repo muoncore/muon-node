@@ -1,3 +1,5 @@
+"use strict";
+
 var Handler = require('../../muon/infrastructure/handler-class.js');
 var assert = require('assert');
 var expect = require('expect.js');
@@ -23,28 +25,27 @@ describe("Handler class test:", function () {
               var upstream = bichannel.create("upstream");
               var downstream = bichannel.create("downstream");
 
-               var testHandler = new Handler('test');
+               class TestHandler extends Handler {
 
+                 outgoingFunction(message, forward, back, route) {
+                   message.count++;
+                   message.audit.push('testHandler.outgoing()');
+                   forward(message);
+                 }
 
-              // OUTGOING/DOWNSTREAM event handling protocol logic
-               testHandler.outgoing(function(message, forward, back) {
-                    message.count++;
-                    message.audit.push('testHandler.outgoing()');
-                    forward(message);
-               });
+                 incomingFunction(message, forward, back, route) {
+                   message.count++;
+                   message.audit.push('testHandler.incoming()');
+                   forward(message);
+                 }
+               }
 
-             // OUTGOING/DOWNSTREAM event handling protocol logic
-              testHandler.incoming(function(message, forward, back) {
-                     message.count++;
-                     message.audit.push('testHandler.incoming()');
-                     forward(message);
-              });
+               var testHandler = new TestHandler('test');
 
                 upstream.rightHandler(testHandler);
                 downstream.leftHandler(testHandler);
 
                 upstream.leftSend(msg);
-
 
                 upstream.leftConnection().listen(function(message) {
                         console.log('***** upstream message returned:');
@@ -66,22 +67,22 @@ describe("Handler class test:", function () {
 
             var msg = {count: 0, audit: [], routingKey: 'server'};
 
+              class TestHandler extends Handler {
 
+                outgoingFunction(message, forward, back, route) {
+                  message.count++;
+                  message.audit.push('testHandler.outgoing()');
+                  forward(message);
+                }
 
-               var testHandler = new Handler('test');
-              // OUTGOING/DOWNSTREAM protocol logic
-               testHandler.outgoing(function(message, forward, back, route) {
-                    message.count++;
-                    message.audit.push('testHandler.outgoing()');
-                    forward(message);
-               });
+                incomingFunction(message, forward, back, route) {
+                  message.count++;
+                  message.audit.push('testHandler.incoming()');
+                  route(message, message.routingKey);
+                }
+              }
 
-             // INCOMING/UPSTREAM eprotocol logic
-              testHandler.incoming(function(message, forward, back, route) {
-                     message.count++;
-                     message.audit.push('testHandler.incoming()');
-                     route(message, message.routingKey);
-              });
+              var testHandler = new TestHandler('test');
 
               var serverEndpoint = function(message, respond) {
                     message.count++;
@@ -113,22 +114,22 @@ describe("Handler class test:", function () {
             var msg = {count: 0, audit: [], routingKey: 'server'};
 
 
+              class TestHandler extends Handler {
 
-               var testHandler = new Handler('test');
-              // OUTGOING/DOWNSTREAM protocol logic
-               testHandler.outgoing(function(message, forward, back, route) {
-                    message.count++;
-                    message.audit.push('testHandler.outgoing()');
-                    route(message, message.routingKey);
+                outgoingFunction(message, forward, back, route) {
+                  message.count++;
+                  message.audit.push('testHandler.outgoing()');
+                  route(message, message.routingKey);
+                }
 
-               });
+                incomingFunction(message, forward, back, route) {
+                  message.count++;
+                  message.audit.push('testHandler.incoming()');
+                  forward(message);
+                }
+              }
 
-             // INCOMING/UPSTREAM eprotocol logic
-              testHandler.incoming(function(message, forward, back, route) {
-                     message.count++;
-                     message.audit.push('testHandler.incoming()');
-                     forward(message);
-              });
+              var testHandler = new TestHandler('test');
 
               var serverEndpoint = function(message, respond) {
                     message.count++;
