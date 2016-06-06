@@ -23,14 +23,14 @@ class MuonSocketAgent {
   }
 
 
-  outbound(message, outboundConnection) {
+  outbound(message, downstreamConnection) {
       logger.debug('**** AGENT MESSAGE PASSTHROUGH OUTBOUND');
-      outboundConnection.send(message);
+      downstreamConnection.send(message);
   }
 
-  inbound(message, inboundConnection) {
+  inbound(message, upstreamConnection) {
       logger.debug('**** AGENT MESSAGE PASSTHROUGH INBOUND');
-      inboundConnection.send(message);
+      upstreamConnection.send(message);
   }
 
 
