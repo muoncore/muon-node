@@ -2,6 +2,7 @@ var _ = require("underscore");
 var bichannel = require('../infrastructure/channel');
 var rpcProtocol = require('../protocol/rpc.js');
 var messages = require('../domain/messages.js');
+var MuonSocketAgent = require('../socket/agent.js');
 
 
 
@@ -21,7 +22,15 @@ ServerStacks.prototype.openChannel = function(protocol) {
     if (! protocol) return null;
     var protocolServerHandler = protocol.protocolHandler().server();
     serverStacksChannel.leftHandler(protocolServerHandler);
-    return serverStacksChannel.rightConnection();
+
+    var agent = new MuonSocketAgent();
+    agent.upstream(serverStacksChannel.rightConnection());
+
+    var transportChannel = bichannel.create("socket-agent");
+
+    agent.downstream(transportChannel.leftConnection());
+
+    return transportChannel.rightConnection();
 };
 
 
