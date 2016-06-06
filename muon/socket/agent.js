@@ -24,12 +24,12 @@ class MuonSocketAgent {
 
 
   outbound(message, downstreamConnection) {
-      logger.debug('**** AGENT MESSAGE PASSTHROUGH OUTBOUND');
+      logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***]');
       downstreamConnection.send(message);
   }
 
   inbound(message, upstreamConnection) {
-      logger.debug('**** AGENT MESSAGE PASSTHROUGH INBOUND');
+      logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***]');
       upstreamConnection.send(message);
   }
 

@@ -1,7 +1,7 @@
 
 var callbacks = {};
 
-logger.error('handler.js DEPRICATED!!! Use handler-class.js instead (@see handler-class-test.js)');
+logger.warn('require("handler.js") DEPRICATED!!! Use require("handler-class.js") instead (@see handler-class-test.js)');
 
 module.exports.create = function(n, handlers) {
     logger.warn('***** DEPRICATED!!! ********************************************************************************');

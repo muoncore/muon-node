@@ -57,7 +57,8 @@ function LeftConnection(name, inbound, outbound, validator) {
                 }
 
             }
-            csp.putAsync(outbound, msg);
+            var result = csp.putAsync(outbound, msg);
+            if (! result) throw new Error('csp channel closed');
         },
         listen: function(callback) {
             if (handler) throw new Error(name + ': cannot set LHS listener as handler already set');
@@ -156,7 +157,8 @@ function RightConnection(name, inbound, outbound, validator) {
                     throw new Error(err);
                 }
             }
-            csp.putAsync(outbound, msg);
+            var result = csp.putAsync(outbound, msg);
+            if (! result) throw new Error('csp channel closed');
         },
         listen: function(callback) {
             if (handler) throw new Error(name + ': cannot set RHS listener as handler already set');

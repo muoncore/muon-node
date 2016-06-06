@@ -377,6 +377,16 @@ describe("Bi directional channel test", function () {
          rightClient(channel.rightConnection());
          channel.leftConnection().send(new Error('non valdiating errror'));
     });
+
+
+      it("unable to send messages on closed channel", function () {
+          var channel = bichannel.create("test-a-kimbo!");
+          channel.close();
+
+          expect(function() {
+            channel.leftConnection().send('blah');
+
+          }).to.throwException(/csp channel closed/);
+
+      });
 });
-
-
