@@ -22,15 +22,9 @@ ServerStacks.prototype.openChannel = function(protocol) {
     if (! protocol) return null;
     var protocolServerHandler = protocol.protocolHandler().server();
     serverStacksChannel.leftHandler(protocolServerHandler);
-
-    var agent = new MuonSocketAgent();
-    agent.upstream(serverStacksChannel.rightConnection());
-
-    var transportChannel = bichannel.create("socket-agent");
-
-    agent.downstream(transportChannel.leftConnection());
-
-    return transportChannel.rightConnection();
+    //var transportChannel = bichannel.create("transport");
+    //var agent = new MuonSocketAgent(serverStacksChannel, transportChannel, protocol, 0);
+    return serverStacksChannel.rightConnection();
 };
 
 

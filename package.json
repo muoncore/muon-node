@@ -27,6 +27,7 @@
     "jsonutil": "*",
     "async": "*",
     "url": "*",
+    "moment": "*",
     "cors": "*",
     "js-csp": "*",
     "node-uuid": "*",
