@@ -39,7 +39,7 @@ describe("Agent class test:", function () {
               var upstream = bichannel.create("upstream");
               var downstream = bichannel.create("downstream");
 
-              var agent = new Agent(upstream, downstream, 'rpc', 100);
+              var agent = new Agent(upstream, downstream, 'rpc', 10);
 
                 var keepAlivePingCount = 0;
                 downstream.rightConnection().listen(function(message){

@@ -37,9 +37,9 @@ class MuonSocketAgent {
       }.bind(this);
       if (this.repeatMs > 0) {
         setInterval(function() {
-          logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] setInterval(f(){}, ' + this.repeatMs + ')');
+          //logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] setInterval(f(){}, ' + this.repeatMs + 'ms)');
           keepAlive();
-        }, this.repeatMs);
+        }.bind(this), this.repeatMs);
       }
 
   }
@@ -57,7 +57,7 @@ class MuonSocketAgent {
   setLastMessageTimestamp() {
       //console.log('setLastMessageTimestamp()', this);
       this.lastMessageTimestamp = new Date();
-      console.log('this.lastMessageTimestamp=' + this.lastMessageTimestamp);
+      logger.trace('this.lastMessageTimestamp=' + this.lastMessageTimestamp);
   }
 
 
@@ -68,9 +68,9 @@ class MuonSocketAgent {
 function messageSentSince(lastMessageTimepstamp, ms) {
   var moment1 = moment(lastMessageTimepstamp).add(ms, 'milliseconds');
   var moment2 = moment(new Date());
-  logger.trace('moment1/moment2: ' + moment1 + "/" + moment2);
+  //logger.trace('moment1/moment2: ' + moment1 + "/" + moment2);
   var inTimeWindow = (moment2).isBefore(moment1) ;
-  logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] message sent since ' + ms + 'ms: ' + inTimeWindow);
+  //logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] message sent since ' + ms + 'ms: ' + inTimeWindow);
   return inTimeWindow;
 }
 
