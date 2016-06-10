@@ -52,7 +52,7 @@ describe("Agent class test:", function () {
 
     });
 
-    /**  SEND 10 message (once every 10ms, then wait for keep alive)   */
+
     it("agent delays keep alive pings if event received", function (done) {
 
               var upstream = bichannel.create("upstream");
@@ -60,6 +60,8 @@ describe("Agent class test:", function () {
               var protocol = 'rpc';
               var agent = new Agent(upstream, downstream, protocol, 200);
 
+
+              //  SEND 10 message (once every 10ms, then wait for keep alive)  /
               var messagesSent = 0;
               var backgroundSender = setInterval(function() {
                 upstream.leftConnection().send({text: 'this is a test event!'});
@@ -72,7 +74,7 @@ describe("Agent class test:", function () {
                 var pingReceived = false;
                 var messagesReceived = 0;
                 downstream.rightConnection().listen(function(message){
-                    //console.log('******************** message: ', message);
+                    console.log('******************** message: ', message);
                     messagesReceived++;
                     if (message.step == 'keep-alive') pingReceived = true;
                     if (message.text) assert.equal('this is a test event!', message.text);
@@ -80,8 +82,12 @@ describe("Agent class test:", function () {
                 });
 
     });
+/*
+    it("two agents keep each other alive", function (done) {
 
-    
+    }
+*/
+
 
 
 

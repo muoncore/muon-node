@@ -1,6 +1,7 @@
 "use strict";
 require('sexylog');
 var moment = require('moment');
+var messages = require('../domain/messages.js');
 
 /**
   Muon SOcket Kep Alive Agent
@@ -17,26 +18,32 @@ class MuonSocketAgent {
 
     if (! offsetMs) offsetMs = 0;
     this.offsetMs = offsetMs;
-    this.lastMessageTimestamp = new Date();
+    this.lastOutboundMessageTimestamp = new Date();
+    this.lastInboundMessageTimestamp = new Date();
+    this.lastInboundPingTimestamp = new Date();
+
     var _outboundFunction = this.outbound; //'this' doesnt work in functions below
     var _inboundFunction = this.inbound; //'this' doesnt work in functions below
 
     upstreamChannel.rightConnection().listen(function(message) {
-        this.lastMessageTimestamp = new Date();
+        this.lastOutboundMessageTimestamp = new Date();
         _outboundFunction(message, downstreamChannel.leftConnection());
     }.bind(this));
 
     downstreamChannel.leftConnection().listen(function(message) {
-        _inboundFunction(message, upstreamChannel.rightConnection());
+        if (message.step == 'keep-alive') {
+          this.lastInboundPingTimestamp = new Date();
+          // then discard the ping
+        } else {
+          _inboundFunction(message, upstreamChannel.rightConnection());
+        }
+
+
     });
 
     var keepAlive =   function() {
-        if (messageWasSentSince(this.lastMessageTimestamp, this.offsetMs)) return;
-        var ping = {
-          protocol:protocol,
-          step: "keep-alive",
-          payload: {}
-        }
+        if (messageWasSentSince(this.lastOutboundMessageTimestamp, this.offsetMs)) return;
+        var ping = messages.muonMessage({}, 'this', 'that', protocol, 'keep-alive');
         logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] sending keep alive ping');
         this.downstreamChannel.leftConnection().send(ping);
 
@@ -52,13 +59,19 @@ class MuonSocketAgent {
   }
 
   outbound(message, downstreamConnection) {
-      logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***]');
+      logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] forwarding message outbound');
       downstreamConnection.send(message);
   }
 
   inbound(message, upstreamConnection) {
-      logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***]');
-      upstreamConnection.send(message);
+      logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] forwarding message inbound');
+      if (message.step == 'keep-alive') {
+          //discard
+
+      } else {
+          upstreamConnection.send(message);
+      }
+
   }
 /*
   setLastMessageTimestamp() {
