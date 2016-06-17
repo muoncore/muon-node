@@ -82,11 +82,38 @@ describe("Agent class test:", function () {
                 });
 
     });
-/*
-    it("two agents keep each other alive", function (done) {
 
-    }
-*/
+    it("two agents keep each other alive", function (done) {
+      var protocol = 'rpc';
+      var clientUpstream = bichannel.create("client-upstream");
+      var clientDownstream = bichannel.create("client-downstream");
+      var serverUpstream = bichannel.create("server-upstream");
+      var serverDownstream = bichannel.create("server-downstream");
+
+      function MockTransport(clientConnection, serverConnection) {
+          var clientKeepAliveMessages = 0;
+          var serverKeepAliveMessages = 0;
+          clientConnection.listen(function(msg) {
+              logger.info('mock trasnport client listener:' + JSON.stringify(msg));
+              clientKeepAliveMessages++;
+              serverConnection.send(msg);
+          });
+          serverConnection.listen(function(msg) {
+              logger.info('mock trasnport server listener:' + JSON.stringify(msg));
+              serverKeepAliveMessages++;
+              clientConnection.send(msg);
+
+              if (serverKeepAliveMessages > 10 && clientKeepAliveMessages > 10) done();
+          });
+      };
+
+      var protocol = 'rpc';
+      var clintAgent = new Agent(clientUpstream, clientDownstream, protocol, 10);
+      var serverAgent = new Agent(serverUpstream, serverDownstream, protocol, 10);
+      var mockTransport = new MockTransport(clientDownstream.rightConnection(), serverDownstream.rightConnection());
+
+    });
+
 
 
 

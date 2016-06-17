@@ -39,7 +39,7 @@ class MuonSocketAgent {
         }
 
 
-    });
+    }.bind(this));
 
     var keepAlive =   function() {
         if (messageWasSentSince(this.lastOutboundMessageTimestamp, this.offsetMs)) return;
