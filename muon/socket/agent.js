@@ -53,7 +53,6 @@ class MuonSocketAgent {
       }.bind(this);
 
       var muonTimeout = function() {
-          if (this.shutdownInitiated) return;
           if (timestampLongerThan(this.lastInboundMessageTimestamp, MUON_TIMEOUT) &&
               timestampLongerThan(this.lastInboundPingTimestamp, MUON_TIMEOUT)) {
                 // send transport shutdown message and close all resources;
@@ -62,10 +61,9 @@ class MuonSocketAgent {
                 var shutdownMsg = messages.shutdownMessage();
                 this.upstreamChannel.rightConnection().send(shutdownMsg);
                 this.downstreamChannel.leftConnection().send(shutdownMsg);
-                //this.upstreamChannel.close();
-                //this.downstreamChannel.close();
                 clearInterval(this.keepAlive);
-                clearInterval(this.muonTimeout);
+                this.upstreamChannel.close();
+                this.downstreamChannel.close();
                 logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown complete');
           }
         }.bind(this);
@@ -74,7 +72,7 @@ class MuonSocketAgent {
       if (this.offsetMs > 0) {
         // keep alive timer
         setInterval(keepAlive, this.offsetMs);
-        setInterval(muonTimeout, MUON_TIMEOUT);
+        setTimeout(muonTimeout, MUON_TIMEOUT);
 
       }
 

@@ -378,16 +378,33 @@ describe("Bi directional channel test", function () {
          channel.leftConnection().send(new Error('non valdiating errror'));
     });
 
-    /* TODO this didn't work, seems aleasy return false? 
-      it("unable to send messages on closed channel", function () {
-          var channel = bichannel.create("test-a-kimbo!");
+
+      it("unable to send messages on closed channel", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
           channel.close();
 
-          expect(function() {
-            channel.leftConnection().send('blah');
-
-          }).to.throwException(/csp channel closed/);
+          setTimeout(function(){
+            expect(function() {
+              channel.leftConnection().send('blah');
+            }).to.throwException(/csp channel closed/);
+            done();
+          }, 200);
 
       });
-      */
+
+      it("unable to listen on closed channel", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
+          channel.close();
+
+          setTimeout(function(){
+            expect(function() {
+              channel.leftConnection().listen(function() {});
+            }).to.throwException(/csp channel closed/);
+            done();
+          }, 200);
+
+
+
+      });
+
 });

@@ -1,6 +1,8 @@
 var csp = require("js-csp");
 require('sexylog');
 
+var SHUTDOWN_DELAY = 1000;
+
 /**
  * Muon-node bi-directional channel
  *
@@ -14,7 +16,8 @@ require('sexylog');
  *
  */
 
-module.exports.create = function(name, validiator) {
+module.exports.create = function(name, validiator, delay) {
+    if (delay) SHUTDOWN_DELAY = delay;
     return new Channel(name, validiator);
 }
 
@@ -37,6 +40,7 @@ function LeftConnection(name, inbound, outbound, validator) {
             csp.putAsync(outbound, err);
         },
         send: function(msg) {
+            if (outbound.closed) throw new Error('csp channel closed');
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
@@ -58,15 +62,16 @@ function LeftConnection(name, inbound, outbound, validator) {
 
             }
             var result = csp.putAsync(outbound, msg);
-            //if (! result) throw new Error('csp channel closed');
         },
         listen: function(callback) {
             if (handler) throw new Error(name + ': cannot set LHS listener as handler already set');
+            if (inbound.closed) throw new Error('csp channel closed');
             listener = callback;
             //logger.trace(name + " ChannelConnection.send() callback: " + callback);
             return csp.go(function*() {
-                while(true) {
+                while(! inbound.closed) {
                     var msg = yield csp.take(inbound);
+                    if (inbound.closed || ! msg) return;
                     //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     var id = msg.id || "unknown";
                     // deal with errors
@@ -111,8 +116,11 @@ function LeftConnection(name, inbound, outbound, validator) {
             return name;
         },
         close: function() {
-            inbound.close();
-            outbound.close();
+            setTimeout(function(){
+              logger.debug('shutting down channel ' + name);
+              inbound.close();
+              outbound.close();
+            }, SHUTDOWN_DELAY);
         }
     };
     //logger.trace('[***** CSP-CHANNEL *****] returning left connection '+ name);
@@ -143,6 +151,7 @@ function RightConnection(name, inbound, outbound, validator) {
             csp.putAsync(outbound, err);
         },
         send: function(msg) {
+            if (outbound.closed) throw new Error('csp channel closed');
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg=" + typeof msg);
             var id = msg.id || "unknown";
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
@@ -166,11 +175,13 @@ function RightConnection(name, inbound, outbound, validator) {
         },
         listen: function(callback) {
             if (handler) throw new Error(name + ': cannot set RHS listener as handler already set');
+            if (inbound.closed) throw new Error('csp channel closed');
             listener = callback;
             //logger.trace(name + " ChannelConnection.send() callback: " + callback);
             return csp.go(function*() {
-                while(true) {
+              while(! inbound.closed) {
                     var msg = yield csp.take(inbound);
+                    if (inbound.closed || ! msg) return;
                     var id = msg.id || "unknown";
                     //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     // deal with errors
@@ -213,8 +224,11 @@ function RightConnection(name, inbound, outbound, validator) {
             return name;
         },
         close: function() {
+          setTimeout(function(){
+            logger.debug('shutting down channel ' + name);
             inbound.close();
             outbound.close();
+          }, SHUTDOWN_DELAY);
         }
     }
     //logger.trace('[***** CSP-CHANNEL *****] returning right connection ' + name);
@@ -268,8 +282,11 @@ function Channel(name, validator) {
             rightConnection.send(msg);
         },
         close: function() {
+          setTimeout(function(){
+            logger.debug('shutting down channel ' + name);
             inbound.close();
             outbound.close();
+          }, SHUTDOWN_DELAY);
         }
     }
 
