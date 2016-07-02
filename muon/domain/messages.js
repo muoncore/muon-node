@@ -114,7 +114,7 @@ exports.shutdownMessage = function() {
         event_source: callingObject(),
         target_service: 'n/a',
         origin_service: 'n/a',
-        channel_op: 'shutdown'
+        channel_op: 'closed'
   };
 
  var message = createMessage({}, headers);

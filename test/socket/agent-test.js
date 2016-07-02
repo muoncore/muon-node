@@ -9,7 +9,7 @@ var bichannel = require('../../muon/infrastructure/channel.js');
 
 describe("Agent class test:", function () {
 
-      this.timeout(2000);
+      this.timeout(3000);
 
     it("agent acts as handler between two channels", function (done) {
 
@@ -129,9 +129,9 @@ describe("Agent class test:", function () {
         downstream.rightConnection().listen(function(message){
             logger.debug(JSON.stringify(message));
             if (message.step == 'keep-alive') keepAlivePingCount++;
-            if (message.channel_op == 'shutdown') shutdownMessage++;
-            logger.trace('keep-alive='+ keepAlivePingCount + ' shutdown=' + shutdownMessage);
-            if (keepAlivePingCount >= 9 & shutdownMessage == 1) done();
+            if (message.channel_op == 'closed') shutdownMessage++;
+            logger.trace('keep-alive='+ keepAlivePingCount + ' closed=' + shutdownMessage);
+            if (keepAlivePingCount >= 8 & shutdownMessage == 1) done();
         });
 
     });
