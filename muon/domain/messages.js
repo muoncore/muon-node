@@ -104,6 +104,23 @@ exports.failure = function(protocol, status, text) {
     return msg;
 }
 
+exports.shutdownMessage = function() {
+
+  var messageid = uuid.v4();
+
+  var headers = {
+        step: 'shutdown',
+        protocol: 'n/a',
+        event_source: callingObject(),
+        target_service: 'n/a',
+        origin_service: 'n/a',
+        channel_op: 'shutdown'
+  };
+
+ var message = createMessage({}, headers);
+ return validateSchema(message);
+}
+
 exports.muonMessage = function(payload, sourceService, targetService, protocol, step) {
 
    //logger.trace("messages.payload='" +  JSON.stringify(payload) + "', sourceService='" +  sourceService + "')");

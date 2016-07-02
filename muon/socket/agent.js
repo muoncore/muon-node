@@ -3,6 +3,8 @@ require('sexylog');
 var moment = require('moment');
 var messages = require('../domain/messages.js');
 
+var MUON_TIMEOUT = 1000;
+
 /**
   Muon SOcket Kep Alive Agent
 
@@ -15,6 +17,8 @@ class MuonSocketAgent {
 
     this.upstreamChannel = upstreamChannel;
     this.downstreamChannel = downstreamChannel;
+
+    this.shutdownInitiated = false;
 
     if (! offsetMs) offsetMs = 0;
     this.offsetMs = offsetMs;
@@ -41,19 +45,37 @@ class MuonSocketAgent {
 
     }.bind(this));
 
-    var keepAlive =   function() {
-        if (messageWasSentSince(this.lastOutboundMessageTimestamp, this.offsetMs)) return;
-        var ping = messages.muonMessage({}, 'this', 'that', protocol, 'keep-alive');
+    var keepAlive = function() {
+        if (timestampSince(this.lastOutboundMessageTimestamp, this.offsetMs) || this.shutdownInitiated) return;
         logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] sending keep alive ping');
+        var ping = messages.muonMessage({}, 'this', 'that', protocol, 'keep-alive');
         this.downstreamChannel.leftConnection().send(ping);
-
       }.bind(this);
 
+      var muonTimeout = function() {
+          if (this.shutdownInitiated) return;
+          if (timestampLongerThan(this.lastInboundMessageTimestamp, MUON_TIMEOUT) &&
+              timestampLongerThan(this.lastInboundPingTimestamp, MUON_TIMEOUT)) {
+                // send transport shutdown message and close all resources;
+                logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown initiated due to muon socket timeout of ' + MUON_TIMEOUT + 'ms');
+                this.shutdownInitiated = true;
+                var shutdownMsg = messages.shutdownMessage();
+                this.upstreamChannel.rightConnection().send(shutdownMsg);
+                this.downstreamChannel.leftConnection().send(shutdownMsg);
+                //this.upstreamChannel.close();
+                //this.downstreamChannel.close();
+                clearInterval(this.keepAlive);
+                clearInterval(this.muonTimeout);
+                logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown complete');
+          }
+        }.bind(this);
+
+
       if (this.offsetMs > 0) {
-        setInterval(function() {
-          //logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] setInterval(f(){}, ' + this.repeatMs + 'ms)');
-          keepAlive();
-        }.bind(this), this.offsetMs);
+        // keep alive timer
+        setInterval(keepAlive, this.offsetMs);
+        setInterval(muonTimeout, MUON_TIMEOUT);
+
       }
 
   }
@@ -73,6 +95,7 @@ class MuonSocketAgent {
       }
 
   }
+
 /*
   setLastMessageTimestamp() {
       //console.log('setLastMessageTimestamp()', this);
@@ -85,13 +108,23 @@ class MuonSocketAgent {
 }
 
 
-function messageWasSentSince(lastMessageTimepstamp, offsetMs) {
-  var moment1 = moment(lastMessageTimepstamp).add(offsetMs, 'milliseconds');
+function timestampSince(timepstamp, offsetMs) {
+  var moment1 = moment(timepstamp).add(offsetMs, 'milliseconds');
   var moment2 = moment(new Date());
   //logger.trace('moment1/moment2: ' + moment1 + "/" + moment2);
   var inTimeWindow = (moment2).isBefore(moment1) ;
   //logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] message sent since ' + ms + 'ms: ' + inTimeWindow);
   return inTimeWindow;
+}
+
+
+function timestampLongerThan(timepstamp, offsetMs) {
+  var moment1 = moment(timepstamp).add(offsetMs, 'milliseconds');
+  var moment2 = moment(new Date());
+  //logger.trace('moment1/moment2: ' + moment1 + "/" + moment2);
+  var outsideTimeWindow = (moment1).isBefore(moment2) ;
+  //logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] message sent since ' + ms + 'ms: ' + inTimeWindow);
+  return outsideTimeWindow;
 }
 
 module.exports = MuonSocketAgent;

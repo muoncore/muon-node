@@ -9,6 +9,8 @@ var bichannel = require('../../muon/infrastructure/channel.js');
 
 describe("Agent class test:", function () {
 
+      this.timeout(2000);
+
     it("agent acts as handler between two channels", function (done) {
 
             var msg = {text: 'agent smith'};
@@ -113,6 +115,27 @@ describe("Agent class test:", function () {
       var mockTransport = new MockTransport(clientDownstream.rightConnection(), serverDownstream.rightConnection());
 
     });
+
+
+    it("agent with no service keep alive shutsdown channels", function (done) {
+
+      var upstream = bichannel.create("upstream");
+      var downstream = bichannel.create("downstream");
+      var protocol = 'rpc';
+      var agent = new Agent(upstream, downstream, protocol, 100);
+
+        var keepAlivePingCount = 0;
+        var shutdownMessage = 0;
+        downstream.rightConnection().listen(function(message){
+            logger.debug(JSON.stringify(message));
+            if (message.step == 'keep-alive') keepAlivePingCount++;
+            if (message.channel_op == 'shutdown') shutdownMessage++;
+            logger.trace('keep-alive='+ keepAlivePingCount + ' shutdown=' + shutdownMessage);
+            if (keepAlivePingCount >= 9 & shutdownMessage == 1) done();
+        });
+
+    });
+
 
 
 

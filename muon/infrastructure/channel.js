@@ -109,6 +109,10 @@ function LeftConnection(name, inbound, outbound, validator) {
         },
         name: function() {
             return name;
+        },
+        close: function() {
+            inbound.close();
+            outbound.close();
         }
     };
     //logger.trace('[***** CSP-CHANNEL *****] returning left connection '+ name);
@@ -207,6 +211,10 @@ function RightConnection(name, inbound, outbound, validator) {
         },
         name: function() {
             return name;
+        },
+        close: function() {
+            inbound.close();
+            outbound.close();
         }
     }
     //logger.trace('[***** CSP-CHANNEL *****] returning right connection ' + name);
