@@ -152,7 +152,7 @@ function RightConnection(name, inbound, outbound, validator) {
         },
         send: function(msg) {
             if (outbound.closed) throw new Error('csp channel closed');
-            //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg=" + typeof msg);
+            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg=" + typeof msg);
             var id = msg.id || "unknown";
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
            // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);

@@ -117,7 +117,7 @@ describe("Agent class test:", function () {
     });
 
 
-    it("agent with no service keep alive shutsdown channels", function (done) {
+    it("agent with no service keep alive shuts down channels", function (done) {
       var doneOnce = asyncAssert(done);
 
       var upstream = bichannel.create("upstream");
@@ -132,7 +132,7 @@ describe("Agent class test:", function () {
             if (message.step == 'keep-alive') keepAlivePingCount++;
             if (message.channel_op == 'closed') shutdownMessage++;
             logger.trace('keep-alive='+ keepAlivePingCount + ' closed=' + shutdownMessage);
-            doneOnce(keepAlivePingCount >= 4 && shutdownMessage == 1);
+            doneOnce(keepAlivePingCount >= 3 && shutdownMessage == 1);
         });
 
     });

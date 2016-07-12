@@ -144,6 +144,7 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
 
                 if (message.channel_op == 'closed') {
                   // close muon socklet
+                  logger.warn("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound recevied message channel_op=closed. deleteing queues for socket ");
                   amqpApi.delete(serverListenQueueName);
                   amqpApi.delete(replyQueueName);
                   muonSocketOpen = false;

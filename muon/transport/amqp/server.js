@@ -34,9 +34,9 @@ try {
       logger.info("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " + msg.headers.server_reply_q);
   });
 } catch (err) {
-    logger.error(err);
+    logger.error(err.stack);
     //TODO do some shutdown?
-    errCallback(err);
+    if (errCallback) errCallback(err);
 }
 
 
@@ -56,9 +56,20 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
         //logger.trace("[*** TRANSPORT:SERVER:INBOUND ***]  inbound muon event sent to server stack channel message.id=%s", message.id);
     });
 
-    serverStackChannel.listen(function (event) {
-        logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event to queue " + send_queue + ": %s", JSON.stringify(event));
-        amqpApi.outbound(send_queue).send({headers: {"content_type": "application/json"}, data: event});
+    serverStackChannel.listen(function (message) {
+      logger.trace('[*** TRANSPORT:SERVER:OUTBOUND ***] message recevied');
+      if (message.channel_op == 'closed') {
+        // close muon socket
+        logger.warn("[*** TRANSPORT:SERVER:OUTBOUND ***]  message channel_op=closed received. deleteing temp amqp queues for muon socket");
+        logger.trace('deleting send_queue/listen_queue=' + send_queue + '/' + listen_queue );
+        amqpApi.delete(listen_queue);
+        amqpApi.delete(send_queue);
+        muonSocketOpen = false;
+        return;
+      } else {
+        logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event to queue " + send_queue + ": %s", JSON.stringify(message));
+        amqpApi.outbound(send_queue).send({headers: {"content_type": "application/json"}, data: message});
+      }
     });
 
 }
