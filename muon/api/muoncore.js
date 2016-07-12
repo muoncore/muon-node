@@ -25,8 +25,8 @@ exports.channel = function() {
 exports.ServerStacks=ServerStacks
 
 exports.api = function( serviceName,  infrastructure) {
-    var rpcApi = rpc.getApi(serviceName, infrastructure.transport);
-    var introspectionApi = introspection.getApi(serviceName, infrastructure.transport);
+    var rpcApi = rpc.getApi(serviceName, infrastructure);
+    var introspectionApi = introspection.getApi(serviceName, infrastructure);
     var streamingApi = streaming.getApi(serviceName, infrastructure);
 
     introspectionApi.protocols([rpcApi]);

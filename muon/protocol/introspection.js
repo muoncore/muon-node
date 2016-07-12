@@ -11,7 +11,7 @@ var messages = require('../domain/messages.js');
 var serviceName;
 var protocols = [];
 var protocolName = 'introspect';
-exports.getApi = function (name, transport) {
+exports.getApi = function (name, infrastructure) {
     serviceName = name;
 
     var api = {
@@ -19,30 +19,33 @@ exports.getApi = function (name, transport) {
             return protocolName;
         },
         introspect: function (remoteService, clientCallback) {
-            var transChannel = transport.openChannel(remoteService, protocolName);
-            var clientChannel = channel.create("client-api");
-            var rpcProtocolClientHandler = clientHandler(remoteService);
-            clientChannel.rightHandler(rpcProtocolClientHandler);
-            transChannel.handler(rpcProtocolClientHandler);
+
+            var transportPromise = infrastructure.getTransport();
 
             var promise = new RSVP.Promise(function (resolve, reject) {
-                var callback = function (event) {
-                    if (!event) {
-                        logger.warn('client-api promise failed check! calling promise.reject()');
-                        reject(event);
-                    } else {
-                        logger.trace('promise calling promise.resolve() event.id=' + event.id);
-                        resolve(event);
-                    }
-                };
-                if (clientCallback) callback = clientCallback;
-                clientChannel.leftConnection().listen(callback);
-                logger.info("SENDING DATA DOWN THE WIRE FOR THE AWESOME")
-                clientChannel.leftConnection().send({});
+
+                transportPromise.then(function(transport) {
+                  var transChannel = transport.openChannel(remoteService, protocolName);
+                  var clientChannel = channel.create("client-api");
+                  var rpcProtocolClientHandler = clientHandler(remoteService);
+                  clientChannel.rightHandler(rpcProtocolClientHandler);
+                  transChannel.handler(rpcProtocolClientHandler);
+                    var callback = function (event) {
+                        if (!event) {
+                            logger.warn('client-api promise failed check! calling promise.reject()');
+                            reject(event);
+                        } else {
+                            logger.trace('promise calling promise.resolve() event.id=' + event.id);
+                            resolve(event);
+                        }
+                    };
+                    if (clientCallback) callback = clientCallback;
+                    clientChannel.leftConnection().listen(callback);
+                    logger.trace("SENDING DATA DOWN THE WIRE FOR THE AWESOME")
+                    clientChannel.leftConnection().send({});
+                });
             });
-
             return promise;
-
         },
         protocols: function(ps) {
             protocols = ps;

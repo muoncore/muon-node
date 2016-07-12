@@ -1,4 +1,4 @@
-var amqp = require('../../../muon/transport/amqp/amqp-api.js');
+//var amqp = require('../../../muon/transport/amqp/amqp-api.js');
 var RSVP = require('rsvp');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var helper = require('./transport-helper.js');
@@ -7,35 +7,39 @@ var messages = require('../../domain/messages.js');
 
 var errCallback;
 
-exports.connect = function (serviceName, url, serverStacks, discovery) {
+exports.connect = function (serviceName, amqpApi, serverStacks, discovery) {
+
+try {
+  logger.info("[*** TRANSPORT:SERVER:BOOTSTRAP ***] advertising service '" + serviceName + "' on muon discovery");
+  //logger.error('amqpApi=' + JSON.stringify(amqpApi));
+  //console.dir(amqpApi);
+  discovery.advertiseLocalService({
+      identifier: serviceName,
+      tags: ["node", serviceName],
+      codecs: ["application/json"],
+      connectionUrls: [amqpApi.url()]
+  });
+
+  logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] server stack of service '" + serviceName + "' connecting to muon...");
+  var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
+
+  logger.info("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceQueueName);
+  var amqpQueue = amqpApi.inbound(serviceQueueName);
+  amqpQueue.listen(function (msg) {
+      logger.debug("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message.headers=%s", JSON.stringify(msg.headers));
+      var serverStackChannel = serverStacks.openChannel(msg.headers.protocol);
+      initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
+      var replyHeaders = helper.handshakeAcceptHeaders();
+      amqpApi.outbound(msg.headers.server_reply_q).send({headers: replyHeaders, data: {}});
+      logger.info("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " + msg.headers.server_reply_q);
+  });
+} catch (err) {
+    logger.error(err);
+    //TODO do some shutdown?
+    errCallback(err);
+}
 
 
-    logger.info("[*** TRANSPORT:SERVER:BOOTSTRAP ***] advertising service '" + serviceName + "' on muon discovery");
-    discovery.advertiseLocalService({
-        identifier: serviceName,
-        tags: ["node", serviceName],
-        codecs: ["application/json"],
-        connectionUrls: [url]
-    });
-
-    logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] server stack of service '" + serviceName + "' connecting to muon...");
-    var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
-    amqp.connect(url).then(function (amqpApi) {
-        logger.info("[*** TRANSPORT:SERVER:HANDSHAKE ***] muon service '" + serviceName + "' listening for negotiation messages on amqp queue '%s'", serviceQueueName);
-        var amqpQueue = amqpApi.inbound(serviceQueueName);
-        amqpQueue.listen(function (msg) {
-            logger.debug("[*** TRANSPORT:SERVER:HANDSHAKE ***]  received negotiation message.headers=%s", JSON.stringify(msg.headers));
-            var serverStackChannel = serverStacks.openChannel(msg.headers.protocol);
-            initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
-            var replyHeaders = helper.handshakeAcceptHeaders();
-            amqpApi.outbound(msg.headers.server_reply_q).send({headers: replyHeaders, data: {}});
-            logger.info("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " + msg.headers.server_reply_q);
-        });
-    }).catch(function (err) {
-        logger.error(err);
-        logger.error(err.stack);
-        errCallback(err);
-    });
 };
 
 exports.onError = function (callback) {
@@ -77,36 +81,3 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
  *
  *
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

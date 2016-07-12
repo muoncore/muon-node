@@ -28,21 +28,24 @@ describe("muon client/server transport test", function () {
                 }
             }
             var discovery = new AmqpDiscovery(url);
-            var muonTransport  = amqpTransport.create(server, url, fakeServerStacks, discovery);
-            var transportChannel = muonTransport.openChannel(server, 'rpc');
+            var muonPromise  = amqpTransport.create(server, url, fakeServerStacks, discovery);
 
-            transportChannel.send(event);
+            muonPromise.then(function (muonTransport) {
+              var transportChannel = muonTransport.openChannel(server, 'rpc');
+              transportChannel.send(event);
+               console.log('test: wait for response from remote service ' + server);
+              fakeServerStackChannel.leftConnection().listen(function(event){
+                  console.log('********** transport.js transportChannel.listen() event received ' + JSON.stringify(event));
+                  var payload = messages.decode(event.payload);
 
-             console.log('test: wait for response from remote service ' + server);
-            fakeServerStackChannel.leftConnection().listen(function(event){
-                console.log('********** transport.js transportChannel.listen() event received ' + JSON.stringify(event));
-                var payload = messages.decode(event.payload);
 
-
-                console.log('test: typeof event.payload: ' + (typeof event.payload));
-                assert.equal(payload, 'PING');
-                done();
+                  console.log('test: typeof event.payload: ' + (typeof event.payload));
+                  assert.equal(payload, 'PING');
+                  done();
+              });
             });
+
+
 
 
 

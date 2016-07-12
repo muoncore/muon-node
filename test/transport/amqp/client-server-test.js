@@ -6,12 +6,19 @@ var expect = require('expect.js');
 var uuid = require('node-uuid');
 var messages = require('../../../muon/domain/messages.js');
 var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
+var amqp = require('../../../muon/transport/amqp/amqp-api.js');
+
+
+var url = "amqp://muon:microservices@localhost";
+var amqpApi;
+var discovery;
+
 
 describe("muon client/server transport test: ", function () {
 
 
-    var url = "amqp://muon:microservices@localhost";
-    var discovery = new AmqpDiscovery(url);
+
+
 
 
     this.timeout(15000);
@@ -24,8 +31,14 @@ describe("muon client/server transport test: ", function () {
         //shutdown nicely
     });
 
-    before(function () {
-
+    before(function (done) {
+      discovery = new AmqpDiscovery(url);
+      amqp.connect(url).then(function(api) {
+          logger.info('****************************** AMQP CONNECTED IN TEST **********************************');
+          //console.dir(api);
+          amqpApi = api;
+          done();
+      });
     });
 
     after(function () {
@@ -61,10 +74,10 @@ describe("muon client/server transport test: ", function () {
         });
 
 
-        server.connect(serverName, url, mockServerStacks, discovery);
+        server.connect(serverName, amqpApi, mockServerStacks, discovery);
         // now create a muon client socket to connect to server1:
         console.log('creating muon client..');
-        var muonClientChannel = client.connect(serverName, "rpc", url, discovery);
+        var muonClientChannel = client.connect(serverName, "rpc", amqpApi, discovery);
         muonClientChannel.listen(function (event) {
             console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
             //console.dir(event);
@@ -108,10 +121,10 @@ describe("muon client/server transport test: ", function () {
             serverChannel.leftConnection().send(reply);
         });
 
-        server.connect(serverName, url, mockServerStacks, discovery);
+        server.connect(serverName, amqpApi, mockServerStacks, discovery);
         // now create a muon client socket to connect to server1:
         console.log('creating muon client..');
-        var muonClientChannel = client.connect(serverName, "rpc", url, discovery);
+        var muonClientChannel = client.connect(serverName, "rpc", amqpApi, discovery);
         muonClientChannel.listen(function (event) {
             console.log('********** client_server-test.js muonClientChannel.listen() event received!');
             var responseData = messages.decode(event.payload);

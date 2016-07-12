@@ -1,17 +1,41 @@
 var ServerStacks = require("../../muon/api/server-stacks");
 var url = require("url");
+var RSVP = require('rsvp');
 
 module.exports.build = function(config) {
 
     var serverStacks = new ServerStacks(config.serviceName);
+    var transport;
 
     var infrastructure = {
         config: config,
         discovery: '',
-        transport: '',
         serverStacks: serverStacks,
         shutdown: function() {
             //shutdown stuff...
+        },
+        getTransport: function() {
+          var retryMs = 100;
+          var timeoutMs = 5000;
+           var promise = new RSVP.Promise(function(resolve, reject) {
+             var attempts = 0;
+              var interval = setInterval(function() {
+
+                  attempts++;
+                  if (transport) {
+                    logger.trace('getTransport() returning transport after attempts=' + attempts);
+                    resolve(transport);
+                    clearInterval(interval);
+                  }
+                  var finalAttemptNum = timeoutMs / retryMs; // keep retrying every $retryMs until $timeoutMs
+                  if (attempts > finalAttemptNum) {
+                      clearInterval(interval);
+                      logger.error('infrasrtructure unable to get transport handle after 5s, giving up and rejecting getTransport() promise');
+                      reject(new Error('unable to find transport after 5s'));
+                  }
+              }, retryMs);
+            }.bind(this));
+          return promise;
         }
     }
 
@@ -27,9 +51,12 @@ module.exports.build = function(config) {
 
     try {
       var amqpTransport = require('../transport/' + config.transportProtocol() + '/transport.js');
+      var muonPromise  = amqpTransport.create(config.serviceName, config.transport_url, serverStacks, infrastructure.discovery);
+      muonPromise.then(function (transportObj) {
+          transport = transportObj;
+      });
       var serviceName = infrastructure.config.serviceName;
       var transportUrl = infrastructure.config.transport_url;
-      infrastructure.transport = amqpTransport.create(serviceName, transportUrl, serverStacks, infrastructure.discovery);
     } catch (err) {
       logger.error('unable to find transport component for url: ""' + config.transport_url + '""');
       logger.error(err.stack);
