@@ -164,6 +164,28 @@ describe("test messages:", function () {
     });
 
 
+    it("shutdown message is valid", function (done) {
+        var msg =messages.shutdownMessage();
+          var response = messages.validate(msg);
+          assert(response);
+          done();
+    });
+
+    it("decodes empty array payload", function (done) {
+        var outcome = messages.decode([], 'application/json');
+          assert.equal('', outcome);
+          done();
+    });
+
+
+    it("decodes empty object payload", function (done) {
+        var outcome = messages.decode({}, 'application/json');
+          assert.equal('', outcome);
+          done();
+    });
+
+
+
     it("creating message with invalid headers throws exception", function (done) {
           try {
             var msg = messages.muonMessage("PING", 'testclient',  'rpc', '', '');

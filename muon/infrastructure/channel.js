@@ -21,6 +21,21 @@ module.exports.create = function(name, validiator, delay) {
     return new Channel(name, validiator);
 }
 
+module.exports.wrap = function(connection) {
+
+  var wrapperChannel = bichannel.create(connection.name() + "-wrapper");
+
+  wrapperChannel.rightConnection().listen(function(msg) {
+         connection.send(msg);
+  });
+
+  connection.listen(function(msg) {
+     wrapperChannel.rightConnection().send(msg);
+  });
+
+  return wrapperChannel;
+}
+
 
 function LeftConnection(name, inbound, outbound, validator) {
     name = name + '-left-connection';
@@ -41,6 +56,7 @@ function LeftConnection(name, inbound, outbound, validator) {
         },
         send: function(msg) {
             if (outbound.closed) throw new Error('csp channel closed');
+            if (! msg) throw new Error('empty message is invalid');
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id='" + id + "'");
@@ -71,7 +87,8 @@ function LeftConnection(name, inbound, outbound, validator) {
             return csp.go(function*() {
                 while(! inbound.closed) {
                     var msg = yield csp.take(inbound);
-                    if (inbound.closed || ! msg) return;
+                    if (inbound.closed || ! msg) return {id: 'n/a', protocol: 'muon', step: 'csp_channel_closed'};
+                    if (! msg) throw new Error('empty message is invalid');
                     //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     var id = msg.id || "unknown";
                     // deal with errors
@@ -152,9 +169,10 @@ function RightConnection(name, inbound, outbound, validator) {
         },
         send: function(msg) {
             if (outbound.closed) throw new Error('csp channel closed');
-            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg=" + typeof msg);
+            if (! msg) throw new Error('empty message is invalid');
+            //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg type=" + typeof msg);
             var id = msg.id || "unknown";
-            //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg.id=" + id);
+            logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg=" + JSON.stringify(msg));
            // logger.debug("[***** CHANNEL *****] " + name + " ChannelConnection.send() listener: " + listener);
             try {
                if (validator && ! (msg instanceof Error)) {
@@ -181,7 +199,8 @@ function RightConnection(name, inbound, outbound, validator) {
             return csp.go(function*() {
               while(! inbound.closed) {
                     var msg = yield csp.take(inbound);
-                    if (inbound.closed || ! msg) return;
+                    if (inbound.closed || ! msg) return {id: 'n/a', protocol: 'muon', step: 'csp_channel_closed'};
+                    if (! msg) throw new Error('empty message is invalid');
                     var id = msg.id || "unknown";
                     //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + JSON.stringify(msg));
                     // deal with errors
@@ -245,6 +264,9 @@ function Channel(name, validator) {
 
     logger.trace('[***** CSP-CHANNEL *****] Created csp bi-channel with name="' + name + '"');
     return {
+        name: function() {
+          return name;
+        },
         leftEndpoint: function(object, ioFunctionName) {
             leftConnection.listen(function(args) {
                     var ioFunction = object[ioFunctionName];
@@ -283,7 +305,7 @@ function Channel(name, validator) {
         },
         close: function() {
           setTimeout(function(){
-            logger.debug('shutting down channel ' + name);
+            logger.warn('[***** CSP-CHANNEL *****] SHUTDOWN CHANNEL ' + name);
             inbound.close();
             outbound.close();
           }, SHUTDOWN_DELAY);

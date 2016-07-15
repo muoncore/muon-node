@@ -50,6 +50,11 @@ AmqpDiscovery.prototype.close = function () {
     this.connection.close();
 };
 
+AmqpDiscovery.prototype.shutdown = function () {
+    logger.trace("shutting down connections...");
+    this.connection.close();
+};
+
 function startAnnouncements(discovery) {
     var waitInterval = setInterval(function () {
         if (typeof discovery.broadcast !== 'undefined') {
@@ -83,7 +88,7 @@ function startAnnouncements(discovery) {
                         payload: it
                     });
                 });
-            }, 3500);
+            }, 3000);
         }
     }, 400);
 }

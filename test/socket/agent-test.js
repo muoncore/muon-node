@@ -9,7 +9,7 @@ var bichannel = require('../../muon/infrastructure/channel.js');
 
 describe("Agent class test:", function () {
 
-      this.timeout(3000);
+      this.timeout(30000);
 
     it("agent acts as handler between two channels", function (done) {
 
@@ -18,21 +18,26 @@ describe("Agent class test:", function () {
               var upstream = bichannel.create("upstream");
               var downstream = bichannel.create("downstream");
 
-              var agent = new Agent(upstream, downstream, 'rpc');
-
-                upstream.leftSend(msg);
+              var agent = new Agent(upstream, downstream, 'rpc', 100);
 
                 upstream.leftConnection().listen(function(message) {
-                        console.log('***** upstream message returned:');
+                        console.log('***** upstream message recevied:' + JSON.stringify(message));
                         console.dir(message);
                         assert.equal(msg.text, message.text);
+                        expect(message.channel_op).to.be(undefined);
                         done();
                 });
 
-
                 downstream.rightConnection().listen(function(message){
+                    console.log('**************** downstream received: ' + JSON.stringify(message));
                     downstream.rightSend(message);
                 });
+
+                // send message async after pings keep alive
+                setTimeout(function () {
+                        upstream.leftSend(msg);
+                }, 1000);
+
 
     });
 
@@ -59,7 +64,7 @@ describe("Agent class test:", function () {
               var upstream = bichannel.create("upstream");
               var downstream = bichannel.create("downstream");
               var protocol = 'rpc';
-              var agent = new Agent(upstream, downstream, protocol, 200);
+              var agent = new Agent(upstream, downstream, protocol, 50);
 
 
               //  SEND 10 message (once every 10ms, then wait for keep alive)  /
@@ -72,14 +77,14 @@ describe("Agent class test:", function () {
                 }
               }, 10);
 
-                var pingReceived = false;
+                var pingReceived = 0;
                 var messagesReceived = 0;
                 downstream.rightConnection().listen(function(message){
                     //console.log('******************** message: ', message);
                     messagesReceived++;
-                    if (message.step == 'keep-alive') pingReceived = true;
+                    if (message.step == 'keep-alive') pingReceived++;
                     if (message.text) assert.equal('this is a test event!', message.text);
-                    doneOnce(messagesReceived > 10 && pingReceived);
+                    doneOnce(messagesReceived > 10 && pingReceived > 0 && pingReceived < 5);
                 });
 
     });
@@ -117,23 +122,97 @@ describe("Agent class test:", function () {
     });
 
 
-    it("agent with no service keep alive shuts down channels", function (done) {
+
+    it("pings do not leak upstream of agents", function (done) {
+      var testMsg = {text: 'this is not a ping'};
+      var doneOnce = asyncAssert(done);
+      var protocol = 'rpc';
+      var clientUpstream = bichannel.create("client-upstream");
+      var clientDownstream = bichannel.create("client-downstream");
+      var serverUpstream = bichannel.create("server-upstream");
+      var serverDownstream = bichannel.create("server-downstream");
+
+      var clientKeepAliveMessages = 0;
+      var serverKeepAliveMessages = 0;
+
+      function MockTransport(clientConnection, serverConnection) {
+
+          clientConnection.listen(function(msg) {
+              //console.log('mock trasnport client fwd msg:' + JSON.stringify(msg));
+              clientKeepAliveMessages++;
+              serverConnection.send(msg);
+          });
+
+          serverConnection.listen(function(msg) {
+              //console.log('mock transport server fwd msg:' + JSON.stringify(msg));
+              serverKeepAliveMessages++;
+              clientConnection.send(msg);
+              //doneOnce(serverKeepAliveMessages > 10 && clientKeepAliveMessages > 10);
+          });
+      };
+
+      var protocol = 'rpc';
+      var clintAgent = new Agent(clientUpstream, clientDownstream, protocol, 10);
+      var serverAgent = new Agent(serverUpstream, serverDownstream, protocol, 10);
+      var mockTransport = new MockTransport(clientDownstream.rightConnection(), serverDownstream.rightConnection());
+
+
+      var msgReceived = false;
+      serverUpstream.leftConnection().listen(function(msg) {
+            if (msg.text == testMsg.text) msgReceived = true;
+            console.log('* server ******************************************** msg: ' + JSON.stringify(msg));
+            console.log('* server ******************************************** serverKeepAliveMessages=' + serverKeepAliveMessages);
+            console.log('* server ******************************************** clientKeepAliveMessages=' + clientKeepAliveMessages);
+            console.log('* server ******************************************** msgReceived=' + msgReceived);
+            expect(msg.text).to.be(testMsg.text);
+            if (serverKeepAliveMessages > 3 && clientKeepAliveMessages > 3 && msgReceived) done();
+
+            serverUpstream.leftSend(msg);
+      });
+      console.log('********************************************** sending message');
+      setTimeout(function() {
+          clientUpstream.leftConnection().send(testMsg);
+      }, 100);
+
+
+      clientUpstream.leftConnection().listen(function(msg) {
+            console.log('* client ******************************************** msg: ' + JSON.stringify(msg));
+            expect(msg.text).to.be(testMsg.text);
+      });
+
+
+
+    });
+
+
+
+    it("agent with no service keep alive response shuts down channels", function (done) {
       var doneOnce = asyncAssert(done);
 
       var upstream = bichannel.create("upstream");
       var downstream = bichannel.create("downstream");
       var protocol = 'rpc';
-      var agent = new Agent(upstream, downstream, protocol, 100);
+      var agent = new Agent(upstream, downstream, protocol, 500);
 
         var keepAlivePingCount = 0;
         var shutdownMessage = 0;
         downstream.rightConnection().listen(function(message){
-            logger.debug(JSON.stringify(message));
+            logger.trace(JSON.stringify(message));
             if (message.step == 'keep-alive') keepAlivePingCount++;
             if (message.channel_op == 'closed') shutdownMessage++;
             logger.trace('keep-alive='+ keepAlivePingCount + ' closed=' + shutdownMessage);
             doneOnce(keepAlivePingCount >= 3 && shutdownMessage == 1);
         });
+
+        // we've got to make sure the agent has at least one keep-alive ping first as it will not shutdown unless
+        // it's already made a connection
+
+        // send message async after pings keep alive
+        setTimeout(function () {
+                downstream.rightSend({step: 'keep-alive'});
+        }, 500);
+
+
 
     });
 
@@ -147,7 +226,7 @@ function asyncAssert(done) {
       calledDone = true;
       done();
   }
-  // returns a function that will only call ldone() once which can happen in async tests
+  // returns a function that will only call done() once which can happen in async tests such as this
   return function(bool) {
     //console.log('doneonce(bool=' + bool + ')');
     if (bool) {

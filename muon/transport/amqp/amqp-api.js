@@ -1,4 +1,4 @@
-var amqp = require('amqplib/callback_api');
+
 var RSVP = require('rsvp');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 require('sexylog');
@@ -20,6 +20,7 @@ var queueSettings = {
 
 var amqpConnectionOk = false;
 var amqpChannelOk = false;
+var connectionUrl;
 
 var amqpConnection;
 
@@ -39,7 +40,7 @@ function validateUrl(url) {
 
 
 exports.connect = function(url) {
-
+        connectionUrl = url;
        var channelValidator = function(msg) {
             helper.validateMessage(msg);
        }
@@ -55,7 +56,14 @@ exports.connect = function(url) {
                             var clientChannel = bichannel.create("amqp-api-outbound-" + queueName, channelValidator);
                             clientChannel.rightConnection().listen(function(msg) {
                                  logger.trace('[*** TRANSPORT:AMQP-API:OUTBOUND ***] received outbound message: ' + JSON.stringify(msg));
-                                 publish(amqpChannel, queueName, msg);
+                                 try {
+                                    publish(amqpChannel, queueName, msg);
+                                 } catch (err) {
+                                   logger.warn('problem publishing message to amqp queue ""' + queueName + '""');
+                                   logger.warn('problem publishing message: ' + JSON.stringify(msg));
+                                   logger.warn(err.stack);
+                                 }
+
                             });
                             return clientChannel.leftConnection();
                           },
@@ -70,7 +78,7 @@ exports.connect = function(url) {
                           shutdown: function() {
                               amqpConnection.close();
                           },
-                          delete: function(name) {
+                          delete: function(queueName) {
                             logger.debug("[*** TRANSPORT:AMQP-API:OUTBOUND ***] deleting amqp queue '" + queueName + "'");
                             amqpChannel.deleteQueue(queueName);
                           },
@@ -89,6 +97,12 @@ exports.connect = function(url) {
 }
 
 
+function reconnect(rerunFunction) {
+    amqpConnect(connectionUrl, function() {
+      rerunFunction();
+    });
+}
+
 function amqpConnect(url, callback) {
     // cache the connection pikey style...
     /*
@@ -97,7 +111,7 @@ function amqpConnect(url, callback) {
       return;
     }
     */
-
+    var amqp = require('amqplib/callback_api');
     logger.trace("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] connecting to amqp " + url);
     amqp.connect(url, function(err, amqpConn) {
         if (err) {
@@ -174,6 +188,7 @@ function publish(amqpChannel, queueName, message) {
     var headers = message.headers;
     //logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' data: ", data);
     //logger.trace("[*** TRANSPORT:AMQP-API:OUTBOUND ***] publish on queue '" + queueName + "' headers: ", headers);
+    //if (! amqpConnectionOk || ! amqpChannelOk) return;
     amqpChannel.assertQueue(queueName, queueSettings);
     var buffer = helper.encode(data);
     amqpChannel.sendToQueue(queueName, new Buffer(buffer), {persistent: false, headers: headers});
@@ -182,6 +197,7 @@ function publish(amqpChannel, queueName, message) {
 
 
 function consume(amqpChannel, queueName, callback) {
+  //if (! amqpConnectionOk || ! amqpChannelOk) return;
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
        logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message: ", JSON.stringify(amqpMsg.properties.headers));

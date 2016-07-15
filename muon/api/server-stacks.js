@@ -15,16 +15,16 @@ var ServerStacks = function (serverName) {
 
 
 
-ServerStacks.prototype.openChannel = function(protocol) {
+ServerStacks.prototype.openChannel = function(protocolName) {
     logger.info("[*** API ***] opening muon server stacks channel...");
     var serverStacksChannel = bichannel.create("serverstacks");
-    var protocol = this.protocols[protocol];
+    var protocol = this.protocols[protocolName];
     if (! protocol) return null;
     var protocolServerHandler = protocol.protocolHandler().server();
     serverStacksChannel.leftHandler(protocolServerHandler);
-    //var transportChannel = bichannel.create("transport");
-    //var agent = new MuonSocketAgent(serverStacksChannel, transportChannel, protocol, 0);
-    return serverStacksChannel.rightConnection();
+    var transportChannel = bichannel.create(protocol + "-transport");
+    var clintKeepAliveAgent = new MuonSocketAgent(serverStacksChannel, transportChannel, protocolName, 1000);
+    return transportChannel.rightConnection();
 };
 
 
@@ -32,6 +32,10 @@ ServerStacks.prototype.openChannel = function(protocol) {
 
 ServerStacks.prototype.addProtocol = function(protocolApi) {
       this.protocols[protocolApi.name()] = protocolApi;
+}
+
+ServerStacks.prototype.shutdown = function() {
+    
 }
 
 module.exports = ServerStacks;

@@ -27,7 +27,6 @@ exports.getApi = function(name, infrastructure) {
            var promise = new RSVP.Promise(function(resolve, reject) {
 
               var transportPromise = infrastructure.getTransport();
-              logger.error('RPC: transportPromise=' + transportPromise);
               transportPromise.then(function(transport) {
                 var transChannel = transport.openChannel(parsedUrl.hostname, protocolName);
                 var clientChannel = channel.create("client-api");
@@ -72,7 +71,7 @@ exports.getApi = function(name, infrastructure) {
                clientChannel.leftConnection().send(data);
 
              }, 150);
-             */;
+             */
             });
 
 
@@ -123,6 +122,18 @@ function serverHandler() {
                logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
                logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
 
+               if (message.channel_op == 'closed') {
+                  forward(message);
+                  shutdown();
+                  return;
+               }
+
+               if (message.protocol == 'muon') {
+                  forward(message);
+                  shutdown();
+                  return;
+               }
+
                var payload = messages.decode(incomingMuonMessage.payload, incomingMuonMessage.content_type);
                logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
 
@@ -172,7 +183,7 @@ function clientHandler(remoteServiceUrl) {
                  setTimeout(function () {
                      if (! responseReceived) {
                            logger.info('[*** PROTOCOL:CLIENT:RPC ***] timeout reached responding with timeout message');
-                           var timeoutMsg = rpcMessage("timeout", remoteServiceUrl, {}, {status: 'timeout', body: 'rpc response timeout exceeded'});
+                           var timeoutMsg = createRpcMessage("timeout", remoteServiceUrl, {}, {status: 'timeout', body: 'rpc response timeout exceeded'});
                            back(timeoutMsg);
                      }
                  }, TIMEOUT_MS);
@@ -180,14 +191,23 @@ function clientHandler(remoteServiceUrl) {
 
 
              incomingFunction(message, forward, back, route) {
+
                  logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message id=" + message.id);
                  logger.debug("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(message));
+
+                 if (message.channel_op == 'closed') {
+                   shutdown();
+                   var timeoutMsg = createRpcMessage("closed", remoteServiceUrl, {}, {status: 'closed', body: 'rpc socket closed by muon'});
+                   forward(timeoutMsg);
+                   return;
+                 }
+
                  responseReceived = true;
                  var rpcMessage =  messages.decode(message.payload, message.content_type)
                  if (rpcMessage.body != undefined) {
                      rpcMessage.body = messages.decode(rpcMessage.body, rpcMessage.content_type)
                  }
-                 logger.info ("Sending the response payload " + rpcMessage)
+                 logger.info ("Sending the response payload " + JSON.stringify(rpcMessage));
                  forward(rpcMessage);
              }
 
@@ -201,8 +221,14 @@ function clientHandler(remoteServiceUrl) {
 
 
 
+function shutdown() {
+  logger.warn('rpc protocol shutdown() called');
+}
 
-function rpcMessage(statusCode, url, body, error) {
+
+
+
+function createRpcMessage(statusCode, url, body, error) {
     if (! body) body = {};
     if (! error) error = {};
     if (! statusCode)  {
@@ -211,6 +237,7 @@ function rpcMessage(statusCode, url, body, error) {
         throw error;
     }
     var rpcMsg = {
+        id: 'rpc-gen',
         body: body,
         status: statusCode,
         url: url,

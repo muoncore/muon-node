@@ -34,11 +34,13 @@ module.exports.create = function(n, handlers) {
         },
         sendDownstream: function(msg, accept, reject) {
             logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending message via handler downstream msg: ' +  JSON.stringify(msg));
+            if (! msg) throw new Error('empty message is invalid');
             var route = createRoute(upstreamConnection, incomingFunction);
             outgoingFunction(msg, accept, reject, route);
         },
         sendUpstream: function(msg, accept, reject) {
             logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + name + ' sending message via handler upstream event.id=' + JSON.stringify(msg));
+            if (! msg) throw new Error('empty message is invalid');
             var route = createRoute(downstreamConnection, outgoingFunction);
             incomingFunction(msg, accept, reject, route);
         },

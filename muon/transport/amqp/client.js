@@ -24,7 +24,7 @@ exports.connect = function (serviceName, protocol, api, discovery) {
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
         .then(readyOutboundSocket(serverListenQueueName, protocol, api, clientChannel.rightConnection(), serverListenQueueName, replyQueueName))
         .catch(function (err) {
-            logger.error('client error: ' + err.message);
+            logger.warn('client error: ' + err.message);
             if (err.message.indexOf('unable to find muon service') > -1) {
                 try {
                     // return muon socket messages unable to find server
@@ -41,7 +41,7 @@ exports.connect = function (serviceName, protocol, api, discovery) {
             }
         });
 
-
+    logger.trace('[*** TRANSPORT:CLIENT:BOOTSTRAP ***] returning channel handle');
     return clientChannel.leftConnection();
 };
 

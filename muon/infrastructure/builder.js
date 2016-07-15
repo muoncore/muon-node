@@ -3,7 +3,7 @@ var url = require("url");
 var RSVP = require('rsvp');
 
 module.exports.build = function(config) {
-
+    logger.info('builder.build() config=' + JSON.stringify(config));
     var serverStacks = new ServerStacks(config.serviceName);
     var transport;
 
@@ -12,7 +12,7 @@ module.exports.build = function(config) {
         discovery: '',
         serverStacks: serverStacks,
         shutdown: function() {
-            //shutdown stuff...
+            if (transport) transport.shutdown();
         },
         getTransport: function() {
           var retryMs = 100;
@@ -53,6 +53,7 @@ module.exports.build = function(config) {
       var amqpTransport = require('../transport/' + config.transportProtocol() + '/transport.js');
       var muonPromise  = amqpTransport.create(config.serviceName, config.transport_url, serverStacks, infrastructure.discovery);
       muonPromise.then(function (transportObj) {
+          logger.warn('[*** INFRASTRUCTURE:BOOTSTRAP ***] TRANSPORT CREATED SUCCESS');
           transport = transportObj;
       });
       var serviceName = infrastructure.config.serviceName;

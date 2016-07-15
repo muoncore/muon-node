@@ -114,10 +114,29 @@ exports.shutdownMessage = function() {
         event_source: callingObject(),
         target_service: 'n/a',
         origin_service: 'n/a',
+        content_type: 'text/plain',
         channel_op: 'closed'
   };
 
- var message = createMessage({}, headers);
+ var message = createMessage('shutdown channel', headers);
+ return validateSchema(message);
+}
+
+
+exports.pingMessage = function() {
+
+  var messageid = uuid.v4();
+
+  var headers = {
+        step: 'keep-alive',
+        protocol: 'muon',
+        event_source: callingObject(),
+        target_service: 'n/a',
+        origin_service: 'n/a',
+        content_type: 'text/plain'
+  };
+
+ var message = createMessage('ping', headers);
  return validateSchema(message);
 }
 
@@ -170,16 +189,20 @@ exports.decode = function(payload, contentType) {
 }
 
 function decode(payload) {
-
-
+      //logger.trace('message decode: ' + payload);
+      //logger.trace('message decode: ' + JSON.stringify(payload));
        if (! payload) {
          throw new Error('cannot decode undefined payload!');
        }
 
-       //logger.trace('decode() payload type: ' + (typeof payload));
-       //logger.trace('decode() payload instanceof array: ' + (payload instanceof Array));
-       //logger.trace('decode() payload array constructor: ' + (payload.constructor === Array));
-       //logger.trace('decode() payload: ' + JSON.stringify(payload));
+       if (Object.keys(payload).length === 0 && payload.constructor === Object) {
+         payload = [];
+      }
+
+       //logger.warn('decode() payload type: ' + (typeof payload));
+       //logger.warn('decode() payload instanceof array: ' + (payload instanceof Array));
+       //logger.warn('decode() payload array constructor: ' + (payload.constructor === Array));
+       //logger.warn('decode() payload: ' + JSON.stringify(payload));
 
        if ( ! payload instanceof Array ) {
             logger.error('payload to decode is not of expected type: ' + JSON.stringify(payload));

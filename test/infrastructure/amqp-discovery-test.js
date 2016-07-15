@@ -12,7 +12,7 @@ var discovery1;
 var discovery2;
 var discovery3;
 
-describe("AMQP Discovery", function () {
+describe("AMQP Discovery: ", function () {
 
     var discovery;
 
@@ -52,12 +52,12 @@ describe("AMQP Discovery", function () {
 
         setTimeout(function() {
             discovery1.discoverServices(function(services) {
-                assert.ok(services.find('simple'), 'could not find "simple" service in discovery list');
-                assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list');
-                assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list');
+                assert.ok(services.find('simple'), 'could not find "simple" service in discovery list (services=)' + JSON.stringify(services) + ')');
+                assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list (services=' + JSON.stringify(services) + ')');
+                assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list (services=' + JSON.stringify(services) + ')');
                 done();
             });
-        }, 6000);
+        }, 12000);
 
     });
 
