@@ -33,7 +33,6 @@ var protocolName = 'reactive-stream';
 
 exports.getApi = function (name, infra) {
     serviceName = name;
-    var transport = infra.transport
 
     var api = {
         name: function () {
@@ -62,27 +61,24 @@ exports.getApi = function (name, infra) {
 
         subscribe: function (remoteServiceUrl, params, clientCallback, errorCallback, completeCallback) {
 
-            var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
-            var targetService = serviceRequest.hostname
-            
-            var transChannel = transport.openChannel(targetService, protocolName);
+            infra.getTransport().then(function(transport) {
+              var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
+              var targetService = serviceRequest.hostname
+              var transChannel = transport.openChannel(targetService, protocolName);
+              var targetStream = serviceRequest.path;
+              var args = params;
+              var protocol = proto.create(
+                  subscriber,
+                  transChannel,
+                  targetService,
+                  serviceName,
+                  targetStream,
+                  args);
+              protocol.start();
+            });
 
-            var subscriber = simpleapi.subscriber(clientCallback, errorCallback, completeCallback)
-
-            var targetStream = serviceRequest.path
-            var args = params
-
-            var protocol = proto.create(
-                subscriber, 
-                transChannel,
-                targetService,
-                serviceName,
-                targetStream,
-                args)
-            
-            protocol.start()
-
-            return subscriber.control
+            var subscriber = simpleapi.subscriber(clientCallback, errorCallback, completeCallback);
+            return subscriber.control;
         },
         protocols: function (ps) {
             protocols = ps;
@@ -90,7 +86,7 @@ exports.getApi = function (name, infra) {
         protocolHandler: function () {
             return {
                 // todo, are these needed externally?
-                
+
                 server: function () {
                     return serverHandler();
                 },
