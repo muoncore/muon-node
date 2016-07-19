@@ -9,10 +9,10 @@ var stackTrace = require('stack-trace');
 var schema = Joi.object().keys({
    id: Joi.string().guid().required(),
    created: Joi.date().timestamp('javascript'),
-   target_service: Joi.string().min(3).required(),
+   target_service: Joi.string().optional(),//.min(3).required(),
    origin_service: Joi.string().min(3).required(),
    // url: Joi.string().uri().required(),
-   protocol: Joi.string().min(3).required(),
+   protocol: Joi.string().min(3).optional(),//.required(),
    step: Joi.string().min(3).required(),
    provenance_id: Joi.string().guid().optional(),
    content_type: Joi.string().min(3).required(),
