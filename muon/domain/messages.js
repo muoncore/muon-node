@@ -115,11 +115,11 @@ exports.shutdownMessage = function() {
         event_source: callingObject(),
         target_service: 'n/a',
         origin_service: 'n/a',
-        content_type: 'text/plain',
+        content_type: 'application/json',
         channel_op: 'closed'
   };
 
- var message = createMessage('shutdown channel', headers);
+ var message = createMessage({}, headers);
  return validateSchema(message);
 }
 
@@ -134,10 +134,10 @@ exports.pingMessage = function() {
         event_source: callingObject(),
         target_service: 'n/a',
         origin_service: 'n/a',
-        content_type: 'text/plain'
+        content_type: 'application/json'
   };
 
- var message = createMessage('ping', headers);
+ var message = createMessage({}, headers);
  return validateSchema(message);
 }
 
@@ -248,12 +248,16 @@ function createMessage(payload, headers, source) {
     if (typeof payload == 'object') {
         headers.content_type = "application/json";
     } else if (typeof payload == 'string') {
+        logger.info("PAYLOAD IS A STRING, setting to text/plain")
         headers.content_type = "text/plain";
     } else if (! headers.content_type) {
+        logger.info("Content type is falsed ... , setting to text/plain")
         headers.content_type = "text/plain";
     } else {
         //do nothing?
     }
+
+
 
     if (! headers.channel_op) headers.channel_op = 'normal';
     if (source) headers.event_source = source;
