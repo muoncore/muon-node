@@ -75,8 +75,14 @@ class MuonSocketAgent {
                       logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown initiated due to muon socket timeout of ' + MUON_TIMEOUT + 'ms');
                       this.shutdownInitiated = true;
                       var shutdownMsg = messages.shutdownMessage();
-                      this.upstreamChannel.rightConnection().send(shutdownMsg);
-                      this.downstreamChannel.leftConnection().send(shutdownMsg);
+                      try {
+                        this.upstreamChannel.rightConnection().send(shutdownMsg);
+                        this.downstreamChannel.leftConnection().send(shutdownMsg);
+                      } catch(err) {
+                          logger.warn('problem sending shutdown message on up/down stream channels, they are probably already closed');
+                          logger.warn(err.stack);
+                      }
+
                       clearInterval(this.keepAlive);
                       this.upstreamChannel.close();
                       this.downstreamChannel.close();

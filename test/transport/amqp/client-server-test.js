@@ -24,11 +24,15 @@ describe("muon client/server transport test: ", function () {
     this.timeout(15000);
 
     beforeEach(function () {
-
+        console.log('************************************************************************');
+        console.log('***  START: ' + this.title);
+        console.log('************************************************************************');
     });
 
     afterEach(function () {
-        //shutdown nicely
+        console.log('************************************************************************');
+        console.log('***  FINSIHED: ' + this.title);
+        console.log('************************************************************************');
     });
 
     before(function (done) {
