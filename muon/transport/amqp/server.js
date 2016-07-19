@@ -51,8 +51,12 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
     amqpApi.inbound(listen_queue).listen(function (message) {
         logger.debug("[*** TRANSPORT:SERVER:INBOUND ***]  received inbound message: %s", JSON.stringify(message));
         var muonMessage = message.data;
-        messages.validate(muonMessage);
-        serverStackChannel.send(muonMessage);
+        try {
+            messages.validate(muonMessage);
+            serverStackChannel.send(muonMessage);
+        } catch (e) {
+            serverStackChannel.close()
+        }
         //logger.trace("[*** TRANSPORT:SERVER:INBOUND ***]  inbound muon event sent to server stack channel message.id=%s", message.id);
     });
 

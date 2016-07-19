@@ -33,8 +33,9 @@ function validateSchema(message) {
     if (validatedMessage.error) {
         logger.warn('invalid message: \n', message);
         logger.info('invalid joi schema for message! details: ' + JSON.stringify(validatedMessage.error.details));
-         logger.error(new Error().stack);
-       throw new Error('Error! problem validating muon message schema: ' + JSON.stringify(validatedMessage.error));
+        var error = new Error('Error! problem validating muon message schema: ' + JSON.stringify(validatedMessage.error))
+        logger.error(error.stack);
+        throw error;
     }
     return message;
 }
