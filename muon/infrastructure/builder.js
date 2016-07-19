@@ -53,7 +53,7 @@ module.exports.build = function(config) {
       var amqpTransport = require('../transport/' + config.transportProtocol() + '/transport.js');
       var muonPromise  = amqpTransport.create(config.serviceName, config.transport_url, serverStacks, infrastructure.discovery);
       muonPromise.then(function (transportObj) {
-          logger.warn('[*** INFRASTRUCTURE:BOOTSTRAP ***] TRANSPORT CREATED SUCCESS');
+          logger.debug('[*** INFRASTRUCTURE:BOOTSTRAP ***] TRANSPORT CREATED SUCCESS');
           transport = transportObj;
       });
       var serviceName = infrastructure.config.serviceName;

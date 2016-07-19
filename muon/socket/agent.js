@@ -15,7 +15,7 @@ class MuonSocketAgent {
 
   constructor(upstreamChannel, downstreamChannel, protocol, offsetMs) {
 
-    try { // GH: had to put try/catch here in roder to catch any errors thrown in the trasnport promise
+    try { // GH: had to put try/catch here in order to catch any errors thrown in the trasnport promise
           //TODO write test to find out whythis happens
 
       //logger.trace('[*** AGENT:CONSTRUCTOR:START ***]');
@@ -24,12 +24,9 @@ class MuonSocketAgent {
       //logger.trace('[*** AGENT:CONSTRUCTOR ***] protocol: ' + protocol);
 
           this.connected = false;
-
           this.upstreamChannel = upstreamChannel;
           this.downstreamChannel = downstreamChannel;
-
           this.shutdownInitiated = false;
-
           if (! offsetMs) offsetMs = 0;
           this.offsetMs = offsetMs;
           this.lastOutboundMessageTimestamp = new Date();
@@ -51,50 +48,24 @@ class MuonSocketAgent {
                 this.connected = true;
               } else {
                 logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] agent muon message recevied');
+                this.connected = true;
                 _inboundFunction(message, upstreamChannel.rightConnection());
               }
 
 
           }.bind(this));
 
-          var keepAlive = function() {
+          this.keepAlive = function() {
               if (timestampSince(this.lastOutboundMessageTimestamp, this.offsetMs) || this.shutdownInitiated) return;
               logger.debug('[*** MUON:SOCKET:AGENT:OUTBOUND ***] sending keep alive ping');
               var ping = messages.pingMessage();
               this.downstreamChannel.leftConnection().send(ping);
             }.bind(this);
 
-            var muonTimeout = function() {
-                logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundPingTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(this.lastInboundPingTimestamp, MUON_TIMEOUT));
-                logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundMessageTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(this.lastInboundMessageTimestamp, MUON_TIMEOUT));
-                logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] connected?=' + this.connected);
-
-                if (timestampLongerThan(this.lastInboundMessageTimestamp, MUON_TIMEOUT) &&
-                    timestampLongerThan(this.lastInboundPingTimestamp, MUON_TIMEOUT) && this.connected) {
-                      // send transport shutdown message and close all resources;
-                      logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown initiated due to muon socket timeout of ' + MUON_TIMEOUT + 'ms');
-                      this.shutdownInitiated = true;
-                      var shutdownMsg = messages.shutdownMessage();
-                      try {
-                        this.upstreamChannel.rightConnection().send(shutdownMsg);
-                        this.downstreamChannel.leftConnection().send(shutdownMsg);
-                      } catch(err) {
-                          logger.warn('problem sending shutdown message on up/down stream channels, they are probably already closed');
-                          logger.warn(err.stack);
-                      }
-
-                      clearInterval(this.keepAlive);
-                      this.upstreamChannel.close();
-                      this.downstreamChannel.close();
-                      logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown complete');
-                }
-              }.bind(this);
-
-
             if (this.offsetMs > 0) {
               // keep alive timer
-              setInterval(keepAlive, this.offsetMs);
-              setInterval(muonTimeout, MUON_TIMEOUT / 2);
+              setInterval(this.keepAlive, this.offsetMs);
+              muonTimeout(this);
 
             }
             //logger.trace('[*** AGENT:CONSTRUCTOR:DONE ***]');
@@ -114,24 +85,52 @@ class MuonSocketAgent {
   inbound(message, upstreamConnection) {
       logger.debug('[*** MUON:SOCKET:AGENT:INBOUND ***] forwarding message inbound');
       if (message.step == 'keep-alive') {
-          //discard
-
+          //discard and carry on
       } else {
           upstreamConnection.send(message);
       }
-
   }
 
-/*
-  setLastMessageTimestamp() {
-      //console.log('setLastMessageTimestamp()', this);
-      this.lastMessageTimestamp = new Date();
-      logger.trace('this.lastMessageTimestamp=' + this.lastMessageTimestamp);
+  destroy() {
+    try {
+      var shutdownMsg = messages.shutdownMessage();
+      //this.upstreamChannel.rightConnection().send(shutdownMsg);
+      this.downstreamChannel.leftConnection().send(shutdownMsg);
+      //this.upstreamChannel.close();
+      //this.downstreamChannel.close();
+    } catch(err) {
+        logger.warn('problem sending shutdown message on up/down stream channels, they are probably already closed');
+        logger.warn(err.stack);
+    }
+    clearInterval(this.keepAlive);
+
   }
-*/
 
 
 }
+
+
+function muonTimeout(agent) {
+    var timeout = setTimeout(function() {
+      logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundPingTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(agent.lastInboundPingTimestamp, MUON_TIMEOUT));
+      logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundMessageTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(agent.lastInboundMessageTimestamp, MUON_TIMEOUT));
+      logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] connected?=' + agent.connected);
+
+      if (timestampLongerThan(agent.lastInboundMessageTimestamp, MUON_TIMEOUT) &&
+          timestampLongerThan(agent.lastInboundPingTimestamp, MUON_TIMEOUT) && agent.connected) {
+            // send transport shutdown message and close all resources;
+            logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown initiated due to muon socket timeout of ' + MUON_TIMEOUT + 'ms');
+            agent.shutdownInitiated = true;
+            agent.destroy();
+            logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown complete');
+      } else {
+        muonTimeout(agent);
+      }
+    }, MUON_TIMEOUT);
+    return timeout;
+
+}
+
 
 
 function timestampSince(timepstamp, offsetMs) {

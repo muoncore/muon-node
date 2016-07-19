@@ -48,7 +48,7 @@ describe("serverStacks test:", function () {
       channel.send(message);
 
       channel.listen(function(data) {
-        if (data.protocol != 'muon') {
+        if (data.protocol != 'muon' && data.step != 'channelShutdown') {
           assert.equal(message, data, 'expected simple test message ""' + message + '" but instead received ' + JSON.stringify(data) );
           done();
         }

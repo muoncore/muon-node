@@ -57,7 +57,7 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
     });
 
     serverStackChannel.listen(function (message) {
-      logger.trace('[*** TRANSPORT:SERVER:OUTBOUND ***] message recevied');
+      logger.trace('[*** TRANSPORT:SERVER:OUTBOUND ***] message: ' + JSON.stringify(message));
       if (message.channel_op == 'closed') {
         // close muon socket
         logger.warn("[*** TRANSPORT:SERVER:OUTBOUND ***]  message channel_op=closed received. deleteing temp amqp queues for muon socket");

@@ -200,11 +200,11 @@ function consume(amqpChannel, queueName, callback) {
   //if (! amqpConnectionOk || ! amqpChannelOk) return;
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
-       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message: ", JSON.stringify(amqpMsg.properties.headers));
+       logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed AMQP message on queue " + queueName + " message: ", JSON.stringify(amqpMsg));
        if (amqpMsg == undefined || amqpMsg == null) {
-           logger.warn("Received a null message over the queue")
+           logger.warn("Received a null message from amqp queue")
            // amqpChannel.ack(amqpMsg);
-            return
+            return;
        }
        var message = helper.fromWire(amqpMsg);
        //logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.headers));

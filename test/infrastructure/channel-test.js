@@ -378,7 +378,7 @@ describe("Bi directional channel test", function () {
          channel.leftConnection().send(new Error('non valdiating errror'));
     });
 
-
+/*
       it("unable to send messages on closed channel", function (done) {
           var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
           channel.close();
@@ -391,7 +391,7 @@ describe("Bi directional channel test", function () {
           }, 200);
 
       });
-
+*/
       it("unable to listen on closed channel", function (done) {
           var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
           channel.close();

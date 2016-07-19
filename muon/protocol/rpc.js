@@ -117,13 +117,18 @@ function serverHandler() {
            }
 
            incomingFunction(message, forward, back, route) {
+
+                if (! message) {
+                    logger.warn('received empty message');
+                    back({});
+                }
                incomingMuonMessage = message;
                logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming event id=" + incomingMuonMessage.id);
                logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
                logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
 
                if (message.channel_op == 'closed') {
-                  forward(message);
+                  //forward(message);
                   shutdown();
                   return;
                }

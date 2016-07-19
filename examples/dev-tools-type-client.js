@@ -9,7 +9,7 @@ var amqpurl = "amqp://muon:microservices@localhost";
 logger.info('starting muon...');
 muon = muoncore.create("nodejs-client", amqpurl);
 // or request://photon/projection-keys
-var pingPromise = muon.request('request://muon-dev-tools/type', {text: "hello, world!"});
+var pingPromise = muon.request('rpc://muon-dev-tools/type', {text: "hello, world!"});
 
 pingPromise.then(function (event) {
     logger.warn('*****************************************************************************************');
@@ -23,8 +23,3 @@ pingPromise.then(function (event) {
     logger.error("dev-tools-client promise.then() error!!!!!: \n" + error.stack);
     process.exit(0);
 });
-
-
-
-
-

@@ -45,14 +45,26 @@ class Handler {
 
   sendDownstream(msg, accept, reject) {
       logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + this.name + ' sending message via handler downstream msg: ' +  JSON.stringify(msg));
-      if (! msg) throw new Error('empty message is invalid');
+      if (! msg) {
+        logger.warn('handler received empty message downstream');
+        var err = new Error();
+        logger.warn(err.stack);
+        reject();
+        return;
+      }
       var route = this.createRoute(this.upstreamConnection, this.incomingFunction);
       this.outgoingFunction(msg, accept, reject, route);
   }
 
   sendUpstream(msg, accept, reject) {
       logger.debug('[*** CSP-CHANNEL:HANDLER ***] ' + this.name + ' sending message via handler upstream event.id=' + JSON.stringify(msg));
-      if (! msg) throw new Error('empty message is invalid');
+      if (! msg) {
+        logger.warn('handler received empty message upstream');
+        var err = new Error();
+        logger.warn(err.stack);
+        reject();
+        return;
+      }
       var route = this.createRoute(this.downstreamConnection, this.outgoingFunction);
       this.incomingFunction(msg, accept, reject, route);
   }

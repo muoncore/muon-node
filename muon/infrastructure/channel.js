@@ -55,7 +55,7 @@ function LeftConnection(name, inbound, outbound, validator) {
             csp.putAsync(outbound, err);
         },
         send: function(msg) {
-            if (outbound.closed) throw new Error('csp channel closed');
+            if (outbound.closed) return new Error('channel closed');
             if (! msg) throw new Error('empty message is invalid');
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".listen() msg=" + typeof msg);
             var id = msg.id || "unknown";
@@ -113,15 +113,18 @@ function LeftConnection(name, inbound, outbound, validator) {
 
 
             return csp.go(function*() {
-                while(true) {
+                while(! inbound.closed) {
                     var msg = yield csp.take(inbound);
                      logger.trace("[***** CSP-CHANNEL *****] " + name + ".handler() msg recevied: " + JSON.stringify(msg));
+                     if (! msg) return;
 
                     var accept = function(result) {
+                        if (! result) return;
                         handler.otherConnection(name).send(result);
                     };
 
                     var reject = function(result) {
+                        if (! result) return;
                         handler.thisConnection(name).send(result);
                     };
 
@@ -168,7 +171,7 @@ function RightConnection(name, inbound, outbound, validator) {
             csp.putAsync(outbound, err);
         },
         send: function(msg) {
-            if (outbound.closed) throw new Error('csp channel closed');
+            if (outbound.closed) return new Error('channel closed');
             if (! msg) throw new Error('empty message is invalid');
             //logger.trace("[***** CSP-CHANNEL *****] " + name + ".send() msg type=" + typeof msg);
             var id = msg.id || "unknown";
@@ -225,14 +228,16 @@ function RightConnection(name, inbound, outbound, validator) {
             handler.setUpstreamConnection(this);
 
             return csp.go(function*() {
-                while(true) {
+                while(! inbound.closed) {
                     var msg = yield csp.take(inbound);
                     logger.trace("[***** CSP-CHANNEL *****] " + name + ".handler() msg recevied: " + JSON.stringify(msg));
                     var accept = function(result) {
+                        if (! result) return;
                         handler.otherConnection(name).send(result);
                     };
 
                     var reject = function(result) {
+                        if (! result) return;
                         handler.thisConnection(name).send(result);
                     };
                     handler.sendDownstream(msg, accept, reject);
@@ -261,6 +266,7 @@ function Channel(name, validator) {
     var outbound = csp.chan();
     var leftConnection = new LeftConnection(name, inbound, outbound, validator);
     var rightConnection = new RightConnection(name, outbound, inbound, validator);
+
 
     logger.trace('[***** CSP-CHANNEL *****] Created csp bi-channel with name="' + name + '"');
     return {
@@ -308,6 +314,7 @@ function Channel(name, validator) {
             logger.warn('[***** CSP-CHANNEL *****] SHUTDOWN CHANNEL ' + name);
             inbound.close();
             outbound.close();
+            open = false;
           }, SHUTDOWN_DELAY);
         }
     }
