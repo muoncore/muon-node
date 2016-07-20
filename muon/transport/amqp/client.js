@@ -21,7 +21,7 @@ exports.connect = function (serviceName, protocol, api, discovery) {
     RSVP.resolve()
         .then(findService(serviceName, discovery))
         .then(sendHandshake(serviceQueueName, handshakeHeaders, api))
-        .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection()))
+        .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection(), serverListenQueueName, replyQueueName))
         .then(readyOutboundSocket(serverListenQueueName, protocol, api, clientChannel.rightConnection(), serverListenQueueName, replyQueueName))
         .catch(function (err) {
             logger.warn('client error: ' + err.message);
@@ -110,8 +110,7 @@ var sendHandshake = function (serviceQueueName, handshakeHeaders, amqpApi) {
 }
 
 
-var readyInboundSocket = function (recvQueueName, amqpApi, clientChannel) {
-
+var readyInboundSocket = function (recvQueueName, amqpApi, clientChannel, serverListenQueueName, replyQueueName) {
     return function (prevResult) {
         var promise = new RSVP.Promise(function (resolve, reject) {
             logger.trace("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
@@ -125,6 +124,12 @@ var readyInboundSocket = function (recvQueueName, amqpApi, clientChannel) {
                     resolve();
                 } else {
                     logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(message));
+
+                    if (message.data && message.data.channel_op == 'closed') {
+                        logger.warn("[*** TRANSPORT:SERVER:INBOUND ***]  handling inbound received message channel_op=closed. deleteing queues for socket ");
+                        amqpApi.delete(serverListenQueueName);
+                        amqpApi.delete(replyQueueName);
+                    }
                     var muonMessage = message.data;
                     clientChannel.send(muonMessage);
                 }
@@ -140,11 +145,10 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
     return function (prevResult) {
         var promise = new RSVP.Promise(function (resolve, reject) {
             clientChannel.listen(function (message) {
-                messages.validate(message);
 
                 if (message.channel_op == 'closed') {
                   // close muon socklet
-                  logger.warn("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound recevied message channel_op=closed. deleteing queues for socket ");
+                  logger.warn("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound received message channel_op=closed. deleteing queues for socket ");
                   amqpApi.delete(serverListenQueueName);
                   amqpApi.delete(replyQueueName);
                   muonSocketOpen = false;
@@ -152,6 +156,7 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
                 }
 
                 if (muonSocketOpen) {
+                  messages.validate(message);
                   logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
                   amqpApi.outbound(serviceQueueName).send({
                       headers: {
