@@ -8,13 +8,13 @@ var ServerStacks = require("../../muon/api/server-stacks");
 var channel = require("../infrastructure/channel")
 
 
-exports.create = function(serviceName, transportUrl, discoveryUrl) {
+exports.create = function(serviceName, transportUrl, discoveryUrl, tags) {
     var builder = require("../infrastructure/builder");
     var config = builder.config(serviceName, transportUrl, discoveryUrl);
 
     var infrastructure = new builder.build(config);
 
-    return this.api(serviceName, infrastructure)
+    return this.api(serviceName, infrastructure, tags)
 }
 
 exports.channel = function() {
@@ -23,7 +23,7 @@ exports.channel = function() {
 
 exports.ServerStacks=ServerStacks
 
-exports.api = function( serviceName,  infrastructure) {
+exports.api = function( serviceName,  infrastructure, tags) {
 
   var rpc = require('../protocol/rpc');
   var introspection = require('../protocol/introspection');
@@ -37,6 +37,22 @@ exports.api = function( serviceName,  infrastructure) {
     infrastructure.serverStacks.addProtocol(rpcApi);
     infrastructure.serverStacks.addProtocol(introspectionApi);
     infrastructure.serverStacks.addProtocol(streamingApi);
+    
+    logger.info("[*** INFRASTRUCTURE:BOOTSTRAP ***] advertising service '" + serviceName + "' on muon discovery");
+    //logger.error('amqpApi=' + JSON.stringify(amqpApi));
+    //console.dir(amqpApi);
+    
+    if (!tags) {
+        tags = ["node", serviceName]
+    }
+    
+    infrastructure.discovery.advertiseLocalService({
+        identifier: serviceName,
+        tags: tags,
+        codecs: ["application/json"],
+        //TODO, more intelligent geenration of connection urls by asking the transports
+        connectionUrls: [infrastructure.config.transport_url]
+    });
 
     return {
         infrastructure: function() { return infrastructure },

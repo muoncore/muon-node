@@ -10,16 +10,7 @@ var errCallback;
 exports.connect = function (serviceName, amqpApi, serverStacks, discovery) {
 
 try {
-  logger.info("[*** TRANSPORT:SERVER:BOOTSTRAP ***] advertising service '" + serviceName + "' on muon discovery");
-  //logger.error('amqpApi=' + JSON.stringify(amqpApi));
-  //console.dir(amqpApi);
-  discovery.advertiseLocalService({
-      identifier: serviceName,
-      tags: ["node", serviceName],
-      codecs: ["application/json"],
-      connectionUrls: [amqpApi.url()]
-  });
-
+  
   logger.debug("[*** TRANSPORT:SERVER:BOOTSTRAP ***] server stack of service '" + serviceName + "' connecting to muon...");
   var serviceQueueName = helper.serviceNegotiationQueueName(serviceName);
 
