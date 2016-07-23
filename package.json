@@ -58,7 +58,8 @@
     "xunit-file": "*",
     "should": "*",
     "mocha-sinon": "*",
-    "mocha-teamcity-reporter": "*"
+    "mocha-teamcity-reporter": "*",
+    "mocha-multi":"*"
   },
   "engines": {
     "node": "*"
