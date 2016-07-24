@@ -57,6 +57,7 @@
     "validator": "*",
     "xunit-file": "*",
     "should": "*",
+    "sinon":"*",
     "mocha-sinon": "*",
     "mocha-teamcity-reporter": "*",
     "mocha-multi":"*"
