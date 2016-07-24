@@ -15,3 +15,5 @@ services:
       - rabbitmq
     environment:
       - MUON_URL=amqp://muon:microservices@rabbitmq
+    volumes:
+      - ./test-results/:/usr/src/app/test-results

@@ -7,4 +7,4 @@ WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 
-CMD ["node_modules/mocha/bin/mocha", "-R", "mocha-multi", "--reporter-options", "mocha-teamcity-reporter=-,xunit=file.xml", "--recursive"]
+CMD ["node_modules/mocha/bin/mocha", "-R", "mocha-multi", "--reporter-options", "mocha-teamcity-reporter=-,xunit=test-results/xunit.xml", "--recursive"]
