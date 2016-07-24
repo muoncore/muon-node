@@ -10,7 +10,10 @@ services:
       - "15672:15672"
 
   nodetests:
-    build: .
+    build:
+      context: .
+      args:
+        user: root
     links:
       - rabbitmq
     environment:
