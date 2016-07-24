@@ -10,7 +10,7 @@ describe("Muon core test:", function () {
 
     this.timeout(30000);
     var serviceName = "example-service";
-    var amqpurl = "amqp://muon:microservices@localhost";
+    var amqpurl = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 
 
     before(function () {

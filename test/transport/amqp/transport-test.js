@@ -17,7 +17,7 @@ describe("muon client/server transport test", function () {
 
     it("client server negotiate handshake", function (done) {
             var server = 'transport-test-server';
-            var url = "amqp://muon:microservices@localhost";
+            var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 
              var event = messages.muonMessage("PING", 'testclient', 'server',  'rpc', "request.made");
 

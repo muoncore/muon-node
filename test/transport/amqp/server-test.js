@@ -73,7 +73,7 @@ describe("muon transport server-test:", function () {
     it("server deletes muon socket queues on channel_op equals closed message", function (done) {
 
       var serverName = 'serverabc123';
-      var url = "amqp://muon:microservices@localhost";
+      var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 
       var listen_q = serverName+ '.listen_to_me';
       var send_q = serverName+ '.send_to_me';

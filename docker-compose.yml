@@ -1,0 +1,17 @@
+version: '2'
+services:
+  rabbitmq:
+    environment:
+      - RABBITMQ_DEFAULT_USER=muon
+      - RABBITMQ_DEFAULT_PASS=microservices
+    image: rabbitmq:3.6.2-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  nodetests:
+    build: .
+    links:
+      - rabbitmq
+    environment:
+      - MUON_URL=amqp://muon:microservices@rabbitmq

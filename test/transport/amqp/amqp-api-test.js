@@ -13,7 +13,7 @@ describe("amqp api test:", function () {
       });
 
     it("send and receive arbitrary number of messages", function (done) {
-            var url = "amqp://muon:microservices@localhost";
+            var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
             var numMessages = 50;
             var messageCount = 0;
             var amqp = require('../../../muon/transport/amqp/amqp-api.js');
@@ -58,7 +58,7 @@ describe("amqp api test:", function () {
 
 
     it("sending invalid message schema throws exception on channel", function (done) {
-            var url = "amqp://muon:microservices@localhost";
+            var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
             var payload = {id: 'A', text: "a_sample_test_message"};
 
             var invalidMessage = {

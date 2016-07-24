@@ -9,7 +9,7 @@ var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
 var amqp = require('../../../muon/transport/amqp/amqp-api.js');
 
 
-var url = "amqp://muon:microservices@localhost";
+var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 var amqpApi;
 var discovery;
 

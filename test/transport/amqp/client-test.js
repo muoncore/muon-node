@@ -43,7 +43,7 @@ describe("client test:", function () {
     it("client discovery error handled gracefully", function (done) {
 
         var serverName = 'serverabc123';
-        var url = "amqp://muon:microservices@localhost";
+        var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
         var discovery = new AmqpDiscovery(url);
         var fakeAmqpApi = {};
 
@@ -61,7 +61,7 @@ describe("client test:", function () {
       it("client deletes muon socket queues on channel_op equals closed message", function (done) {
 
         var serverName = 'serverabc123';
-        var url = "amqp://muon:microservices@localhost";
+        var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 
         var deleteCalled = 0;
         var discovery = {

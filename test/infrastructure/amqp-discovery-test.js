@@ -25,29 +25,29 @@ describe("AMQP Discovery: ", function () {
     it("Discoveries can locate each other over the amqp broker", function (done) {
         this.timeout(25000);
 
-        discovery1 = new AmqpDiscovery("amqp://muon:microservices@localhost");
-        discovery2 = new AmqpDiscovery("amqp://muon:microservices@localhost");
-        discovery3 = new AmqpDiscovery("amqp://muon:microservices@localhost");
+        discovery1 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost");
+        discovery2 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost");
+        discovery3 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost");
 
         discovery1.advertiseLocalService({
             identifier:"tombola",
             tags:["node", "tombola"],
             codecs:["application/json"],
-            connectionUrls:["amqp://muon:microservices@localhost"]
+            connectionUrls:[process.env.MUON_URL || "amqp://muon:microservices@localhost"]
         });
 
         discovery2.advertiseLocalService({
             identifier:"simple",
             tags:["node", "simple"],
             codecs:["application/json"],
-            connectionUrls:["amqp://muon:microservices@localhost"]
+            connectionUrls:[process.env.MUON_URL || "amqp://muon:microservices@localhost"]
         });
 
         discovery3.advertiseLocalService({
             identifier:"awesomeService",
             tags:["node", "awesomeService"],
             codecs:["application/json"],
-            connectionUrls:["amqp://muon:microservices@localhost"]
+            connectionUrls:[process.env.MUON_URL || "amqp://muon:microservices@localhost"]
         });
 
         setTimeout(function() {
