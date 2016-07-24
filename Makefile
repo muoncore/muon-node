@@ -2,7 +2,7 @@
 
 
 install:
-	npm install
+	npm install -d
 	npm link
 
 testlocal:
