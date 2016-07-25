@@ -8,7 +8,8 @@ install:
 testlocal:
 	./node_modules/mocha/bin/mocha -R mocha-multi --reporter-options xunit=test-results/file.xml,spec=- --recursive
 
-test: install
+test:
+	npm install -d
 	mkdir -p test-results/
 	docker-compose up -d
 	docker-compose build nodetests
