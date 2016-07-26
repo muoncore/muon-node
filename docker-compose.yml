@@ -12,8 +12,7 @@ services:
   nodetests:
     build:
       context: .
-      args:
-        user: root
+	user: root
     links:
       - rabbitmq
     environment:
