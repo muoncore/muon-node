@@ -16,5 +16,4 @@ test:
 	-docker-compose run nodetests
 	docker-compose down
 
-
 .PHONY: test

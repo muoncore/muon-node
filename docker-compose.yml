@@ -5,14 +5,14 @@ services:
       - RABBITMQ_DEFAULT_USER=muon
       - RABBITMQ_DEFAULT_PASS=microservices
     image: rabbitmq:3.6.2-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    #ports:
+    #  - "5672:5672"
+    #  - "15672:15672"
 
   nodetests:
     build:
       context: .
-	user: root
+    user: root
     links:
       - rabbitmq
     environment:
