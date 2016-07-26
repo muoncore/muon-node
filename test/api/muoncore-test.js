@@ -28,18 +28,18 @@ describe("Muon core test:", function () {
 
 
         var muon = muoncore.create(serviceName, amqpurl);
-        muon.handle('muon://example-service/tennis', function (event, respond) {
+        muon.handle('/tennis', function (event, respond) {
             logger.warn('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.warn('muon://service/tennis server responding to event=' + JSON.stringify(event));
+            logger.warn('rpc://service/tennis server responding to event=' + JSON.stringify(event));
             respond("pong");
         });
 
         var muon2 = muoncore.create("example-client", amqpurl);
 
-        var promise = muon2.request('muon://example-service/tennis', "ping");
+        var promise = muon2.request('rpc://example-service/tennis', "ping");
 
         promise.then(function (response) {
-            logger.warn("muon://example-client server response received! response=" + JSON.stringify(response));
+            logger.warn("rpc://example-client server response received! response=" + JSON.stringify(response));
             logger.warn("muon promise.then() asserting response...");
             logger.info("Response is " + JSON.stringify(response))
             assert(response, "request response is undefined");
@@ -68,19 +68,19 @@ describe("Muon core test:", function () {
       console.log('***************************************************************************************************************');
 
         var muon = muoncore.create(serviceName, amqpurl);
-        muon.handle('muon://example-service/tennis', function (event, respond) {
-            logger.warn('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.warn('muon://service/tennis server responding to event.id=' + event.id);
+        muon.handle('/tennis', function (event, respond) {
+            logger.warn('*****  rpc://service/tennis: muoncore-test.js *************************************************');
+            logger.warn('rpc://service/tennis server responding to event.id=' + event.id);
             respond("pong");
         });
 
         var muon2 = muoncore.create("example-client", amqpurl);
 
-        var promise = muon2.request('muon://example-service/blah', "ping");
+        var promise = muon2.request('rpc://example-service/blah', "ping");
 
         promise.then(function (event) {
-            logger.warn("muon://example-client server response received! event.id=" + event.id);
-            logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
+            logger.warn("rpc://example-client server response received! event.id=" + event.id);
+            logger.warn("rpc://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
             assert.equal(event.status, "404", "expected '404' response message from muon://example-service/blah");
@@ -120,11 +120,11 @@ describe("Muon core test:", function () {
       console.log('***************************************************************************************************************');
         var muon = muoncore.create("example-client", amqpurl);
 
-        var promise = muon.request('muon://invalid-service/blah', "ping");
+        var promise = muon.request('rpc://invalid-service/blah', "ping");
 
         promise.then(function (event) {
-            logger.warn("muon://example-client server response received! event.id=" + event.id);
-            logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
+            logger.warn("rpc://example-client server response received! event.id=" + event.id);
+            logger.warn("rpc://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
             assert.equal(event.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
@@ -156,22 +156,22 @@ describe("Muon core test:", function () {
         console.log('*** rpc returns timeout message for non replying resource');
         console.log('***************************************************************************************************************');
         var muon = muoncore.create(serviceName, amqpurl);
-        muon.handle('muon://example-service/tennis', function (event, respond) {
-            logger.warn('*****  muon://service/tennis: muoncore-test.js *************************************************');
-            logger.warn('muon://service/tennis server not responding');
+        muon.handle('/tennis', function (event, respond) {
+            logger.warn('*****  rpc://service/tennis: muoncore-test.js *************************************************');
+            logger.warn('rpc://service/tennis server not responding');
             //respond("pong");
         });
 
         var muon2 = muoncore.create("example-client", amqpurl);
 
-        var promise = muon2.request('muon://example-service/tennis', "ping");
+        var promise = muon2.request('rpc://example-service/tennis', "ping");
 
         promise.then(function (event) {
-            logger.warn("muon://example-client server response received! event.id=" + event.id);
-            logger.warn("muon://example-client server response received! event=" + JSON.stringify(event));
+            logger.warn("rpc://example-client server response received! event.id=" + event.id);
+            logger.warn("rpc://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.error.status, "timeout", "expected 'timeout' message from calling muon://example-service/tennis");
+            assert.equal(event.error.status, "timeout", "expected 'timeout' message from calling rpc://example-service/tennis");
 
                         console.log('***************************************************************************************************************');
                         console.log('*** done');
@@ -198,9 +198,9 @@ describe("Muon core test:", function () {
     it("remote introspection request", function (done) {
 
         var muon = muoncore.create('awesome-service', amqpurl);
-        muon.handle('muon://awesome-service/some-endpoint', function (event, respond) {
+        muon.handle('/some-endpoint', function (event, respond) {
             logger.warn('*****  muon://awesome-service/some-endpoint: called *************************************************');
-            logger.warn('muon://awesome-service/some-endpoint server responding to event=' + JSON.stringify(event));
+            logger.warn('rpc://awesome-service/some-endpoint server responding to event=' + JSON.stringify(event));
             respond("I'm awesome, awesome, awesome, awesome");
         });
 

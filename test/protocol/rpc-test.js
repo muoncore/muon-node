@@ -16,7 +16,7 @@ describe("test rpc protocol:", function () {
     it("rpc server api inbound/outbound handler happy path", function (done) {
          var rpcApi = rpc.getApi('server');
 
-         rpcApi.handle(requestUrl, function(request, respond) {
+         rpcApi.handle('/endpoint', function(request, respond) {
               console.log('rpcApi.handle() called');
              logger.info("request is " + JSON.stringify(request))
               assert.equal(requestText, request.body);
@@ -54,7 +54,7 @@ describe("test rpc protocol:", function () {
     it("rpc client-server happy path", function (done) {
          var rpcApi = rpc.getApi('server');
 
-         rpcApi.handle(requestUrl, function(request, respond) {
+         rpcApi.handle('/endpoint', function(request, respond) {
               console.log('rpcApi.handle() called');
              logger.info("request is " + JSON.stringify(request))
               assert.equal(requestText, request.body);
@@ -142,14 +142,14 @@ describe("test rpc protocol:", function () {
             content_type: 'text/plain'
          }
 
-         rpcApi.handle('rpc://server/endpoint1', function(request, response) {
-              console.log('rpcApi.handle(rpc://server/endpoint1) called');
+         rpcApi.handle('/endpoint1', function(request, response) {
+              console.log('rpcApi.handle(/endpoint1) called');
               assert.equal('blah1 text', request.body);
               response('reply1');
          });
 
-         rpcApi.handle('rpc://server/endpoint2', function(request, response) {
-              console.log('rpcApi.handle(rpc://server/endpoint2) called');
+         rpcApi.handle('/endpoint2', function(request, response) {
+              console.log('rpcApi.handle(/endpoint2) called');
               assert.equal('blah2 text', request.body);
               response('reply2');
          });

@@ -8,9 +8,12 @@ var RSVP = require('rsvp');
 require('sexylog');
 var Handler = require('../infrastructure/handler-class.js');
 var messages = require('../domain/messages.js');
+var url = require('url');
+
+var handlerMappings = { };
 
 
-var handlerMappings = {};
+
 var serviceName;
 var protocolName = 'rpc';
 exports.getApi = function(name, infrastructure) {
@@ -79,8 +82,9 @@ exports.getApi = function(name, infrastructure) {
 
         },
         handle: function(endpoint, callback) {
-            logger.debug('[*** API ***] registering handler endpoint: ' + endpoint);
+            logger.warn('[*** API ***] registering handler endpoint: ' + endpoint);
             handlerMappings[endpoint] = callback;
+            logger.warn('[*** API ***]  handler endpoints: ' + getMappings(handlerMappings));
         },
         protocolHandler: function() {
             return {
@@ -145,7 +149,11 @@ function serverHandler() {
                var endpoint = payload.url;
                payload.body = messages.decode(payload.body, payload.content_type)
 
-               var handler = handlerMappings[endpoint];
+               var urlpath = url.parse(endpoint).pathname;
+               logger.debug('[*** PROTOCOL:SERVER:RPC ***] looking for handler for path "' + urlpath + '"');
+               logger.trace('[*** PROTOCOL:SERVER:RPC ***] server handler mappings: ' + getMappings());
+               var handler = getMappingForPath(urlpath);
+
                if (! handler) {
                    logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMuonMessage.id);
                    payload.status = 404
@@ -153,7 +161,7 @@ function serverHandler() {
                    back(return404msg);
                } else {
                    logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ endpoint + '" event.id=' + incomingMuonMessage.id);
-                   route(payload, endpoint);
+                   route(payload, urlpath);
                }
            }
          };
@@ -162,7 +170,27 @@ function serverHandler() {
          return rpcProtocolHandler;
 }
 
+function getMappings() {
 
+    var output = "{";
+    for (var key in handlerMappings) {
+      output += "'" + key + "': " + typeof handlerMappings[key] + ", "
+    }
+    output += "}";
+    return output;
+}
+
+function getMappingForPath(path) {
+    for (var mapping in handlerMappings) {
+      if (path == mapping) {
+        logger.debug('[*** PROTOCOL:SERVER:RPC ***] found handler mapping for ' + typeof mapping + ' "' + mapping + '"');
+        var func =  handlerMappings[mapping];
+        return func;
+      }
+    }
+    logger.warn('[*** PROTOCOL:SERVER:RPC ***] unable to find handler mapping for path ' + path);
+    return ;
+}
 
 
 

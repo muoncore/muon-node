@@ -19,7 +19,7 @@ exports.connect = function (serviceName, protocol, api, discovery) {
     var handshakeHeaders = helper.handshakeRequestHeaders(protocol, serverListenQueueName, replyQueueName);
     logger.trace('[*** TRANSPORT:CLIENT:BOOTSTRAP ***] preparing to handshake...');
     RSVP.resolve()
-        .then(findService(serviceName, discovery))
+        .then(findService(serviceName, discovery)) 
         .then(sendHandshake(serviceQueueName, handshakeHeaders, api))
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection(), serverListenQueueName, replyQueueName))
         .then(readyOutboundSocket(serverListenQueueName, protocol, api, clientChannel.rightConnection(), serverListenQueueName, replyQueueName))

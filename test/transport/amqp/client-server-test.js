@@ -7,7 +7,7 @@ var uuid = require('node-uuid');
 var messages = require('../../../muon/domain/messages.js');
 var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
 var amqp = require('../../../muon/transport/amqp/amqp-api.js');
-
+        var AmqpDiscovery = require('../../../muon/discovery/amqp/discovery.js');
 
 var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 var amqpApi;
@@ -17,29 +17,24 @@ var discovery;
 describe("muon client/server transport test: ", function () {
 
 
-
+    var discovery = new AmqpDiscovery(url);
 
 
 
     this.timeout(15000);
 
     beforeEach(function () {
-        console.log('************************************************************************');
-        console.log('***  START: ' + this.title);
-        console.log('************************************************************************');
+
     });
 
     afterEach(function () {
-        console.log('************************************************************************');
-        console.log('***  FINSIHED: ' + this.title);
-        console.log('************************************************************************');
+
     });
 
     before(function (done) {
       discovery = new AmqpDiscovery(url);
       amqp.connect(url).then(function(api) {
           logger.info('****************************** AMQP CONNECTED IN TEST **********************************');
-          //console.dir(api);
           amqpApi = api;
           done();
       });
@@ -60,6 +55,15 @@ describe("muon client/server transport test: ", function () {
                 return serverChannel.rightConnection();
             }
         };
+
+
+
+        discovery.advertiseLocalService({
+            identifier:serverName,
+            tags:["node", "test", serverName],
+            codecs:["application/json"],
+            connectionUrls:[url]
+        });
 
         serverChannel.leftConnection().listen(function (event) {
             logger.warn('********** client_server-test.js serverChannel.leftConnection().listen() event.id=' + event.id);
@@ -105,6 +109,14 @@ describe("muon client/server transport test: ", function () {
 
         var serverName = 'server2';
         var clientName = 'client2';
+
+
+        discovery.advertiseLocalService({
+            identifier:serverName,
+            tags:["node", "test", serverName],
+            codecs:["application/json"],
+            connectionUrls:[url]
+        });
 
         var serverChannel = bichannel.create("server-stacks");
         var mockServerStacks = {
