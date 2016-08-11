@@ -82,6 +82,8 @@ exports.getApi = function(name, infrastructure) {
         handle: function(endpoint, callback) {
             logger.debug('[*** API ***] registering handler endpoint: ' + endpoint);
             handlerMappings[endpoint] = callback;
+            logger.trace('handlermappings=' + JSON.stringify(handlerMappings));
+            //console.dir(handlerMappings);
         },
         protocolHandler: function() {
             return {
@@ -142,19 +144,19 @@ function serverHandler() {
 
                var payload = messages.decode(incomingMuonMessage.payload, incomingMuonMessage.content_type);
                logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
-
+               logger.trace('handlermappings=' + JSON.stringify(handlerMappings));
                var endpoint = payload.url;
                payload.body = messages.decode(payload.body, payload.content_type)
-               var path = endpoint.split('/')[2];
-               var handler = handlerMappings['/' + path];
+               var path = '/' + endpoint.split('/')[3];
+               var handler = handlerMappings[path];
                if (! handler) {
-                   logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + endpoint + '" RETURN 404! event.id=' + incomingMuonMessage.id);
+                   logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + path + '" RETURN 404! event.id=' + incomingMuonMessage.id);
                    payload.status = 404
                    var return404msg = messages.resource404(incomingMuonMessage, payload);
                    back(return404msg);
                } else {
-                   logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ endpoint + '" event.id=' + incomingMuonMessage.id);
-                   route(payload, endpoint);
+                   logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ path + '" event.id=' + incomingMuonMessage.id);
+                   route(payload, path);
                }
            }
          };

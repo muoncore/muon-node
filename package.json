@@ -51,7 +51,7 @@
     "async-rq": "*"
   },
   "devDependencies": {
-    "mocha": "*",
+    "mocha": "0.3.0",
     "superagent": "*",
     "assert": "*",
     "validator": "*",
