@@ -4,7 +4,7 @@ require('sexylog');
 
 var ServerStacks = require("../../muon/api/server-stacks");
 
-
+var MuonSocketAgent = require('../socket/agent.js');
 var channel = require("../infrastructure/channel")
 
 
@@ -22,6 +22,7 @@ exports.channel = function() {
 }
 
 exports.ServerStacks=ServerStacks
+exports.MuonSocketAgent=MuonSocketAgent
 
 exports.api = function( serviceName,  infrastructure, tags) {
 
