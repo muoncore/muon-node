@@ -207,9 +207,6 @@ function consume(amqpChannel, queueName, callback) {
             return;
        }
        var message = helper.fromWire(amqpMsg);
-       //logger.trace("[*** TRANSPORT:AMQP-API:INBOUND ***] consumed message on queue " + queueName + " message.headers: " + JSON.stringify(message.headers));
-       //logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] raw incoming message: ');
-       //logger.trace(message);
        callback(message);
        amqpChannel.ack(amqpMsg);
    }, {noAck: false});

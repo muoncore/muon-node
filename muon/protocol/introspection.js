@@ -32,16 +32,16 @@ exports.getApi = function (name, infrastructure) {
                   transChannel.handler(rpcProtocolClientHandler);
                     var callback = function (event) {
                         if (!event) {
-                            logger.warn('client-api promise failed check! calling promise.reject()');
+                            logger.warn('[*** PROTOCOL:INTROSPECTION ***] client-api promise failed check! calling promise.reject()');
                             reject(event);
                         } else {
-                            logger.trace('promise calling promise.resolve() event.id=' + event.id);
+                            logger.trace('[*** PROTOCOL:INTROSPECTION ***] promise calling promise.resolve() event.id=' + event.id);
                             resolve(event);
                         }
                     };
                     if (clientCallback) callback = clientCallback;
                     clientChannel.leftConnection().listen(callback);
-                    logger.trace("SENDING DATA DOWN THE WIRE FOR THE AWESOME")
+                    logger.trace("[*** PROTOCOL:INTROSPECTION ***] sending payload {}")
                     clientChannel.leftConnection().send({});
                 });
             });
@@ -122,7 +122,7 @@ function clientHandler(remoteService) {
          // INCOMING/UPSTREAM  event handling protocol logic
          protocolHandler.incoming(function(msg, accept, reject, route) {
                 incomingMuonMessage = msg;
-                logger.debug("[*** PROTOCOL:SERVER:INTROSPECT ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
+                logger.debug("[*** PROTOCOL:SERVER:INTROSPECT ***] incoming message=%s", JSON.stringify(incomingMuonMessage));
 
                 protocolsResponse = [];
                 for (var i = 0 ; i < protocols.length ; i++) {

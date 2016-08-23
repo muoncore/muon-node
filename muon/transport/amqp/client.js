@@ -132,6 +132,8 @@ var readyInboundSocket = function (recvQueueName, amqpApi, clientChannel, server
                     }
                     var muonMessage = message.data;
                     clientChannel.send(muonMessage);
+
+
                 }
             });
         });

@@ -8,13 +8,13 @@ var AmqpDiscovery = function (url) {
     this.descriptors = [];
     var _this = this;
 
-    logger.debug("AMQP Discovery is booting using URL " + url);
+    logger.debug("[*** DISCOVERY:BOOTSTRAP ***] AMQP Discovery is booting using URL " + url);
 
     _this.connection = new AmqpConnection(url);
     _this.url = url;
 
     _this.connection.connect(function() {
-        logger.info("AMQP Discovery is ready!!");
+        logger.info("[*** DISCOVERY:BOOTSTRAP ***] AMQP Discovery is ready!!");
         _this.broadcast = new Broadcast(_this.connection);
         startAnnouncements(_this);
     });
@@ -46,12 +46,12 @@ AmqpDiscovery.prototype.discoverServices = function (callback) {
 };
 
 AmqpDiscovery.prototype.close = function () {
-    logger.trace("closing connections...");
+    logger.trace("[*** DISCOVERY:SHUTDOWN ***] closing connections...");
     this.connection.close();
 };
 
 AmqpDiscovery.prototype.shutdown = function () {
-    logger.trace("shutting down connections...");
+    logger.trace("[*** DISCOVERY:SHUTDOWN ***] shutting down connections...");
     this.connection.close();
 };
 
@@ -83,10 +83,12 @@ function startAnnouncements(discovery) {
 
             setInterval(function () {
                 _.each(discovery.descriptors, function (it) {
-                    discovery.broadcast.emit({
+                    var discMsg = {
                         name: "discovery",
                         payload: it
-                    });
+                    };
+                    //logger.trace('[*** DISCOVERY ***] broadcasting discovery services: ' + JSON.stringify(discMsg));
+                    discovery.broadcast.emit(discMsg);
                 });
             }, 3000);
         }
