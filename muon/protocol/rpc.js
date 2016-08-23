@@ -130,12 +130,6 @@ function serverHandler() {
                logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
                logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
 
-               if (message.channel_op == 'closed') {
-                  //forward(message);
-                  shutdown();
-                  return;
-               }
-
                if (message.protocol == 'muon') {
                   forward(message);
                   shutdown();
@@ -157,6 +151,12 @@ function serverHandler() {
                } else {
                    logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "'+ path + '" event.id=' + incomingMuonMessage.id);
                    route(payload, path);
+               }
+
+               if (message.channel_op == 'closed') {
+                   // forward(message);
+                   // shutdown();
+                   return;
                }
            }
          };

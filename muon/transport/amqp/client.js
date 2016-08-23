@@ -167,10 +167,11 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
                 } else {
                   //throw new Error('muon socket has been closed');
                   logger.error('cannot send message as muon socket is not open');
+                  logger.info("Muon socket has been closed " + protocol + " " + serviceQueueName);
                   logger.error(new Error().stack);
+
+
                 }
-
-
             });
             //logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
             resolve();
