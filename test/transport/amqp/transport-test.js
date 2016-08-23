@@ -7,7 +7,7 @@ var builder = require("../../../muon/infrastructure/builder");
  var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
 
 
-describe("muon client/server transport test", function () {
+describe("muon transport test: ", function () {
 
     this.timeout(10000);
 
@@ -19,7 +19,7 @@ describe("muon client/server transport test", function () {
             var server = 'transport-test-server';
             var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 
-             var event = messages.muonMessage("PING", 'testclient', 'server',  'rpc', "request.made");
+             var event = messages.muonMessage("PING", 'testclient', 'server',  'test', "test.request");
 
             var fakeServerStackChannel = bichannel.create("fake-serverstacks");
             var fakeServerStacks = {

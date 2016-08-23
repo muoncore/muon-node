@@ -19,7 +19,7 @@ exports.connect = function (serviceName, protocol, api, discovery) {
     var handshakeHeaders = helper.handshakeRequestHeaders(protocol, serverListenQueueName, replyQueueName);
     logger.trace('[*** TRANSPORT:CLIENT:BOOTSTRAP ***] preparing to handshake...');
     RSVP.resolve()
-        .then(findService(serviceName, discovery)) 
+        .then(findService(serviceName, discovery))
         .then(sendHandshake(serviceQueueName, handshakeHeaders, api))
         .then(readyInboundSocket(replyQueueName, api, clientChannel.rightConnection(), serverListenQueueName, replyQueueName))
         .then(readyOutboundSocket(serverListenQueueName, protocol, api, clientChannel.rightConnection(), serverListenQueueName, replyQueueName))
@@ -165,7 +165,9 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
                       }, data: message
                   });
                 } else {
-                  throw new Error('muon socket has been closed');
+                  //throw new Error('muon socket has been closed');
+                  logger.error('cannot send message as muon socket is not open');
+                  logger.error(new Error().stack);
                 }
 
 

@@ -9,7 +9,7 @@ var amqpurl = "amqp://muon:microservices@localhost";
 logger.info('starting muon...');
 muon = muoncore.create("nodejs-client", amqpurl);
 // or request://photon/projection-keys
-var pingPromise = muon.request('rpc://muon-dev-tools/uuid', "");
+var pingPromise = muon.request('rpc://muon-node-test-examples/uuid', "");
 
 pingPromise.then(function (event) {
     logger.warn('*****************************************************************************************');
