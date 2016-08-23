@@ -1,7 +1,7 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "7.0.30",
+  "version": "7.0.31",
   "author": "Muon Core Ltd",
   "keywords": [
     "muon",
@@ -57,10 +57,10 @@
     "validator": "*",
     "xunit-file": "*",
     "should": "*",
-    "sinon":"*",
+    "sinon": "*",
     "mocha-sinon": "*",
     "mocha-teamcity-reporter": "*",
-    "mocha-multi":"*"
+    "mocha-multi": "*"
   },
   "engines": {
     "node": "*"
