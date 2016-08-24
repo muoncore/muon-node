@@ -72,7 +72,7 @@ function clientHandler(remoteService) {
 
     // OUTGOING/DOWNSTREAM event handling protocol logic
     protocolHandler.outgoing(function (requestData, accept, reject, route) {
-        logger.info("[*** PROTOCOL:CLIENT:INTROSPECT ***] client protocol outgoing requestData=%s", JSON.stringify(requestData));
+        logger.debug("[*** PROTOCOL:CLIENT:INTROSPECT ***] client protocol outgoing requestData=%s", JSON.stringify(requestData));
 
         var request = {};
         var muonMessage = messages.muonMessage(request, serviceName, remoteService, protocolName, "introspectionRequested");
@@ -94,13 +94,13 @@ function clientHandler(remoteService) {
     // INCOMING/UPSTREAM  event handling protocol logic
     protocolHandler.incoming(function (introspectionResponse, accept, reject, route) {
         logger.info("[*** PROTOCOL:CLIENT:INTROSPECT ***] protocol incoming event id=" + introspectionResponse.id);
-        logger.info("[*** PROTOCOL:CLIENT:INTROSPECT ***] protocol incoming message=%s", JSON.stringify(introspectionResponse));
+        //logger.trace("[*** PROTOCOL:CLIENT:INTROSPECT ***] protocol incoming message=%s", JSON.stringify(introspectionResponse));
         responseReceived = true;
         var introspectionReport = messages.decode(introspectionResponse.payload, introspectionResponse.content_type)
         if (introspectionReport.body != undefined) {
             introspectionReport.body = messages.decode(introspectionReport.body, introspectionReport.content_type)
         }
-        logger.info("Sending the introspection payload " + introspectionReport)
+        logger.info("Sending the introspection payload " + JSON.stringify(introspectionReport));
         accept(introspectionReport);
     });
     //logger.trace('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
@@ -127,11 +127,16 @@ function clientHandler(remoteService) {
                 protocolsResponse = [];
                 for (var i = 0 ; i < protocols.length ; i++) {
                   var protocol = protocols[i];
+                  logger.trace('[*** PROTOCOL:SERVER:INTROSPECT ***] found protocol to advertise: ' + protocol.name() + ' enpoints: ' + JSON.stringify(protocol.endpoints()));
+                  var endpoints = [];
+                  for (var key in protocol.endpoints()) {
+                      endpoints.push({resource: protocol.endpoints()[key], doc: 'N/A'});
+                  }
                   protocolsResponse.push({
                     protocolScheme: protocol.name(),
-                        protocolName: 'N/A',
-                        description: 'N/A',
-                        operations: 'N/A'
+                        protocolName: 'Request/Response Protocol',
+                        description: 'Make a single request, get a single response',
+                        operations: endpoints
 
                   });
                 }

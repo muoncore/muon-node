@@ -21,6 +21,15 @@ exports.getApi = function(name, infrastructure) {
         name: function() {
             return protocolName;
         },
+        endpoints: function() {
+          var endpoints = [];
+
+          for (var key in handlerMappings) {
+              // ; = handlerMappings[key].toString();
+              endpoints.push(key);
+          }
+          return endpoints;
+        },
         request: function(remoteServiceUrl, data, clientCallback) {
 
            var parsedUrl = nodeUrl.parse(remoteServiceUrl, true);
