@@ -119,7 +119,7 @@ exports.shutdownMessage = function() {
         channel_op: 'closed'
   };
 
- var message = createMessage({}, headers);
+ var message = createMessage(".", headers);
  return validateSchema(message);
 }
 

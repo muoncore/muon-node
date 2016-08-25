@@ -126,6 +126,11 @@ function serverHandler() {
                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, protocolName, "request.response");
                 logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol outgoing muonMessage=" + JSON.stringify(outboundMuonMessage));
                forward(outboundMuonMessage);
+
+               setTimeout(function() {
+                 var shutdownMsg = messages.shutdownMessage();
+                 forward(shutdownMsg);
+               }, 1000);
            }
 
            incomingFunction(message, forward, back, route) {

@@ -41,6 +41,7 @@ describe("test rpc protocol:", function () {
 
 
         serverTransportChannel.rightConnection().listen(function(msg) {
+                          if (msg.channel_op == 'closed') return;
                           console.dir(msg);
                           var response = messages.decode(msg.payload, msg.content_type);
                           var responseBody = messages.decode(response.body, msg.content_type)
@@ -86,6 +87,7 @@ describe("test rpc protocol:", function () {
 
 
         serverTransportChannel.rightConnection().listen(function(msg) {
+                if (msg.channel_op == 'closed') return;
                 var response = messages.decode(msg.payload, msg.content_type);
                 var responseBody = messages.decode(response.body, response.content_type)
                 assert.equal(responseText, responseBody);
@@ -162,7 +164,7 @@ describe("test rpc protocol:", function () {
 
         serverTransportChannel1.rightConnection().listen(function(msg) {
                 console.log('****** serverTransportChannel1.rightConnection().listen() ');
-
+                if (msg.channel_op == 'closed') return;
                 var rpcResponse = messages.decode(msg.payload, msg.content_type);
                 var responseBody = messages.decode(rpcResponse.body, rpcResponse.content_type)
                 console.dir(rpcResponse);
@@ -179,6 +181,7 @@ describe("test rpc protocol:", function () {
 
         serverTransportChannel2.rightConnection().listen(function(msg) {
                 console.log('****** serverTransportChannel2.rightConnection().listen() ');
+                if (msg.channel_op == 'closed') return;
                 var rpcResponse = messages.decode(msg.payload, msg.content_type);
                 var responseBody = messages.decode(rpcResponse.body, rpcResponse.content_type)
                 console.dir(rpcResponse);

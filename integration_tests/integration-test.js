@@ -53,7 +53,7 @@ describe("Muon core integration test:", function () {
 
           });
 
-        }, 5000);
+        }, 15000);
 
 
 

@@ -1,4 +1,4 @@
-"use strict";
+  "use strict";
 
 var Agent = require('../../muon/socket/agent.js');
 var assert = require('assert');
@@ -23,9 +23,12 @@ describe("Agent class test:", function () {
                 upstream.leftConnection().listen(function(message) {
                         console.log('***** upstream message recevied:' + JSON.stringify(message));
                         console.dir(message);
-                        assert.equal(msg.text, message.text);
-                        expect(message.channel_op).to.be(undefined);
-                        done();
+                        if (! message.channel_op) {
+                          assert.equal(msg.text, message.text);
+                          done();
+                        }
+                        //expect(message.channel_op).to.be(undefined);
+                        //done();
                 });
 
                 downstream.rightConnection().listen(function(message){
@@ -159,13 +162,16 @@ describe("Agent class test:", function () {
 
       var msgReceived = false;
       serverUpstream.leftConnection().listen(function(msg) {
-            if (msg.text == testMsg.text) msgReceived = true;
+            var doneOnce = asyncAssert(done);
             console.log('* server ******************************************** msg: ' + JSON.stringify(msg));
             console.log('* server ******************************************** serverKeepAliveMessages=' + serverKeepAliveMessages);
             console.log('* server ******************************************** clientKeepAliveMessages=' + clientKeepAliveMessages);
             console.log('* server ******************************************** msgReceived=' + msgReceived);
-            expect(msg.text).to.be(testMsg.text);
-            if (serverKeepAliveMessages > 3 && clientKeepAliveMessages > 3 && msgReceived) done();
+            if (msg.text == testMsg.text) msgReceived = true;
+            if (! msg.channel_op) {
+              expect(msg.text).to.be(testMsg.text);
+              doneOnce(serverKeepAliveMessages > 3 && clientKeepAliveMessages > 3 && msgReceived);
+            }
 
             serverUpstream.leftSend(msg);
       });
@@ -177,7 +183,7 @@ describe("Agent class test:", function () {
 
       clientUpstream.leftConnection().listen(function(msg) {
             console.log('* client ******************************************** msg: ' + JSON.stringify(msg));
-            expect(msg.text).to.be(testMsg.text);
+            if (! msg.channel_op) expect(msg.text).to.be(testMsg.text);
       });
 
 
@@ -215,6 +221,17 @@ describe("Agent class test:", function () {
 
 
     });
+
+
+
+        //it("client agent shutsdown socket if no server reply received", function (done) {
+
+        //}
+
+
+        //it("server agent sends shutsdown message after response", function (done) {
+
+        //}
 
 });
 

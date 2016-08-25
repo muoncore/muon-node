@@ -3,7 +3,7 @@ require('sexylog');
 var moment = require('moment');
 var messages = require('../domain/messages.js');
 
-var MUON_TIMEOUT = 3000;
+var MUON_TIMEOUT = 5000;
 
 /**
   Muon SOcket Kep Alive Agent
@@ -30,7 +30,7 @@ class MuonSocketAgent {
           if (! offsetMs) offsetMs = 0;
           this.offsetMs = offsetMs;
           this.lastOutboundMessageTimestamp = new Date();
-          this.lastInboundMessageTimestamp = new Date();
+          this.lastInboundMessageTimestamp = 0;
           this.lastInboundPingTimestamp = new Date();
 
           var _outboundFunction = this.outbound; //'this' doesnt work in functions below
@@ -112,12 +112,12 @@ class MuonSocketAgent {
 
 function muonTimeout(agent) {
     var timeout = setTimeout(function() {
-      logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundPingTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(agent.lastInboundPingTimestamp, MUON_TIMEOUT));
-      logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundMessageTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(agent.lastInboundMessageTimestamp, MUON_TIMEOUT));
-      logger.trace('[*** MUON:SOCKET:AGENT:TIMEOUT ***] connected?=' + agent.connected);
+      logger.debug('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundPingTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(agent.lastInboundPingTimestamp, MUON_TIMEOUT));
+      logger.debug('[*** MUON:SOCKET:AGENT:TIMEOUT ***] timestampLongerThan(lastInboundMessageTimestamp, MUON_TIMEOUT)=' + timestampLongerThan(agent.lastInboundMessageTimestamp, MUON_TIMEOUT));
+      logger.debug('[*** MUON:SOCKET:AGENT:TIMEOUT ***] connected?=' + agent.connected);
 
-      if (timestampLongerThan(agent.lastInboundMessageTimestamp, MUON_TIMEOUT) &&
-          timestampLongerThan(agent.lastInboundPingTimestamp, MUON_TIMEOUT) && agent.connected) {
+      if ((timestampSince(agent.lastInboundMessageTimestamp, 3000) ||
+          timestampLongerThan(agent.lastInboundPingTimestamp, MUON_TIMEOUT)) && agent.connected) {
             // send transport shutdown message and close all resources;
             logger.warn('[*** MUON:SOCKET:AGENT:IN/OUTBOUND ***] shutdown initiated due to muon socket timeout of ' + MUON_TIMEOUT + 'ms');
             agent.shutdownInitiated = true;
