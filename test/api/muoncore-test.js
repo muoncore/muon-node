@@ -5,7 +5,7 @@ var expect = require('expect.js');
 
 
 
-describe("Muon core test:", function () {
+describe("Muon core API test:", function () {
 
 
     this.timeout(30000);
