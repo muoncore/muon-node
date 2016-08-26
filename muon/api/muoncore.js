@@ -23,6 +23,7 @@ exports.channel = function() {
 
 exports.ServerStacks=ServerStacks
 exports.MuonSocketAgent=MuonSocketAgent
+exports.Messages=require("../domain/messages")
 
 exports.api = function( serviceName,  infrastructure, tags) {
 

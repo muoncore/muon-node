@@ -1,4 +1,3 @@
-
 var RSVP = require('rsvp');
 require('sexylog');
 var helper = require('./transport-helper.js');
@@ -98,7 +97,7 @@ var readyInboundSocket = function (recvQueueName, amqpApi, clientChannel, server
         var promise = new RSVP.Promise(function (resolve, reject) {
             logger.trace("[*** TRANSPORT:CLIENT:INBOUND ***] waiting for muon replies on queue '" + recvQueueName + "'");
 
-            amqpApi.inbound(recvQueueName, function() {
+            amqpApi.inbound(recvQueueName, function () {
                 var channel = amqpApi.outbound(serviceQueueName).send({data: {}, headers: handshakeHeaders});
                 logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'" + JSON.stringify(handshakeHeaders));
             }).listen(function (message) {
@@ -133,31 +132,35 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
         var promise = new RSVP.Promise(function (resolve, reject) {
             clientChannel.listen(function (message) {
 
-                if (message.channel_op == 'closed') {
-                  // close muon socklet
-                  logger.warn("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound received message channel_op=closed. deleteing queues for socket ");
-                  amqpApi.delete(serverListenQueueName);
-                  amqpApi.delete(replyQueueName);
-                  muonSocketOpen = false;
-                  return;
-                }
-
                 if (muonSocketOpen) {
-                  messages.validate(message);
-                  logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
-                  amqpApi.outbound(serviceQueueName).send({
-                      headers: {
-                          protocol: protocol,
-                          content_type: message.content_type
-                      }, data: message
-                  });
+                    if (message.channel_op == 'closed') {
+                        // close muon socklet
+                        amqpApi.outbound(serviceQueueName).send({
+                            headers: {
+                                protocol: protocol,
+                                content_type: message.content_type
+                            }, data: message
+                        });
+                        setTimeout(function () {
+                            logger.info("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound received message channel_op=closed. deleteing queues for socket ");
+                            amqpApi.delete(serverListenQueueName);
+                            amqpApi.delete(replyQueueName);
+                            muonSocketOpen = false;
+                        }, 100)
+                        return;
+                    }
+
+                    messages.validate(message);
+                    logger.debug("[*** TRANSPORT:CLIENT:OUTBOUND ***] send on queue " + serviceQueueName + "  message=", JSON.stringify(message));
+                    amqpApi.outbound(serviceQueueName).send({
+                        headers: {
+                            protocol: protocol,
+                            content_type: message.content_type
+                        }, data: message
+                    });
                 } else {
-                  //throw new Error('muon socket has been closed');
-                  logger.error('cannot send message as muon socket is not open');
-                  logger.info("Muon socket has been closed " + protocol + " " + serviceQueueName);
-                  logger.error(new Error().stack);
-
-
+                    logger.trace('cannot send message as muon socket is not open');
+                    logger.debug("Muon socket has been closed " + protocol + " " + serviceQueueName);
                 }
             });
             //logger.trace('[*** TRANSPORT:CLIENT:HANDSHAKE ***] readyOutboundSocket success');
