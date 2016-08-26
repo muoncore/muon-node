@@ -67,12 +67,12 @@ exports.connect = function(url) {
                             });
                             return clientChannel.leftConnection();
                           },
-                          inbound: function(queueName) {
+                          inbound: function(queueName, onReady) {
                             var clientChannel = bichannel.create("amqp-api-inbound-" + queueName, channelValidator);
                             consume(amqpChannel, queueName, function(msg) {
                                     //logger.trace('[*** TRANSPORT:AMQP-API:INBOUND ***] send message up stream: ' + JSON.stringify(msg));
                                     clientChannel.rightConnection().send(msg);
-                            });
+                            }, onReady);
                             return clientChannel.leftConnection();
                           },
                           shutdown: function() {
@@ -196,7 +196,7 @@ function publish(amqpChannel, queueName, message) {
 }
 
 
-function consume(amqpChannel, queueName, callback) {
+function consume(amqpChannel, queueName, callback, onReadyCallback) {
   //if (! amqpConnectionOk || ! amqpChannelOk) return;
    amqpChannel.assertQueue(queueName, queueSettings);
    amqpChannel.consume(queueName, function(amqpMsg) {
@@ -209,6 +209,6 @@ function consume(amqpChannel, queueName, callback) {
        var message = helper.fromWire(amqpMsg);
        callback(message);
        amqpChannel.ack(amqpMsg);
-   }, {noAck: false});
+   }, {noAck: false}, onReadyCallback);
 
 }
