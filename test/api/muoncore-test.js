@@ -196,7 +196,7 @@ describe("Muon core API test:", function () {
 
 
     it("remote introspection request", function (done) {
-
+        var doneOnce = asyncAssert(done);
         var muon = muoncore.create('awesome-service', amqpurl);
         muon.handle('/some-endpoint', function (event, respond) {
             logger.warn('*****  muon://awesome-service/some-endpoint: called *************************************************');
@@ -209,9 +209,7 @@ describe("Muon core API test:", function () {
         var promise = muon2.introspect('awesome-service', function(response) {
               logger.trace(response);
               assert(response, "introspect response is undefined");
-              //assert.equal(response.serviceName, 'awesome-service'); FAILS!!!! EH?
-              assert.equal(response.protocols[0].protocolScheme, 'rpc');
-              done();
+              doneOnce(response.protocols[0].protocolScheme, 'rpc');
         });
 
     });
@@ -241,3 +239,21 @@ describe("Muon core API test:", function () {
 
 
 });
+
+
+
+function asyncAssert(done) {
+  var calledDone = false;
+  function callDoneOnce() {
+      if (calledDone) return;
+      calledDone = true;
+      done();
+  }
+  // returns a function that will only call done() once which can happen in async tests such as this
+  return function(bool) {
+    //console.log('doneonce(bool=' + bool + ')');
+    if (bool) {
+      callDoneOnce();
+    }
+  }
+}

@@ -3,9 +3,12 @@ var rpc = require('../../muon/protocol/rpc.js');
 var assert = require('assert');
 var expect = require('expect.js');
 var messages = require('../../muon/domain/messages.js');
+//var eep = require('eep');
 
 
 describe("test rpc protocol:", function () {
+
+      this.timeout(4000);
 
     var requestText = 'Hello, world!';
     var responseText = 'Goodbye, world!';
@@ -39,14 +42,18 @@ describe("test rpc protocol:", function () {
         var muonMessage = messages.muonMessage(rpcClientRequest, clientName, 'server',  'rpc', "response.sent");
         serverTransportChannel.rightSend(muonMessage);
 
-
+        var closeMsg = 0;
         serverTransportChannel.rightConnection().listen(function(msg) {
-                          if (msg.channel_op == 'closed') return;
-                          console.dir(msg);
-                          var response = messages.decode(msg.payload, msg.content_type);
-                          var responseBody = messages.decode(response.body, msg.content_type)
-                          assert.equal(responseText, responseBody);
-                          done();
+                            console.log('***** test message received: ' + JSON.stringify(msg));
+                              console.dir(msg);
+                          if (msg.channel_op == 'closed') {
+                            closeMsg++;
+                            if (closeMsg == 1) done(); // here we ensure a shutdown message is sent at elast once before passing test
+                          } else {
+                            var response = messages.decode(msg.payload, msg.content_type);
+                            var responseBody = messages.decode(response.body, msg.content_type)
+                            assert.equal(responseText, responseBody);
+                          }
         });
 
     });

@@ -1,5 +1,7 @@
 "use strict";
 
+var messages = require('../domain/messages.js');
+
 class Handler {
 
 
@@ -53,7 +55,10 @@ class Handler {
         return;
       }
       var route = this.createRoute(this.upstreamConnection, this.incomingFunction);
-      this.outgoingFunction(msg, accept, reject, route);
+      var close = closeSocket(this.downstreamConnection);
+      //logger.error('sendDownStream() outgoingFunction() close=' + close.toString());
+      //console.dir(close);
+      this.outgoingFunction(msg, accept, reject, route, close);
   }
 
   sendUpstream(msg, accept, reject) {
@@ -66,7 +71,10 @@ class Handler {
         return;
       }
       var route = this.createRoute(this.downstreamConnection, this.outgoingFunction);
-      this.incomingFunction(msg, accept, reject, route);
+      var close = closeSocket(this.downstreamConnection);
+      //logger.error('sendUpStream() incomingFunction() close=' + close.toString());
+      //console.dir(close);
+      this.incomingFunction(msg, accept, reject, route, close);
   }
 
   getUpstreamConnection() {
@@ -119,6 +127,7 @@ class Handler {
 
   createRoute(otherConnection, handlerFunction) {
       var _callbacks = this.callbacks;
+      var _downstreamConnection = this.downstreamConnection;
 
       var route = function(message, key) {
           var callbackHandler = _callbacks[key];
@@ -134,20 +143,34 @@ class Handler {
                   callbackHandler({}, error);
               };
               logger.trace('[*** CSP-CHANNEL:HANDLER ***] calling onward function for key: ' + key);
-              handlerFunction(response, accept, reject);
+              var close = closeSocket(_downstreamConnection);
+              handlerFunction(response, accept, reject, route, close);
           }
           logger.trace('[*** CSP-CHANNEL:HANDLER ***]  executing routed callback handler for key: ' + key);
           callbackHandler(message, tempCallback);
-      };
+      }.bind(this);
 
       return route;
 
   }
 
+
+
+
 }
 
 
-
+function closeSocket(downstreamConnection) {
+  var func = function() {
+    setTimeout(function() {
+      logger.warn('handler.close() called sending shutdown message');
+      var shutdownMsg = messages.shutdownMessage();
+      downstreamConnection.send(shutdownMsg);
+      }, 1000);
+  }
+  //logger.error('func=' + func.toString());
+  return func;
+}
 
 
 
