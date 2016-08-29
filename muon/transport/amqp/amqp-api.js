@@ -207,8 +207,8 @@ function consume(amqpChannel, queueName, callback, onReadyCallback) {
             return;
        }
        var message = helper.fromWire(amqpMsg);
-       callback(message);
        amqpChannel.ack(amqpMsg);
+       callback(message);
    }, {noAck: false}, onReadyCallback);
 
 }
