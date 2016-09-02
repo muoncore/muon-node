@@ -39,6 +39,7 @@ module.exports.create = function(
                            var msg = messages.muonMessage(
                                {}, localService, targetService, "reactive-stream", "Cancelled")
                            transportchannel.send(msg)
+                           transportchannel.send(messages.shutdownMessage())
                        },
                        request: function(amount) {
                            var msg = messages.muonMessage(

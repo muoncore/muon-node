@@ -45,7 +45,11 @@ module.exports.subscriber = function(dataCallback, errorCallback, completeCallba
         // with the full api/ protocol details.
         control: {
             cancel: function() {
-                sub.cancel()
+                if (sub) {
+                    sub.cancel()
+                } else {
+                    logger.warn("Called subscriber.cancel(), no subscriber set yet, ignoring")
+                }
             }
         }
     }

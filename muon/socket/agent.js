@@ -47,12 +47,12 @@ class MuonSocketAgent {
                 logger.debug('[*** MUON:SOCKET:AGENT:INBOUND ***] agent: ping recevied');
                 this.connected = true;
               } else {
+                this.lastInboundPingTimestamp = new Date();
                 logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] agent muon message recevied');
                 this.connected = true;
                 _inboundFunction(message, upstreamChannel.rightConnection());
               }
-
-
+              
           }.bind(this));
 
           this.keepAlive = function() {
