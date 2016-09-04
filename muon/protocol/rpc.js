@@ -127,7 +127,8 @@ function serverHandler() {
                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, protocolName, "request.response");
                 logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol outgoing muonMessage=" + JSON.stringify(outboundMuonMessage));
                forward(outboundMuonMessage);
-               //close();
+               close();
+
            }
 
            incomingFunction(message, forward, back, route, close) {
