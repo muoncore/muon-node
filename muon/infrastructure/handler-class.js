@@ -1,6 +1,7 @@
 "use strict";
 
 var messages = require('../domain/messages.js');
+var stackTrace = require('stack-trace');
 
 class Handler {
 
@@ -161,9 +162,10 @@ class Handler {
 
 
 function closeSocket(downstreamConnection) {
-  var func = function() {
+  var func = function(source) {
+    logger.info('[*** CSP-CHANNEL:HANDLER ***] close() source=' + source);
     setTimeout(function() {
-      logger.warn('handler.close() called sending shutdown message');
+      logger.warn('[*** CSP-CHANNEL:HANDLER ***] handler.close() called sending shutdown message');
       var shutdownMsg = messages.shutdownMessage();
       downstreamConnection.send(shutdownMsg);
     }, 5000);
@@ -171,6 +173,9 @@ function closeSocket(downstreamConnection) {
   //logger.error('func=' + func.toString());
   return func;
 }
+
+
+
 
 
 

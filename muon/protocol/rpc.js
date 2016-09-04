@@ -118,7 +118,6 @@ function serverHandler() {
 
            outgoingFunction(message, forward, back, route, close) {
                logger.debug("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing message=%s", JSON.stringify(message));
-               logger.trace("[*** PROTOCOL:SERVER:RPC ***] server.outgoingFunction() close() = ", close);
                 var serverResponse = {
                      status: 200,
                      body: messages.encode(message),
@@ -127,7 +126,7 @@ function serverHandler() {
                 var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, protocolName, "request.response");
                 logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol outgoing muonMessage=" + JSON.stringify(outboundMuonMessage));
                forward(outboundMuonMessage);
-               close();
+               close('server_outgoing');
 
            }
 
@@ -141,7 +140,6 @@ function serverHandler() {
                logger.info("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming event id=" + incomingMuonMessage.id);
                logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
                logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
-               //logger.trace("[*** PROTOCOL:SERVER:RPC ***] server.incomingFunction() close() = ", close);
                if (message.protocol == 'muon') {
                   forward(message);
                   shutdown();
@@ -171,7 +169,7 @@ function serverHandler() {
 
                if (message.channel_op == 'closed') {
                    shutdown();
-                   close();
+                   close('server_incoming');
                    return;
                }
            }
@@ -194,7 +192,6 @@ function clientHandler(remoteServiceUrl) {
 
              outgoingFunction(message, forward, back, route, close) {
                  logger.debug("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing message=%s", JSON.stringify(message));
-                 //logger.trace("[*** PROTOCOL:CLIENT:RPC ***] client.outgoingFunction() close() = ", close);
                   var request = {
                        url: remoteServiceUrl,
                        body: messages.encode(message),
@@ -209,7 +206,7 @@ function clientHandler(remoteServiceUrl) {
                            logger.info('[*** PROTOCOL:CLIENT:RPC ***] timeout reached responding with timeout message');
                            var timeoutMsg = createRpcMessage("timeout", remoteServiceUrl, {}, {status: 'timeout', body: 'rpc response timeout exceeded'});
                            back(timeoutMsg);
-                           close();
+                           close('client_outgoing');
                      }
                  }, TIMEOUT_MS);
              }
@@ -219,7 +216,6 @@ function clientHandler(remoteServiceUrl) {
 
                  logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message id=" + message.id);
                  logger.debug("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(message));
-                 //logger.trace("[*** PROTOCOL:CLIENT:RPC ***] client.incomingFunction() close() = ", close);
                  if (message.channel_op == 'closed') {
                    shutdown();
                    var timeoutMsg = createRpcMessage("closed", remoteServiceUrl, {}, {status: 'closed', body: 'rpc socket closed by muon'});
@@ -234,7 +230,7 @@ function clientHandler(remoteServiceUrl) {
                  }
                  logger.info ("Sending the response payload " + JSON.stringify(rpcMessage));
                  forward(rpcMessage);
-                 close();
+                 close('client_incoming');
              }
 
         }; //RpcProtocolHandler
