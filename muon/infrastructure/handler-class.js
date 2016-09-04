@@ -166,7 +166,7 @@ function closeSocket(downstreamConnection) {
       logger.warn('handler.close() called sending shutdown message');
       var shutdownMsg = messages.shutdownMessage();
       downstreamConnection.send(shutdownMsg);
-    }, 6000);
+    }, 5000);
   }
   //logger.error('func=' + func.toString());
   return func;

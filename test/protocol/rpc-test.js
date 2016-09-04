@@ -8,7 +8,7 @@ var messages = require('../../muon/domain/messages.js');
 
 describe("test rpc protocol:", function () {
 
-      this.timeout(4000);
+      this.timeout(8000);
 
     var requestText = 'Hello, world!';
     var responseText = 'Goodbye, world!';
@@ -45,7 +45,7 @@ describe("test rpc protocol:", function () {
         var closeMsg = 0;
         serverTransportChannel.rightConnection().listen(function(msg) {
                             console.log('***** test message received: ' + JSON.stringify(msg));
-                              console.dir(msg);
+                              //console.dir(msg);
                           if (msg.channel_op == 'closed') {
                             closeMsg++;
                             if (closeMsg == 1) done(); // here we ensure a shutdown message is sent at elast once before passing test
