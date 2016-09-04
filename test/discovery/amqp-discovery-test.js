@@ -23,11 +23,11 @@ describe("AMQP Discovery: ", function () {
     });
 
     it("Discoveries can locate each other over the amqp broker", function (done) {
-        this.timeout(25000);
+        this.timeout(12000);
 
-        discovery1 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost");
-        discovery2 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost");
-        discovery3 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost");
+        discovery1 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost", 500);
+        discovery2 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost", 500);
+        discovery3 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost", 500);
 
         discovery1.advertiseLocalService({
             identifier:"tombola",
@@ -50,14 +50,12 @@ describe("AMQP Discovery: ", function () {
             connectionUrls:[process.env.MUON_URL || "amqp://muon:microservices@localhost"]
         });
 
-        setTimeout(function() {
-            discovery1.discoverServices(function(services) {
-                assert.ok(services.find('simple'), 'could not find "simple" service in discovery list (services=)' + JSON.stringify(services) + ')');
-                assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list (services=' + JSON.stringify(services) + ')');
-                assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list (services=' + JSON.stringify(services) + ')');
-                done();
-            });
-        }, 12000);
+          discovery1.discoverServices(function(services) {
+              assert.ok(services.find('simple'), 'could not find "simple" service in discovery list (services=)' + JSON.stringify(services) + ')');
+              assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list (services=' + JSON.stringify(services) + ')');
+              assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list (services=' + JSON.stringify(services) + ')');
+              done();
+          });
 
     });
 
