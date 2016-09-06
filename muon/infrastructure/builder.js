@@ -54,7 +54,7 @@ module.exports.build = function (config) {
         var muonPromise = amqpTransport.create(config.serviceName, config.transport_url, serverStacks, infrastructure.discovery);
         muonPromise.then(function (transportObj) {
             logger.debug('[*** INFRASTRUCTURE:BOOTSTRAP ***] TRANSPORT CREATED SUCCESS');
-            transport = TransportClient.create(transportObj);
+            transport = TransportClient.create(transportObj, infrastructure);
         });
     } catch (err) {
         logger.error('unable to find transport component for url: ""' + config.transport_url + '""');

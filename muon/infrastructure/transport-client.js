@@ -1,3 +1,8 @@
+
+var _ = require("underscore")
+var uuid = require("node-uuid")
+var messages = require("../domain/messages")
+var bichannel = require("./channel")
 /**
  * Implements the client side of transport socket sharing.
  *
@@ -9,11 +14,20 @@
  * at the transport/ ServerStack boundary
  */
 
-module.exports.create = function(transport) {
+module.exports.create = function(transport, infrastructure) {
 
+    /*
+     * "channelId (uuid)": {
+     *   "virtualChannels": [ 
+     *      {
+     *        channel_id
+     *        channel
+     *      }
+     *   ]
+     * }
+     */
     var transportChannels= {}
     var virtualChannels = {}
-
     /*
      * TODO, handle shutdown message from the transport.
      * shutdown message from the virtual channel, close on the other side and remove from this list
@@ -23,31 +37,59 @@ module.exports.create = function(transport) {
      */
 
 
-    var transportApi = {
-        openChannel: function (remoteServiceName, protocolName) {
-            //look up channel. if not found, create
-            var transportChannel = null;
-            if (transportChannel == null) {
-                transportChannel = transport.openChannel(remoteServiceName, "shared-channel")
-                //listen left, look up
-                transportChannel.left().listen(function(msg) {
-                    //unwrap SharedChannelMessage
+    function virtualChannel(remoteServiceName, protocolName) {
 
-                    // look up virtual channel
+        var virtualChannel = {
+            channel_id:uuid.v4().toString(),
+            channel: null
+        }
+        virtualChannels[virtualChannel.channel_id] = virtualChannel
+        
+        var transportChannel = transportChannels[remoteServiceName]
+        if (transportChannel == null) {
+            transportChannel = transport.openChannel(remoteServiceName, "shared-channel")
+            transportChannels[remoteServiceName] = transportChannel
+            transportChannel.left().listen(function(msg) {
+                var sharedChannelMessage = messages.decode(msg.payload)
+                var virtualChannel = virtualChannels[sharedChannelMessage.channelId]
+                var wrappedMuonMsg = messages.decode(sharedChannelMessage.message)
+                virtualChannel.channel.rightConnection().send(wrappedMuonMsg);
+            })
+        }
 
-                    //send wrapped message down the channel
-                })
+        //generate the client side multiplexer
+        virtualChannel.channel = bichannel.create("virtual-channel-" + remoteServiceName)
+        virtualChannel.channel.rightConnection().listen(function(message) {
+            var sharedChannelMessage = {
+                channelId: virtualChannel.channel_id,
+                message: messages.encode(message)
             }
 
-            //generate the client side multiplex
-            var channelConnection = null; //TODO, bichannel.X
-            channelConnection.right.listen(function(message) {
-                var sharedChannelMessage = null //TODO, wrap message into this.
+            transportChannel.leftConnection().send(sharedChannelMessage)
+        })
 
-                transportChannel.left().send(sharedChannelMessage) //TODO, correct API?
-            })
+        return virtualChannel.channel.leftConnection();
+    }
 
-            return channelConnection;
+    function transportChannel(remoteServiceName, protocolName) {
+        return transport.openChannel(remoteServiceName, protocolName)
+    }
+
+    var transportApi = {
+        openChannel: function (remoteServiceName, protocolName) {
+
+            var remoteService = infrastructure.discovery.find(remoteServiceName)
+            var supportsSharedChannels = false
+            if (remoteService && _.contains(remoteService.capabilities, "shared-channel")) {
+                logger.debug("Opening shared-channel connection to " + remoteServiceName)
+                supportsSharedChannels = true
+            }
+
+            if (supportsSharedChannels) {
+                return virtualChannel(remoteServiceName, protocolName)
+            } else {
+                return transportChannel(remoteServiceName, protocolName)
+            }
         },
         onError: function (cb) {
             return transport.onError(cb)
@@ -56,4 +98,6 @@ module.exports.create = function(transport) {
             return transport.shutdown()
         }
     }
+
+    return transportApi;
 }
