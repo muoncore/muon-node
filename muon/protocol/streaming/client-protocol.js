@@ -71,6 +71,7 @@ module.exports.create = function(
 
     return {
         start: function() {
+            logger.debug("Stream subscription requested!")
             var msg = messages.muonMessage({
                 streamName: targetStream,
                 args: args

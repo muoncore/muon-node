@@ -39,6 +39,8 @@ module.exports.create = function(transport, infrastructure) {
 
     function virtualChannel(remoteServiceName, protocolName) {
 
+        logger.debug("Opening virtual channel to " + remoteServiceName)
+        
         var virtualChannel = {
             channel_id:uuid.v4().toString(),
             channel: null
@@ -47,25 +49,33 @@ module.exports.create = function(transport, infrastructure) {
         
         var transportChannel = transportChannels[remoteServiceName]
         if (transportChannel == null) {
+            logger.debug("Opening transport channel to " + remoteServiceName)
             transportChannel = transport.openChannel(remoteServiceName, "shared-channel")
             transportChannels[remoteServiceName] = transportChannel
-            transportChannel.left().listen(function(msg) {
+            transportChannel.listen(function(msg) {
+                logger.debug("Received message from transport " + JSON.stringify(msg))
                 var sharedChannelMessage = messages.decode(msg.payload)
                 var virtualChannel = virtualChannels[sharedChannelMessage.channelId]
-                var wrappedMuonMsg = messages.decode(sharedChannelMessage.message)
+                var wrappedMuonMsg = sharedChannelMessage.message
                 virtualChannel.channel.rightConnection().send(wrappedMuonMsg);
             })
         }
 
+        logger.debug("Creating bichannel for virtual channel connection")
         //generate the client side multiplexer
         virtualChannel.channel = bichannel.create("virtual-channel-" + remoteServiceName)
         virtualChannel.channel.rightConnection().listen(function(message) {
+            logger.debug("Sending shared-channel message " + JSON.stringify(message))
             var sharedChannelMessage = {
                 channelId: virtualChannel.channel_id,
-                message: messages.encode(message)
+                message: message
             }
 
-            transportChannel.leftConnection().send(sharedChannelMessage)
+            //TODO, re-encode into a muon message for the transport to send.
+
+            var muonMsg = messages.muonMessage(sharedChannelMessage, message.origin_service, remoteServiceName, "shared-channel", "message")
+
+            transportChannel.send(muonMsg)
         })
 
         return virtualChannel.channel.leftConnection();
@@ -77,18 +87,25 @@ module.exports.create = function(transport, infrastructure) {
 
     var transportApi = {
         openChannel: function (remoteServiceName, protocolName) {
+            logger.debug("Open transclient channel " + remoteServiceName)
+            // var remoteService = infrastructure.discovery.find(remoteServiceName)
+            var supportsSharedChannels = true
+            // if (remoteService && _.contains(remoteService.capabilities, "shared-channel")) {
+            //     logger.debug("Opening shared-channel connection to " + remoteServiceName)
+            //     supportsSharedChannels = true
+            // }
 
-            var remoteService = infrastructure.discovery.find(remoteServiceName)
-            var supportsSharedChannels = false
-            if (remoteService && _.contains(remoteService.capabilities, "shared-channel")) {
-                logger.debug("Opening shared-channel connection to " + remoteServiceName)
-                supportsSharedChannels = true
-            }
-
-            if (supportsSharedChannels) {
-                return virtualChannel(remoteServiceName, protocolName)
-            } else {
-                return transportChannel(remoteServiceName, protocolName)
+            try {
+                if (supportsSharedChannels) {
+                    logger.debug("Remote supports shared-channel, generating a virtual channel")
+                    return virtualChannel(remoteServiceName, protocolName)
+                } else {
+                    logger.debug("No rmeote support for shared-channel, returning transport channel directly")
+                    return transportChannel(remoteServiceName, protocolName)
+                }
+            } catch (e) {
+                console.log("ERROR DETECTED")
+                logger.error("WARNING!", e)
             }
         },
         onError: function (cb) {

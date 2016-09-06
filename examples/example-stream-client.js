@@ -13,20 +13,20 @@ setTimeout(function() {
     var then = new Date().getTime()
     console.log("Starting request!")
 
-    muon.subscribe("stream://awesomeservicequery/hello", {},
-        function(data) {
-            logger.error("Data...")
-            console.dir(data)
-        },
-        function(error) {
-            logger.error("Errored...")
-            console.dir(error)
-        }, 
-        function() {
-            logger.warn("COMPLETED STREAM")
-        }
-    )
-    
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+    subscribe()
+
     
     // var promise = muon.request('rpc://muon-dev-tools/echo', {"search": "red"});
     //
@@ -38,3 +38,20 @@ setTimeout(function() {
 
 
 }, 6000)
+
+
+function subscribe() {
+    muon.subscribe("stream://awesomeservicequery/ticktock", {},
+        function(data) {
+            logger.error("Data...")
+            console.dir(data)
+        },
+        function(error) {
+            logger.error("Errored...")
+            console.dir(error)
+        },
+        function() {
+            logger.warn("COMPLETED STREAM")
+        }
+    )
+}
