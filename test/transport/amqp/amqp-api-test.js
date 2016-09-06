@@ -70,18 +70,13 @@ describe("amqp api test:", function () {
             var amqp = require('../../../muon/transport/amqp/amqp-api.js');
             var amqpConnect = amqp.connect(url);
              amqpConnect.then(function (amqpApi) {
-                   amqpApi.inbound('api_test_queue').listen(function(message) {
-                   });
-                    amqpApi.outbound('api_test_queue').send(invalidMessage);
-            }, function (err) {
-                // this is not currrently expected to trigger with an invalid message, but could be considered as a nice alternative
-                done(err);
-            }).catch(function(err) {
-               if (err.toString().indexOf('Problem validating transport message schema') > -1) {
-                 done();
-               } else {
-                 done(err);
-               }
+                  amqpApi.inbound('api_test_queue').listen(function(message) { });
+                  var channel = amqpApi.outbound('api_test_queue');
+                  channel.onError(function(err) {
+                      assert.ok(err);
+                      done();
+                  });
+                  channel.send(invalidMessage);
             });
 
     });
@@ -122,7 +117,7 @@ describe("amqp api test:", function () {
             });
       });
 
-/* amqp connect  behaviour seems to vary depending on network type 
+/* amqp connect  behaviour seems to vary depending on network type
       it("invalid amqp url host", function (done) {
           var amqp = require('../../../muon/transport/amqp/amqp-api.js');
             var amqpConnect = amqp.connect('amqp://bob:password@lolcathost');

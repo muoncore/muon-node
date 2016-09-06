@@ -378,20 +378,20 @@ describe("Bi directional channel test", function () {
          channel.leftConnection().send(new Error('non valdiating errror'));
     });
 
-/*
+
       it("unable to send messages on closed channel", function (done) {
           var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
           channel.close();
 
           setTimeout(function(){
-            expect(function() {
-              channel.leftConnection().send('blah');
-            }).to.throwException(/csp channel closed/);
+            expect(
+              channel.leftConnection().send('blah')
+            ).to.be(false);
             done();
           }, 200);
 
       });
-*/
+
       it("unable to listen on closed channel", function (done) {
           var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
           channel.close();
@@ -402,8 +402,6 @@ describe("Bi directional channel test", function () {
             }).to.throwException(/csp channel closed/);
             done();
           }, 200);
-
-
 
       });
 
