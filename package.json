@@ -1,7 +1,7 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "7.0.46",
+  "version": "7.0.47",
   "author": "Muon Core Ltd",
   "keywords": [
     "muon",
