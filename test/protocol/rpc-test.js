@@ -48,7 +48,7 @@ describe("test rpc protocol:", function () {
                               //console.dir(msg);
                           if (msg.channel_op == 'closed') {
                             closeMsg++;
-                            if (closeMsg == 1) done(); // here we ensure a shutdown message is sent at elast once before passing test
+                            if (closeMsg >= 1) done(); // here we ensure a shutdown message is sent at elast once before passing test
                           } else {
                             var response = messages.decode(msg.payload, msg.content_type);
                             var responseBody = messages.decode(response.body, msg.content_type)
