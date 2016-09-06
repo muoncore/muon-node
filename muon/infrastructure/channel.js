@@ -1,5 +1,6 @@
 var csp = require("js-csp");
 require('sexylog');
+var messages = require('../domain/messages.js');
 
 var SHUTDOWN_DELAY = 1000;
 
@@ -254,12 +255,9 @@ function Channel(name, validator) {
     var _this = this;
     var inbound = csp.chan();
     var outbound = csp.chan();
-    var leftConnection = new LeftConnection(name, inbound, outbound, validator, _this);
-    var rightConnection = new RightConnection(name, outbound, inbound, validator, _this);
-
 
     logger.trace('[***** CSP-CHANNEL *****] Created csp bi-channel with name="' + name + '"');
-    return {
+    var channelApi = {
         name: function() {
           return name;
         },
@@ -300,13 +298,22 @@ function Channel(name, validator) {
             rightConnection.send(msg);
         },
         close: function() {
+          logger.warn('[***** CSP-CHANNEL *****] Sending channel_op=closed message downstream ' + name);
+          var shutdownMsg = messages.shutdownMessage();
+          csp.putAsync(outbound, shutdownMsg);
           setTimeout(function(){
             logger.warn('[***** CSP-CHANNEL *****] SHUTDOWN CHANNEL ' + name);
+
             inbound.close();
             outbound.close();
             open = false;
           }, SHUTDOWN_DELAY);
         }
     }
+
+    var leftConnection = new LeftConnection(name, inbound, outbound, validator, channelApi);
+    var rightConnection = new RightConnection(name, outbound, inbound, validator, channelApi);
+    
+    return channelApi;
 
 }

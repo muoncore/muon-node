@@ -389,6 +389,22 @@ describe("Bi directional channel test", function () {
             ).to.be(false);
             done();
           }, 200);
+      });
+
+      it("close() call sends channel_op=shutodwn message downstream", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
+
+          channel.rightConnection().listen(function(msg) {
+              expect(msg.channel_op).to.be('closed');
+              done();
+          });
+
+          channel.close();
+
+          setTimeout(function() {
+
+
+          }, 200);
 
       });
 
@@ -403,6 +419,31 @@ describe("Bi directional channel test", function () {
             done();
           }, 200);
 
+      });
+
+      it("unable to send messages on closed left connection", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
+          channel.leftConnection().close();
+
+          setTimeout(function(){
+            expect(
+              channel.leftConnection().send('blah')
+            ).to.be(false);
+            done();
+          }, 200);
+      });
+
+
+      it("unable to send messages on closed right connection", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
+          channel.rightConnection().close();
+
+          setTimeout(function(){
+            expect(
+              channel.leftConnection().send('blah')
+            ).to.be(false);
+            done();
+          }, 200);
       });
 
 });

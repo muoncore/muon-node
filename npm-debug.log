@@ -15,23 +15,23 @@
 7 silly cache add   rawSpec: '.',
 7 silly cache add   spec: '/Users/gawain/dev/muon-node',
 7 silly cache add   type: 'directory' }
-8 verbose addLocalDirectory /Users/gawain/.npm/muon-core/7.0.44/package.tgz not in flight; packing
+8 verbose addLocalDirectory /Users/gawain/.npm/muon-core/7.0.46/package.tgz not in flight; packing
 9 verbose correctMkdir /Users/gawain/.npm correctMkdir not in flight; initializing
-10 info lifecycle muon-core@7.0.44~prepublish: muon-core@7.0.44
-11 silly lifecycle muon-core@7.0.44~prepublish: no script for prepublish, continuing
-12 verbose tar pack [ '/Users/gawain/.npm/muon-core/7.0.44/package.tgz',
+10 info lifecycle muon-core@7.0.46~prepublish: muon-core@7.0.46
+11 silly lifecycle muon-core@7.0.46~prepublish: no script for prepublish, continuing
+12 verbose tar pack [ '/Users/gawain/.npm/muon-core/7.0.46/package.tgz',
 12 verbose tar pack   '/Users/gawain/dev/muon-node' ]
-13 verbose tarball /Users/gawain/.npm/muon-core/7.0.44/package.tgz
+13 verbose tarball /Users/gawain/.npm/muon-core/7.0.46/package.tgz
 14 verbose folder /Users/gawain/dev/muon-node
-15 verbose addLocalTarball adding from inside cache /Users/gawain/.npm/muon-core/7.0.44/package.tgz
+15 verbose addLocalTarball adding from inside cache /Users/gawain/.npm/muon-core/7.0.46/package.tgz
 16 verbose correctMkdir /Users/gawain/.npm correctMkdir not in flight; initializing
-17 silly cache afterAdd muon-core@7.0.44
-18 verbose afterAdd /Users/gawain/.npm/muon-core/7.0.44/package/package.json not in flight; writing
+17 silly cache afterAdd muon-core@7.0.46
+18 verbose afterAdd /Users/gawain/.npm/muon-core/7.0.46/package/package.json not in flight; writing
 19 verbose correctMkdir /Users/gawain/.npm correctMkdir not in flight; initializing
-20 verbose afterAdd /Users/gawain/.npm/muon-core/7.0.44/package/package.json written
+20 verbose afterAdd /Users/gawain/.npm/muon-core/7.0.46/package/package.json written
 21 silly publish { name: 'muon-core',
 21 silly publish   description: 'node.js muon implementation',
-21 silly publish   version: '7.0.44',
+21 silly publish   version: '7.0.46',
 21 silly publish   author: { name: 'Muon Core Ltd' },
 21 silly publish   keywords: [ 'muon', 'microservices', 'antifragile' ],
 21 silly publish   private: false,
@@ -88,11 +88,11 @@
 21 silly publish   main: './muon/api/muoncore',
 21 silly publish   readme: '\n# Muon Core - NodeJS\n\n\nNodeJS implementation of Muon\n\n\n\n\n\n# Examples\n\n\nopen a terminal and run the exmaples service:\n\n```\nnode examples/muon-dev-tools-server.js\n\n```\n\n\n\nnow open another terminal window and run a client to test some of the exmaple services:\n\n\n### echo service\n\nthis exmaple service endpoint echos back it\'s given payload.\n\n```\nnode ./examples/dev-tools-echo-client.js\n```\n\n\n### ping service\n\nThis example service responds to a payload with contents \'ping\' with a \'pong\' message.\n\n```\nnode ./examples/dev-tools-ping-client.js\n```\n\n\n\n### random number service\n\nGenerates a random number between 10000 & 99999.\n\n```\nnode ./examples/dev-tools-random-client.js\n```\n\n\n### type id service\n\nidentifies the javascript type of the payload and responds back.\n\n```\nnode ./examples/dev-tools-type-client.js\n\n```\n\n\n\n\n### uuid service\n\nGenerate a uuid\n\n```\nnode ./examples/dev-tools-uuid-client.js\n\n```\n',
 21 silly publish   readmeFilename: 'Readme.adoc',
-21 silly publish   gitHead: 'c3ec5742f6bf1f86f4e949b4c6402389c16b3ed4',
+21 silly publish   gitHead: '9748c74314d37f5f71cb6566e526a4033b0e2ecc',
 21 silly publish   bugs: { url: 'https://github.com/microserviceux/muon-node/issues' },
 21 silly publish   homepage: 'https://github.com/microserviceux/muon-node#readme',
-21 silly publish   _id: 'muon-core@7.0.44',
-21 silly publish   _shasum: '38e7d6c417fff1c197d11f786d9993fa57abb9a6',
+21 silly publish   _id: 'muon-core@7.0.46',
+21 silly publish   _shasum: '47b6612b200fa428f3406e49bc2095d341ac9574',
 21 silly publish   _from: '.' }
 22 verbose getPublishConfig undefined
 23 silly mapToRegistry name muon-core
@@ -108,25 +108,25 @@
 26 silly mapToRegistry   type: 'tag' }
 27 silly mapToRegistry uri https://registry.npmjs.org/muon-core
 28 verbose publish registryBase https://registry.npmjs.org/
-29 silly publish uploading /Users/gawain/.npm/muon-core/7.0.44/package.tgz
+29 silly publish uploading /Users/gawain/.npm/muon-core/7.0.46/package.tgz
 30 verbose request uri https://registry.npmjs.org/muon-core
 31 verbose request sending authorization for write operation
-32 info attempt registry request try #1 at 4:00:41 PM
+32 info attempt registry request try #1 at 8:43:14 PM
 33 verbose request using bearer token for auth
-34 verbose request id f5af93e51484cfee
+34 verbose request id 978e7903e64e2b09
 35 http request PUT https://registry.npmjs.org/muon-core
 36 http 403 https://registry.npmjs.org/muon-core
 37 verbose headers { 'content-type': 'application/json',
 37 verbose headers   'cache-control': 'max-age=300',
 37 verbose headers   'content-length': '103',
 37 verbose headers   'accept-ranges': 'bytes',
-37 verbose headers   date: 'Sun, 04 Sep 2016 15:00:42 GMT',
+37 verbose headers   date: 'Tue, 06 Sep 2016 19:43:16 GMT',
 37 verbose headers   via: '1.1 varnish',
 37 verbose headers   connection: 'keep-alive',
-37 verbose headers   'x-served-by': 'cache-lhr6341-LHR',
+37 verbose headers   'x-served-by': 'cache-lhr6338-LHR',
 37 verbose headers   'x-cache': 'MISS',
 37 verbose headers   'x-cache-hits': '0',
-37 verbose headers   'x-timer': 'S1473001241.766912,VS0,VE1070',
+37 verbose headers   'x-timer': 'S1473190995.997973,VS0,VE772',
 37 verbose headers   vary: 'Accept-Encoding' }
 38 verbose request invalidating /Users/gawain/.npm/registry.npmjs.org/muon-core on PUT
 39 error publish Failed PUT 403

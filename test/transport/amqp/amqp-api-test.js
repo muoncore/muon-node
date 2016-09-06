@@ -35,14 +35,18 @@ describe("amqp api test:", function () {
                    });
                   console.log('sending payload');
                   for (var i = 0 ; i < numMessages ; i++) {
-                            payload.id = i;
-                            var message = {
-                                data: payload,
-                                headers: {
-                                    protocol: 'rpc'
-                                }
+                      setTimeout(function() {
+                        payload.id = i;
+                        var message = {
+                            data: payload,
+                            headers: {
+                                protocol: 'rpc'
                             }
-                            amqpApi.outbound('api_test_queue').send(message);
+                        }
+                        amqpApi.outbound('api_test_queue').send(message);
+                      }, 10);
+
+
                   }
 
             }, function (err) {

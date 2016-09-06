@@ -162,18 +162,15 @@ describe("Agent class test:", function () {
 
       var msgReceived = false;
       serverUpstream.leftConnection().listen(function(msg) {
-            var doneOnce = asyncAssert(done);
             console.log('* server ******************************************** msg: ' + JSON.stringify(msg));
             console.log('* server ******************************************** serverKeepAliveMessages=' + serverKeepAliveMessages);
             console.log('* server ******************************************** clientKeepAliveMessages=' + clientKeepAliveMessages);
             console.log('* server ******************************************** msgReceived=' + msgReceived);
-            if (msg.text == testMsg.text) msgReceived = true;
-            if (! msg.channel_op) {
-              expect(msg.text).to.be(testMsg.text);
-              doneOnce(serverKeepAliveMessages > 3 && clientKeepAliveMessages > 3 && msgReceived);
-            }
+            expect(msg.text).to.be(testMsg.text);
+            setTimeout(function(){
+              serverUpstream.leftSend(msg);
+            }, 100);
 
-            serverUpstream.leftSend(msg);
       });
       console.log('********************************************** sending message');
       setTimeout(function() {
@@ -183,7 +180,8 @@ describe("Agent class test:", function () {
 
       clientUpstream.leftConnection().listen(function(msg) {
             console.log('* client ******************************************** msg: ' + JSON.stringify(msg));
-            if (! msg.channel_op) expect(msg.text).to.be(testMsg.text);
+            expect(msg.text).to.be(testMsg.text);
+            done();
       });
 
 
