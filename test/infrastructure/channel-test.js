@@ -378,20 +378,36 @@ describe("Bi directional channel test", function () {
          channel.leftConnection().send(new Error('non valdiating errror'));
     });
 
-/*
+
       it("unable to send messages on closed channel", function (done) {
           var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
           channel.close();
 
           setTimeout(function(){
-            expect(function() {
-              channel.leftConnection().send('blah');
-            }).to.throwException(/csp channel closed/);
+            expect(
+              channel.leftConnection().send('blah')
+            ).to.be(false);
             done();
+          }, 200);
+      });
+
+      it("close() call sends channel_op=shutodwn message downstream", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
+
+          channel.rightConnection().listen(function(msg) {
+              expect(msg.channel_op).to.be('closed');
+              done();
+          });
+
+          channel.close();
+
+          setTimeout(function() {
+
+
           }, 200);
 
       });
-*/
+
       it("unable to listen on closed channel", function (done) {
           var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
           channel.close();
@@ -403,8 +419,31 @@ describe("Bi directional channel test", function () {
             done();
           }, 200);
 
+      });
+
+      it("unable to send messages on closed left connection", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
+          channel.leftConnection().close();
+
+          setTimeout(function(){
+            expect(
+              channel.leftConnection().send('blah')
+            ).to.be(false);
+            done();
+          }, 200);
+      });
 
 
+      it("unable to send messages on closed right connection", function (done) {
+          var channel = bichannel.create("test-a-kimbo", function() {return true}, 50);
+          channel.rightConnection().close();
+
+          setTimeout(function(){
+            expect(
+              channel.leftConnection().send('blah')
+            ).to.be(false);
+            done();
+          }, 200);
       });
 
 });

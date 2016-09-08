@@ -166,8 +166,8 @@ function closeSocket(downstreamConnection) {
     logger.info('[*** CSP-CHANNEL:HANDLER ***] close() source=' + source);
     setTimeout(function() {
       logger.warn('[*** CSP-CHANNEL:HANDLER ***] handler.close() called sending shutdown message');
-      var shutdownMsg = messages.shutdownMessage();
-      downstreamConnection.send(shutdownMsg);
+      downstreamConnection.close();
+      //upstreamConnection.close();
     }, 5000);
   }
   //logger.error('func=' + func.toString());
