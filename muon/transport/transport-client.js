@@ -2,7 +2,7 @@
 var _ = require("underscore")
 var uuid = require("node-uuid")
 var messages = require("../domain/messages")
-var bichannel = require("./channel")
+var bichannel = require("../infrastructure/channel")
 /**
  * Implements the client side of transport socket sharing.
  *
@@ -41,19 +41,26 @@ module.exports.create = function(transport, infrastructure) {
 
         logger.debug("Opening virtual channel to " + remoteServiceName)
         
-        var virtualChannel = {
-            channel_id:uuid.v4().toString(),
-            channel: null
-        }
-        virtualChannels[virtualChannel.channel_id] = virtualChannel
-        
         var transportChannel = transportChannels[remoteServiceName]
         if (transportChannel == null) {
             logger.debug("Opening transport channel to " + remoteServiceName)
             transportChannel = transport.openChannel(remoteServiceName, "shared-channel")
+            transportChannel.virtualChannels = {}
             transportChannels[remoteServiceName] = transportChannel
             transportChannel.listen(function(msg) {
-                logger.debug("Received message from transport " + JSON.stringify(msg))
+                logger.warn("Received message from transport " + JSON.stringify(msg))
+                if (msg.channel_op == "closed") {
+
+                    for (var property in transportChannel.virtualChannels) {
+                        if (transportChannel.virtualChannels.hasOwnProperty(property)) {
+                            console.log(property)
+                            transportChannel.virtualChannels[property].channel.rightConnection().send(msg)
+                            delete transportChannel.virtualChannels[property]
+                        }
+                    }
+
+                    return
+                }
                 var sharedChannelMessage = messages.decode(msg.payload)
                 var virtualChannel = virtualChannels[sharedChannelMessage.channelId]
                 var wrappedMuonMsg = sharedChannelMessage.message
@@ -61,17 +68,31 @@ module.exports.create = function(transport, infrastructure) {
             })
         }
 
+        var virtualChannel = {
+            channel_id:uuid.v4().toString(),
+            channel: null,
+            transportChannel: transportChannel
+        }
+        virtualChannels[virtualChannel.channel_id] = virtualChannel
+        transportChannel.virtualChannels[virtualChannel.channel_id] = virtualChannel
+
         logger.debug("Creating bichannel for virtual channel connection")
         //generate the client side multiplexer
         virtualChannel.channel = bichannel.create("virtual-channel-" + remoteServiceName)
         virtualChannel.channel.rightConnection().listen(function(message) {
             logger.debug("Sending shared-channel message " + JSON.stringify(message))
+            if (message.channel_op == "closed") {
+                delete virtualChannels[virtualChannel.channel_id].transportChannel.virtualChannels[virtualChannel.channel_id]
+                delete virtualChannels[virtualChannel.channel_id]
+                if (Object.keys(transportChannel.virtualChannels).length == 0) {
+                    logger.debug("Transport channel " + transportChannel.name() + " will shutdown, no more virtual channels are routing over it")
+                    transportChannel.send(messages.shutdownMessage())
+                }
+            }
             var sharedChannelMessage = {
                 channelId: virtualChannel.channel_id,
                 message: message
             }
-
-            //TODO, re-encode into a muon message for the transport to send.
 
             var muonMsg = messages.muonMessage(sharedChannelMessage, message.origin_service, remoteServiceName, "shared-channel", "message")
 
@@ -95,17 +116,12 @@ module.exports.create = function(transport, infrastructure) {
             //     supportsSharedChannels = true
             // }
 
-            try {
-                if (supportsSharedChannels) {
-                    logger.debug("Remote supports shared-channel, generating a virtual channel")
-                    return virtualChannel(remoteServiceName, protocolName)
-                } else {
-                    logger.debug("No rmeote support for shared-channel, returning transport channel directly")
-                    return transportChannel(remoteServiceName, protocolName)
-                }
-            } catch (e) {
-                console.log("ERROR DETECTED")
-                logger.error("WARNING!", e)
+            if (supportsSharedChannels) {
+                logger.debug("Remote supports shared-channel, generating a virtual channel")
+                return virtualChannel(remoteServiceName, protocolName)
+            } else {
+                logger.debug("No rmeote support for shared-channel, returning transport channel directly")
+                return transportChannel(remoteServiceName, protocolName)
             }
         },
         onError: function (cb) {
