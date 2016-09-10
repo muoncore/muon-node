@@ -24,7 +24,6 @@ AmqpConnection.prototype.connect = function (callback) {
     });
     connection.on("close", function() {
         logger.debug("AMQP Connection has CLOSED");
-        callback();
     });
     connection.on("blocked", function(data) {
         logger.error("AMQP Connection is BLOCKED");
