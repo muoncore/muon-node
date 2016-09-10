@@ -26,6 +26,7 @@ describe("Muon core API test:", function () {
 
     it("full stack request/response for rpc message", function (done) {
 
+        console.log("MUONURL " + amqpurl)
 
         var muon = muoncore.create(serviceName, amqpurl);
         muon.handle('/tennis', function (event, respond) {
@@ -53,8 +54,6 @@ describe("Muon core API test:", function () {
             done(error);
 
         });
-
-
     });
 
 

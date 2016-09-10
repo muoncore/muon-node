@@ -36,12 +36,12 @@ class MuonSocketAgent {
           var _outboundFunction = this.outbound; //'this' doesnt work in functions below
           var _inboundFunction = this.inbound; //'this' doesnt work in functions below
 
-          upstreamChannel.rightConnection().listen(function(message) {
+          upstreamChannel.listen(function(message) {
               this.lastOutboundMessageTimestamp = new Date();
-              _outboundFunction(message, downstreamChannel.leftConnection());
+              _outboundFunction(message, downstreamChannel);
           }.bind(this));
 
-          downstreamChannel.leftConnection().listen(function(message) {
+          downstreamChannel.listen(function(message) {
               if (message.step == 'keep-alive') {
                 this.lastInboundPingTimestamp = new Date();
                 logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] agent: ping recevied');
@@ -50,7 +50,7 @@ class MuonSocketAgent {
                 this.lastInboundPingTimestamp = new Date();
                 logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] agent muon message recevied');
                 this.connected = true;
-                _inboundFunction(message, upstreamChannel.rightConnection());
+                _inboundFunction(message, upstreamChannel);
               }
               
           }.bind(this));
@@ -59,7 +59,7 @@ class MuonSocketAgent {
               if (timestampSince(this.lastOutboundMessageTimestamp, this.offsetMs) || this.shutdownInitiated) return;
               logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] sending keep alive ping');
               var ping = messages.pingMessage();
-              this.downstreamChannel.leftConnection().send(ping);
+              this.downstreamChannel.send(ping);
             }.bind(this);
 
             if (this.offsetMs > 0) {
@@ -95,7 +95,7 @@ class MuonSocketAgent {
     try {
       var shutdownMsg = messages.shutdownMessage();
       //this.upstreamChannel.rightConnection().send(shutdownMsg);
-      this.downstreamChannel.leftConnection().send(shutdownMsg);
+      this.downstreamChannel.send(shutdownMsg);
       //this.upstreamChannel.close();
       //this.downstreamChannel.close();
     } catch(err) {

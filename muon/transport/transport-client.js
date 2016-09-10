@@ -110,7 +110,7 @@ module.exports.create = function(transport, infrastructure) {
         openChannel: function (remoteServiceName, protocolName) {
             logger.debug("Open transclient channel " + remoteServiceName)
             // var remoteService = infrastructure.discovery.find(remoteServiceName)
-            var supportsSharedChannels = true
+            var supportsSharedChannels = false
             // if (remoteService && _.contains(remoteService.capabilities, "shared-channel")) {
             //     logger.debug("Opening shared-channel connection to " + remoteServiceName)
             //     supportsSharedChannels = true

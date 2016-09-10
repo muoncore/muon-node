@@ -32,7 +32,7 @@ exports.create = function (localServiceName, url, serverStacks, discovery) {
                      logger.trace('[*** TRANSPORT:OPEN-CONNECTION ***] got amqp client channel handle');
                      var upstreamClientChannel = bichannel.create(localServiceName + "upstream-transport-client");
                      logger.trace('[*** TRANSPORT:OPEN-CONNECTION ***] created upstream cleint channel');
-                     var clientKeepAliveAgent = new MuonSocketAgent(upstreamClientChannel, transportChannel, protocolName, 1000);
+                     var clientKeepAliveAgent = new MuonSocketAgent(upstreamClientChannel.leftConnection(), transportChannel.rightConnection(), protocolName, 1000);
                      logger.trace('[*** TRANSPORT:OPEN-CONNECTION ***] created keep-alive agent');
                      client.onError(transportErrCallback);
                       logger.trace('[*** TRANSPORT:OPEN-CONNECTION ***] returning upstream cleint channel handle');

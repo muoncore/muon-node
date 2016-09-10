@@ -9,7 +9,7 @@ var bichannel = require('../../muon/infrastructure/channel.js');
 
 describe("Agent class test:", function () {
 
-      this.timeout(30000);
+      this.timeout(5000);
 
     it("agent acts as handler between two channels", function (done) {
 
@@ -18,7 +18,7 @@ describe("Agent class test:", function () {
               var upstream = bichannel.create("upstream");
               var downstream = bichannel.create("downstream");
 
-              var agent = new Agent(upstream, downstream, 'rpc', 100);
+              var agent = new Agent(upstream.rightConnection(), downstream.leftConnection(), 'rpc', 100);
 
                 upstream.leftConnection().listen(function(message) {
                         console.log('***** upstream message recevied:' + JSON.stringify(message));
@@ -49,7 +49,7 @@ describe("Agent class test:", function () {
               var upstream = bichannel.create("upstream");
               var downstream = bichannel.create("downstream");
               var protocol = 'rpc';
-              var agent = new Agent(upstream, downstream, protocol, 10);
+              var agent = new Agent(upstream.rightConnection(), downstream.leftConnection(), protocol, 10);
 
                 var keepAlivePingCount = 0;
                 downstream.rightConnection().listen(function(message){
@@ -67,7 +67,7 @@ describe("Agent class test:", function () {
               var upstream = bichannel.create("upstream");
               var downstream = bichannel.create("downstream");
               var protocol = 'rpc';
-              var agent = new Agent(upstream, downstream, protocol, 50);
+              var agent = new Agent(upstream.rightConnection(), downstream.leftConnection(), protocol, 50);
 
 
               //  SEND 10 message (once every 10ms, then wait for keep alive)  /
@@ -118,8 +118,8 @@ describe("Agent class test:", function () {
       };
 
       var protocol = 'rpc';
-      var clintAgent = new Agent(clientUpstream, clientDownstream, protocol, 10);
-      var serverAgent = new Agent(serverUpstream, serverDownstream, protocol, 10);
+      var clintAgent = new Agent(clientUpstream.rightConnection(), clientDownstream.leftConnection(), protocol, 10);
+      var serverAgent = new Agent(serverUpstream.rightConnection(), serverDownstream.leftConnection(), protocol, 10);
       var mockTransport = new MockTransport(clientDownstream.rightConnection(), serverDownstream.rightConnection());
 
     });
@@ -155,8 +155,8 @@ describe("Agent class test:", function () {
       };
 
       var protocol = 'rpc';
-      var clintAgent = new Agent(clientUpstream, clientDownstream, protocol, 10);
-      var serverAgent = new Agent(serverUpstream, serverDownstream, protocol, 10);
+      var clintAgent = new Agent(clientUpstream.rightConnection(), clientDownstream.leftConnection(), protocol, 10);
+      var serverAgent = new Agent(serverUpstream.rightConnection(), serverDownstream.leftConnection(), protocol, 10);
       var mockTransport = new MockTransport(clientDownstream.rightConnection(), serverDownstream.rightConnection());
 
 
@@ -196,7 +196,7 @@ describe("Agent class test:", function () {
       var upstream = bichannel.create("upstream");
       var downstream = bichannel.create("downstream");
       var protocol = 'rpc';
-      var agent = new Agent(upstream, downstream, protocol, 500);
+      var agent = new Agent(upstream.rightConnection(), downstream.leftConnection(), protocol, 500);
 
         var keepAlivePingCount = 0;
         var shutdownMessage = 0;
@@ -215,21 +215,7 @@ describe("Agent class test:", function () {
         setTimeout(function () {
                 downstream.rightSend({step: 'keep-alive'});
         }, 500);
-
-
-
     });
-
-
-
-        //it("client agent shutsdown socket if no server reply received", function (done) {
-
-        //}
-
-
-        //it("server agent sends shutsdown message after response", function (done) {
-
-        //}
 
 });
 
