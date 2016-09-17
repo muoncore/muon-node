@@ -46,8 +46,10 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
         var muonMessage = message.data;
         try {
             messages.validate(muonMessage);
+            logger.info("Sending message on channel " + JSON.stringify(muonMessage));
             serverStackChannel.send(muonMessage);
         } catch (e) {
+            logger.info("CLOSING CHANNEL .... " + JSON.stringify(e))
             serverStackChannel.close()
         }
     });

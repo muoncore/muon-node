@@ -48,7 +48,7 @@ module.exports.create = function(transport, infrastructure) {
             transportChannel.virtualChannels = {}
             transportChannels[remoteServiceName] = transportChannel
             transportChannel.listen(function(msg) {
-                logger.warn("Received message from transport " + JSON.stringify(msg))
+                logger.trace("Received message from transport " + JSON.stringify(msg))
                 if (msg.channel_op == "closed") {
 
                     for (var property in transportChannel.virtualChannels) {

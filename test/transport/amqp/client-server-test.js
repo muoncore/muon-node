@@ -46,8 +46,8 @@ describe("muon client/server transport test: ", function () {
 
     it("client server negotiate handshake and exchange rpc message", function (done) {
 
-        var serverName = 'server1';
-        var clientName = 'client1';
+        var serverName = 'server17';
+        var clientName = 'client17';
 
         var serverChannel = bichannel.create("server-stacks");
         var mockServerStacks = {
@@ -96,11 +96,11 @@ describe("muon client/server transport test: ", function () {
         });
         console.log('sending muon event via client..');
         var rpcMsg = {
-            url: 'rpc://client1/ping',
+            url: 'rpc://client17/ping',
             body: "PING",
             content_type: 'text/plain'
         }
-        var event = messages.muonMessage(rpcMsg, clientName, 'server1', 'rpc', "request.made");
+        var event = messages.muonMessage(rpcMsg, clientName, 'server17', 'rpc', "request.made");
         muonClientChannel.send(event);
 
     });

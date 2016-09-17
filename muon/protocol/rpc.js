@@ -141,8 +141,9 @@ function serverHandler() {
                logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
                logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
                if (message.protocol == 'muon') {
-                  forward(message);
-                  shutdown();
+                   logger.error(JSON.stringify(message))
+                  // forward(message);
+                  // shutdown();
                   return;
                }
               try {
