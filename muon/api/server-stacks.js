@@ -17,7 +17,7 @@ var ServerStacks = function (serverName) {
 ServerStacks.prototype.openChannel = function(protocolName) {
     logger.debug("[*** API ***] opening muon server stacks channel..." + protocolName);
     if (protocolName == "shared-channel") {
-        return sharedChannelServer.create(this)
+        return sharedChannelServer.openSharedServerChannel(this)
     } else {
         var serverStacksChannel = bichannel.create("serverstacks");
         var protocol = this.protocols[protocolName];

@@ -72,7 +72,6 @@ function wrap(connection) {
 
     connection.listen(function (msg) {
         try {
-            console.log("SENDING FROM TRNASPORT TO PROTOCOL "+ JSON.stringify(msg))
             wrapperChannel.rightConnection().send(msg);
         } catch (err) {
             logger.warn('error sending message on csp channel ' + connection);

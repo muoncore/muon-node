@@ -51,10 +51,16 @@ module.exports.create = function(transport, infrastructure) {
                 logger.trace("Received message from transport " + JSON.stringify(msg))
                 if (msg.channel_op == "closed") {
 
+                    var failMessage = msg
+                    
+                    if (msg.step.includes("noserver")) {
+                        // failMessage = 
+                    }
+
                     for (var property in transportChannel.virtualChannels) {
                         if (transportChannel.virtualChannels.hasOwnProperty(property)) {
                             console.log(property)
-                            transportChannel.virtualChannels[property].channel.rightConnection().send(msg)
+                            transportChannel.virtualChannels[property].channel.rightConnection().send(failMessage)
                             delete transportChannel.virtualChannels[property]
                         }
                     }
@@ -110,7 +116,7 @@ module.exports.create = function(transport, infrastructure) {
         openChannel: function (remoteServiceName, protocolName) {
             logger.debug("Open transclient channel " + remoteServiceName)
             // var remoteService = infrastructure.discovery.find(remoteServiceName)
-            var supportsSharedChannels = false
+            var supportsSharedChannels = true
             // if (remoteService && _.contains(remoteService.capabilities, "shared-channel")) {
             //     logger.debug("Opening shared-channel connection to " + remoteServiceName)
             //     supportsSharedChannels = true
