@@ -2,7 +2,7 @@ var client = require('./client.js');
 var server = require('./server.js');
 var bichannel = require('../../infrastructure/channel.js');
 
-var MuonSocketAgent = require('../../socket/agent.js');
+var MuonSocketAgent = require('../../socket/keep-alive-agent');
 var RSVP = require('rsvp');
 
 exports.create = function (localServiceName, url, serverStacks, discovery) {

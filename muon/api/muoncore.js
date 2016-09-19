@@ -3,7 +3,7 @@ require('sexylog');
 
 var ServerStacks = require("../../muon/api/server-stacks");
 
-var MuonSocketAgent = require('../socket/agent.js');
+var MuonSocketAgent = require('../socket/keep-alive-agent');
 var channel = require("../infrastructure/channel")
 
 

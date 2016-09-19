@@ -1,6 +1,6 @@
 "use strict";
 
-var Agent = require('../../muon/socket/agent.js');
+var Agent = require('../../muon/socket/keep-alive-agent.js');
 var assert = require('assert');
 var expect = require('expect.js');
 require('sexylog');
@@ -9,7 +9,7 @@ var bichannel = require('../../muon/infrastructure/channel.js');
 
 describe("Agent class test:", function () {
 
-    this.timeout(5000);
+    this.timeout(11000);
 
     it("agent acts as handler between two channels", function (done) {
 
@@ -190,7 +190,7 @@ describe("Agent class test:", function () {
         var upstream = bichannel.create("upstream");
         var downstream = bichannel.create("downstream");
         var protocol = 'rpc';
-        var agent = new Agent(upstream.rightConnection(), downstream.leftConnection(), protocol, 500);
+        var agent = new Agent(upstream.rightConnection(),downstream.leftConnection(), protocol, 500);
 
         var keepAlivePingCount = 0;
         var shutdownMessage = 0;

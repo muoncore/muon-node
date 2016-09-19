@@ -4,7 +4,7 @@ var bichannel = require('../../../muon/infrastructure/channel.js');
 var helper = require('./transport-helper.js');
 require('sexylog');
 var messages = require('../../domain/messages.js');
-var MuonSocketAgent = require("../../socket/agent")
+var MuonSocketAgent = require("../../socket/keep-alive-agent")
 var errCallback;
 
 exports.connect = function (serviceName, amqpApi, serverStacks, discovery) {

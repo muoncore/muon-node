@@ -2,7 +2,7 @@ var _ = require("underscore");
 var bichannel = require('../infrastructure/channel');
 var rpcProtocol = require('../protocol/rpc.js');
 var messages = require('../domain/messages.js');
-var MuonSocketAgent = require('../socket/agent.js');
+var MuonSocketAgent = require('../socket/keep-alive-agent');
 var sharedChannelServer = require('../transport/shared-channel-server');
 
 
