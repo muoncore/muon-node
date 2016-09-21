@@ -132,7 +132,7 @@ function amqpConnect(url, callback) {
                 amqpChannelOk = true;
                 logger.trace("[*** TRANSPORT:AMQP-API:BOOTSTRAP ***] amqp comms channel to " + url + " created successfully");
                 handleChannelEvents(amqpChan);
-                amqpChannel = amqpChan;
+                // amqpChannel = amqpChan;
                 callback(null, amqpConn, amqpChan);
             }
 

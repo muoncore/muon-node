@@ -112,7 +112,7 @@ exports.shutdownMessage = function() {
   var messageid = uuid.v4();
 
   var headers = {
-        step: 'channelShutdown',
+        step: 'ChannelShutdown',
         protocol: 'n/a',
         event_source: callingObject(),
         target_service: 'n/a',

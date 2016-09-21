@@ -18,6 +18,7 @@ var SHUTDOWN_DELAY = 1000;
  */
 
 module.exports.create = function(name, validiator, delay) {
+    if (!name) throw new Error("This is screwed")
     if (delay) SHUTDOWN_DELAY = delay;
     return new Channel(name, validiator);
 }
@@ -306,7 +307,6 @@ function Channel(name, validator) {
 
             inbound.close();
             outbound.close();
-            open = false;
           }, SHUTDOWN_DELAY);
         }
     }
