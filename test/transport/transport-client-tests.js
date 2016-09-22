@@ -13,7 +13,9 @@ describe("transport-client:", function () {
     
     var infra = {
         config: {
-            serviceName: "local-service"
+            serviceName: "local-service",
+            sharedChannelTimeout:1000,
+            sharedChannelCheck: 100
         }
     }
 

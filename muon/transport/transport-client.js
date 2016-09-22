@@ -16,32 +16,28 @@ var bichannel = require("../infrastructure/channel")
 
 module.exports.create = function(transport, infrastructure) {
 
-    /*
-     * "channelId (uuid)": {
-     *   "virtualChannels": [ 
-     *      {
-     *        channel_id
-     *        channel
-     *      }
-     *   ]
-     * }
-     */
+    var sharedChannelTimeout = infrastructure.config.sharedChannelTimeout || 60 * 60 * 5 // 5 mins.
+    var sharedChannelCheck = infrastructure.config.sharedChannelCheck || 1000 // 5 mins.
+
     var transportChannels= {}
     var virtualChannels = {}
-    /*
-     * TODO, handle shutdown message from the transport.
-     * shutdown message from the virtual channel, close on the other side and remove from this list
-     *
-     * logically tie virtual to transport channels. probably in data sturcture?
-     * need to track usage of transport channels. if they are not used for a while (ie, no active virtual channels), shut them down.
-     */
+
+    setInterval(function() {
+        for (var channelName in transportChannels) {
+            if (transportChannels.hasOwnProperty(channelName)) {
+                var transportChannel = transportChannels[channelName]
+                var lastTime = transportChannel.lastTime
+                var now = new Date().getTime();
+                if (Object.keys((transportChannel.virtualChannels).length == 0) && lastTime < now - sharedChannelTimeout) {
+                    logger.debug("Transport channel to " + transportChannel.name() + " will shutdown due to timeout")
+                    cleanupTransportChannel(transportChannel, messages.shutdownMessage())
+                }
+            }
+        }
+    }, sharedChannelCheck)
 
     function cleanupTransportChannel(transportChannel, msg) {
         var failMessage = msg
-
-        if (msg.step.includes("noserver")) {
-            // failMessage =
-        }
 
         logger.debug("Transport channel shutdown, removing virtual channels ... ")
         for (var property in transportChannel.virtualChannels) {
@@ -52,16 +48,19 @@ module.exports.create = function(transport, infrastructure) {
                 delete transportChannel.virtualChannels[property]
             }
         }
-
+        transportChannel.send(msg)
+        delete transportChannels[transportChannel.remoteServiceName]
     }
 
     function openTransportChannel(remoteServiceName) {
         logger.debug("Opening transport channel to " + remoteServiceName)
         var transportChannel = transport.openChannel(remoteServiceName, "shared-channel")
+        transportChannel.remoteServiceName = remoteServiceName
         transportChannel.virtualChannels = {}
         transportChannels[remoteServiceName] = transportChannel
         transportChannel.listen(function(msg) {
             logger.trace("Received message from transport " + JSON.stringify(msg))
+            transportChannel.lastTime = new Date().getTime()
             if (msg.channel_op == "closed") {
                 cleanupTransportChannel(transportChannel, msg)
                 return
@@ -92,11 +91,6 @@ module.exports.create = function(transport, infrastructure) {
             delete transportChannel.virtualChannels[virtualChannel.channel_id]
             delete virtualChannels[virtualChannel.channel_id]
         }
-        if (Object.keys(transportChannel.virtualChannels).length == 0) {
-            logger.debug("Transport channel " + transportChannel.name() + " will shutdown, no more virtual channels are routing over it")
-            transportChannel.send(messages.shutdownMessage())
-            delete transportChannels[remoteServiceName]
-        }
     }
 
     function openVirtualChannel(transportChannel, remoteServiceName) {
@@ -114,6 +108,7 @@ module.exports.create = function(transport, infrastructure) {
         virtualChannel.channel = bichannel.create("virtual-channel-" + virtualChannel.channel_id + "-" + remoteServiceName)
         virtualChannel.channel.rightConnection().listen(function(message) {
             logger.debug("Sending shared-channel message on transportchannel " + transportChannel + ":::" + JSON.stringify(message))
+            transportChannel.lastTime = new Date().getTime()
             message.target_service = remoteServiceName
             message.origin_service = infrastructure.config.serviceName
             if (message.channel_op == "closed") {
