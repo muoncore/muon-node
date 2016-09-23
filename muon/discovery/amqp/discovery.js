@@ -5,7 +5,8 @@ require('sexylog');
 
 var AmqpDiscovery = function (url, frequency) {
 
-    if (! frequency) frequency = 3000; //broadcast frequency ms
+    if (!frequency) frequency = 3000; //broadcast frequency ms
+    this.cacheFillTime = 5500;
     this.frequency = frequency;
     this.descriptors = [];
     this.callbacks = [];
@@ -17,35 +18,36 @@ var AmqpDiscovery = function (url, frequency) {
     _this.connection = new AmqpConnection(url);
     _this.url = url;
 
-    _this.connection.connect(function() {
+    _this.connection.connect(function () {
         logger.info("[*** DISCOVERY:BOOTSTRAP ***] AMQP Discovery is ready!!");
+        setTimeout(function() {
+            logger.debug("Discovery is now Initialised and has a full cache. Discovery queries will now return")
+            _this.discoveryInitiated = true;
+        }, _this.cacheFillTime)
         _this.broadcast = new Broadcast(_this.connection);
         startAnnouncements(_this);
     });
 
+    _this.serviceList = []
+
     this.discoveredServices = {
-        find: function(name) {
-            for (var i = 0 ; i < this.serviceList.length ; i++) {
-                if (this.serviceList[i].identifier == name) {
-                    return this.serviceList[i];
-                };
+        find: function (name) {
+            logger.trace("DISCOVERY:AMQP - Searching for service " + name + " in list " + JSON.stringify(_this.serviceList))
+            for (var i = 0; i < _this.serviceList.length; i++) {
+                if (_this.serviceList[i].identifier == name) {
+                    return _this.serviceList[i];
+                }
+                ;
             }
             return null;
         },
-        serviceList: [],
+        serviceList: _this.serviceList,
         addFoundService(svc) {
-            this.serviceList.push(svc);
-            if (! _this.discoveryInitiated) {
-              setTimeout(function() {
-                _this.discoveryInitiated = true;
-              }, 100);
-            }
+            _this.serviceList.push(svc);
         }
     };
 
 };
-
-
 
 
 AmqpDiscovery.prototype.advertiseLocalService = function (serviceDescriptor) {
@@ -56,15 +58,19 @@ AmqpDiscovery.prototype.clearAnnouncements = function () {
 };
 
 AmqpDiscovery.prototype.discoverServices = function (callback) {
-  var _this = this;
-  var interval = setInterval(function() {
-      if (_this.discoveryInitiated) {
-        clearInterval(interval);
-        setTimeout(function() {
+    var _this = this
+    setTimeout(function () {
+        if (_this.discoveryInitiated) {
             callback(_this.discoveredServices);
-        }, 500);
-      }
-  }, _this.frequency);
+        } else {
+            var interval = setInterval(function() {
+                if (_this.discoveryInitiated) {
+                    clearInterval(interval)
+                    callback(_this.discoveredServices);
+                }
+            }, 100)
+        }
+    }, 0);
 };
 
 AmqpDiscovery.prototype.close = function () {
@@ -113,7 +119,7 @@ function startAnnouncements(discovery) {
                 });
             }, discovery.frequency);
         }
-    }, 400);
+    }, 0);
 }
 
 module.exports = AmqpDiscovery;

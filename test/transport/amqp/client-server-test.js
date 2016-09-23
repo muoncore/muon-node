@@ -193,6 +193,7 @@ describe("muon client/server transport test: ", function () {
                 var now = new Date().getTime()
                 var handshakeTime = now - then
                 assert(handshakeTime < 500, "Handshake took too long, " + handshakeTime)
+                console.log("Handshake is quick - " + handshakeTime)
                 done();
             });
             console.log('sending muon event via client..');

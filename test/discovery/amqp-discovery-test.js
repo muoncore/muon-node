@@ -1,4 +1,3 @@
-
 require('mocha-sinon');
 var sinon = require("sinon");
 var assert = require('assert');
@@ -16,7 +15,7 @@ describe("AMQP Discovery: ", function () {
 
     var discovery;
 
-    afterEach(function() {
+    afterEach(function () {
         discovery1.close();
         discovery2.close();
         discovery3.close();
@@ -30,33 +29,31 @@ describe("AMQP Discovery: ", function () {
         discovery3 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost", 500);
 
         discovery1.advertiseLocalService({
-            identifier:"tombola",
-            tags:["node", "tombola"],
-            codecs:["application/json"],
-            connectionUrls:[process.env.MUON_URL || "amqp://muon:microservices@localhost"]
+            identifier: "tombola",
+            tags: ["node", "tombola"],
+            codecs: ["application/json"],
+            connectionUrls: [process.env.MUON_URL || "amqp://muon:microservices@localhost"]
         });
 
         discovery2.advertiseLocalService({
-            identifier:"simple",
-            tags:["node", "simple"],
-            codecs:["application/json"],
-            connectionUrls:[process.env.MUON_URL || "amqp://muon:microservices@localhost"]
+            identifier: "simple",
+            tags: ["node", "simple"],
+            codecs: ["application/json"],
+            connectionUrls: [process.env.MUON_URL || "amqp://muon:microservices@localhost"]
         });
 
         discovery3.advertiseLocalService({
-            identifier:"awesomeService",
-            tags:["node", "awesomeService"],
-            codecs:["application/json"],
-            connectionUrls:[process.env.MUON_URL || "amqp://muon:microservices@localhost"]
+            identifier: "awesomeService",
+            tags: ["node", "awesomeService"],
+            codecs: ["application/json"],
+            connectionUrls: [process.env.MUON_URL || "amqp://muon:microservices@localhost"]
         });
 
-          discovery1.discoverServices(function(services) {
-              assert.ok(services.find('simple'), 'could not find "simple" service in discovery list (services=)' + JSON.stringify(services) + ')');
-              assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list (services=' + JSON.stringify(services) + ')');
-              assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list (services=' + JSON.stringify(services) + ')');
-              done();
-          });
-
+        discovery1.discoverServices(function (services) {
+            assert.ok(services.find('simple'), 'could not find "simple" service in discovery list (services=)' + JSON.stringify(services) + ')');
+            assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list (services=' + JSON.stringify(services) + ')');
+            assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list (services=' + JSON.stringify(services) + ')');
+            done();
+        });
     });
-
 });
