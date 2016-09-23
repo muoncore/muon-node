@@ -66,7 +66,9 @@ describe("transport-client:", function () {
 
         var transportChannel = bichannel.create("transportchannel")
         transportChannel.rightConnection().listen(function(msg) {
-            assert.equal(msg.channel_op, "closed")
+            var payload = messages.decode(msg.payload)
+            logger.info("Got message " + JSON.stringify(payload))
+            assert.equal(payload.message.channel_op, "closed")
             done()
         })
 
