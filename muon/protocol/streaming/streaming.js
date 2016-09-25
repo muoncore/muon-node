@@ -62,19 +62,24 @@ exports.getApi = function (name, infra) {
         subscribe: function (remoteServiceUrl, params, clientCallback, errorCallback, completeCallback) {
 
             infra.getTransport().then(function(transport) {
-              var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
-              var targetService = serviceRequest.hostname
-              var transChannel = transport.openChannel(targetService, protocolName);
-              var targetStream = serviceRequest.path;
-              var args = params;
-              var protocol = proto.create(
-                  subscriber,
-                  transChannel,
-                  targetService,
-                  serviceName,
-                  targetStream,
-                  args);
-              protocol.start();
+                try {
+                    logger.info("STARTING A STREAM SERVICE ....")
+                    var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
+                    var targetService = serviceRequest.hostname
+                    var transChannel = transport.openChannel(targetService, protocolName);
+                    var targetStream = serviceRequest.path;
+                    var args = params;
+                    var protocol = proto.create(
+                        subscriber,
+                        transChannel,
+                        targetService,
+                        serviceName,
+                        targetStream,
+                        args);
+                    protocol.start();
+                } catch (e) {
+                    logger.error("BALLS", e)
+                }
             });
 
             var subscriber = simpleapi.subscriber(clientCallback, errorCallback, completeCallback);

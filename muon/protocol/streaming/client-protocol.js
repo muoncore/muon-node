@@ -60,6 +60,7 @@ module.exports.create = function(
            case "Completed":
                subscriber.onComplete()
                break
+           case "ChannelShutdown":
            case "ChannelFailure":
                subscriber.onError("The connection to the remote has failed, the channel has shutdown unexpectedly")
                break
@@ -71,6 +72,7 @@ module.exports.create = function(
 
     return {
         start: function() {
+            logger.debug("Stream subscription requested!")
             var msg = messages.muonMessage({
                 streamName: targetStream,
                 args: args

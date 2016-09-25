@@ -82,6 +82,7 @@ exports.serverFailure = function(msg, protocol, status, text) {
     copy.step = protocol  + '.' + status;
     copy.provenance_id = msg.id;
     copy.payload = {status: status, message: text};
+    copy.channel_op = "closed"
     return copy;
 }
 
@@ -102,6 +103,7 @@ exports.failure = function(protocol, status, text) {
     var msg =  createMessage(payload, headers);
     msg.status = "failure";
     msg.step = protocol  + '.' + status;
+    msg.channel_op="closed"
     return msg;
 }
 
@@ -110,7 +112,7 @@ exports.shutdownMessage = function() {
   var messageid = uuid.v4();
 
   var headers = {
-        step: 'channelShutdown',
+        step: 'ChannelShutdown',
         protocol: 'n/a',
         event_source: callingObject(),
         target_service: 'n/a',

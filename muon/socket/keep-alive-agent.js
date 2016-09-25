@@ -36,30 +36,30 @@ class MuonSocketAgent {
           var _outboundFunction = this.outbound; //'this' doesnt work in functions below
           var _inboundFunction = this.inbound; //'this' doesnt work in functions below
 
-          upstreamChannel.rightConnection().listen(function(message) {
+          upstreamChannel.listen(function(message) {
               this.lastOutboundMessageTimestamp = new Date();
-              _outboundFunction(message, downstreamChannel.leftConnection());
+              _outboundFunction(message, downstreamChannel);
           }.bind(this));
 
-          downstreamChannel.leftConnection().listen(function(message) {
+          downstreamChannel.listen(function(message) {
               if (message.step == 'keep-alive') {
                 this.lastInboundPingTimestamp = new Date();
-                logger.debug('[*** MUON:SOCKET:AGENT:INBOUND ***] agent: ping recevied');
+                logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] agent: ping recevied');
                 this.connected = true;
               } else {
                 this.lastInboundPingTimestamp = new Date();
                 logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] agent muon message recevied');
                 this.connected = true;
-                _inboundFunction(message, upstreamChannel.rightConnection());
+                _inboundFunction(message, upstreamChannel);
               }
               
           }.bind(this));
 
           this.keepAlive = function() {
               if (timestampSince(this.lastOutboundMessageTimestamp, this.offsetMs) || this.shutdownInitiated) return;
-              logger.debug('[*** MUON:SOCKET:AGENT:OUTBOUND ***] sending keep alive ping');
+              logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] sending keep alive ping');
               var ping = messages.pingMessage();
-              this.downstreamChannel.leftConnection().send(ping);
+              this.downstreamChannel.send(ping);
             }.bind(this);
 
             if (this.offsetMs > 0) {
@@ -78,12 +78,12 @@ class MuonSocketAgent {
   }
 
   outbound(message, downstreamConnection) {
-      logger.debug('[*** MUON:SOCKET:AGENT:OUTBOUND ***] forwarding message outbound');
+      logger.trace('[*** MUON:SOCKET:AGENT:OUTBOUND ***] forwarding message outbound');
       downstreamConnection.send(message);
   }
 
   inbound(message, upstreamConnection) {
-      logger.debug('[*** MUON:SOCKET:AGENT:INBOUND ***] forwarding message inbound');
+      logger.trace('[*** MUON:SOCKET:AGENT:INBOUND ***] forwarding message inbound');
       if (message.step == 'keep-alive') {
           //discard and carry on
       } else {
@@ -95,7 +95,7 @@ class MuonSocketAgent {
     try {
       var shutdownMsg = messages.shutdownMessage();
       //this.upstreamChannel.rightConnection().send(shutdownMsg);
-      this.downstreamChannel.leftConnection().send(shutdownMsg);
+      this.downstreamChannel.send(shutdownMsg);
       //this.upstreamChannel.close();
       //this.downstreamChannel.close();
     } catch(err) {
