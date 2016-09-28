@@ -10,6 +10,8 @@ NodeJS implementation of Muon, a polyglot microservices communications framework
 
 # Examples
 
+You'll need RabbitMQ running for transport, try running our demo VM over here preconfigured for this demo: https://github.com/muoncore/muon-dev-vm
+
 
 open a terminal and run the exmaples service:
 
