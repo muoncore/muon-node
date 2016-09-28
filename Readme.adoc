@@ -2,7 +2,7 @@
 # Muon Core - NodeJS
 
 
-NodeJS implementation of Muon
+NodeJS implementation of Muon, a polyglot mciroservices communicatiomns framework.
 
 
 
