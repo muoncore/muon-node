@@ -58,12 +58,11 @@ exports.getApi = function (name, infra) {
             })
             return ret
         },
-
         subscribe: function (remoteServiceUrl, params, clientCallback, errorCallback, completeCallback) {
 
             infra.getTransport().then(function(transport) {
                 try {
-                    logger.info("STARTING A STREAM SERVICE ....")
+                    logger.debug("Subscribing to " + remoteServiceUrl + " with params " + JSON.stringify(params))
                     var serviceRequest = nodeUrl.parse(remoteServiceUrl, true);
                     var targetService = serviceRequest.hostname
                     var transChannel = transport.openChannel(targetService, protocolName);
@@ -78,7 +77,7 @@ exports.getApi = function (name, infra) {
                         args);
                     protocol.start();
                 } catch (e) {
-                    logger.error("BALLS", e)
+                    logger.error("Error in stream subscription initialisation ", e)
                 }
             });
 

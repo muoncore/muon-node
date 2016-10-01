@@ -16,8 +16,8 @@ var bichannel = require("../infrastructure/channel")
 
 module.exports.create = function(transport, infrastructure) {
 
-    var sharedChannelTimeout = infrastructure.config.sharedChannelTimeout || 60 * 60 * 5 // 5 mins.
-    var sharedChannelCheck = infrastructure.config.sharedChannelCheck || 1000 // 5 mins.
+    var sharedChannelTimeout = infrastructure.config.sharedChannelTimeout || 60 * 60 * 15 // 15 mins.
+    var sharedChannelCheck = infrastructure.config.sharedChannelCheck || 1000
 
     var transportChannels= {}
     var virtualChannels = {}
