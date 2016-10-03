@@ -25,10 +25,16 @@ var AmqpDiscovery = function (url, frequency) {
             _this.discoveryInitiated = true;
         }, _this.cacheFillTime)
         _this.broadcast = new Broadcast(_this.connection);
-        startAnnouncements(_this);
+        listenToServices(_this)
+        startAnnouncements(_this)
     });
 
     _this.serviceList = []
+
+    _this.addFoundService = function(svc) {
+        if (_.findWhere(_this.serviceList, {"identifier": svc.identifier})) return
+        _this.serviceList.push(svc);
+    }
 
     this.discoveredServices = {
         find: function (name) {
@@ -41,10 +47,7 @@ var AmqpDiscovery = function (url, frequency) {
             }
             return null;
         },
-        serviceList: _this.serviceList,
-        addFoundService(svc) {
-            _this.serviceList.push(svc);
-        }
+        serviceList: _this.serviceList
     };
 
 };
@@ -83,22 +86,21 @@ AmqpDiscovery.prototype.shutdown = function () {
     this.connection.close();
 };
 
+function listenToServices(discovery) {
+    discovery.broadcast.listenOnBroadcast("discovery", function (event, message) {
+        try {
+            discovery.addFoundService(message);
+        } catch (err) {
+            logger.warn("[*** DISCOVERY ***] Had issues parsing discovery response");
+            logger.warn(err);
+        }
+    });
+}
+
 function startAnnouncements(discovery) {
     var waitInterval = setInterval(function () {
         if (typeof discovery.broadcast !== 'undefined') {
             clearInterval(waitInterval);
-
-            discovery.broadcast.listenOnBroadcast("discovery", function (event, message) {
-                try {
-                    var pay = message;
-                    if (discovery.discoveredServices.serviceList.indexOf(pay.identifier) < 0) {
-                        discovery.discoveredServices.addFoundService(pay);
-                    }
-                } catch (err) {
-                    logger.warn("[*** DISCOVERY ***] Had issues parsing discovery response");
-                    logger.warn(err);
-                }
-            });
 
             _.each(discovery.descriptors, function (it) {
                 discovery.broadcast.emit(
