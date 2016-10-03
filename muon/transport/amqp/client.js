@@ -138,7 +138,7 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
                         amqpApi.outbound(serviceQueueName).send({
                             headers: {
                                 protocol: protocol,
-                                content_type: message.content_type
+                                content_type: "application/json"
                             }, data: message
                         });
                         setTimeout(function () {
@@ -155,7 +155,7 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
                     amqpApi.outbound(serviceQueueName).send({
                         headers: {
                             protocol: protocol,
-                            content_type: message.content_type
+                            content_type: "application/json"
                         }, data: message
                     });
                 } else {

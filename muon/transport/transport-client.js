@@ -3,6 +3,7 @@ var _ = require("underscore")
 var uuid = require("node-uuid")
 var messages = require("../domain/messages")
 var bichannel = require("../infrastructure/channel")
+var zip = require("./zip")
 /**
  * Implements the client side of transport socket sharing.
  *
@@ -36,6 +37,16 @@ module.exports.create = function(transport, infrastructure) {
         }
     }, sharedChannelCheck)
 
+    function concreteTransportChannel(remoteServiceName, protocolName) {
+        var channel = transport.openChannel(remoteServiceName, protocolName)
+        var left = bichannel.create("awesome")
+
+        zip.connectAndZip(channel, left.rightConnection())
+
+        return left.leftConnection()
+        // return transport.openChannel(remoteServiceName, protocolName)
+    }
+    
     function cleanupTransportChannel(transportChannel, msg) {
         var failMessage = msg
 
@@ -54,7 +65,7 @@ module.exports.create = function(transport, infrastructure) {
 
     function openTransportChannel(remoteServiceName) {
         logger.debug("Opening transport channel to " + remoteServiceName)
-        var transportChannel = transport.openChannel(remoteServiceName, "shared-channel")
+        var transportChannel = concreteTransportChannel(remoteServiceName, "shared-channel")
         transportChannel.remoteServiceName = remoteServiceName
         transportChannel.virtualChannels = {}
         transportChannels[remoteServiceName] = transportChannel
@@ -141,10 +152,6 @@ module.exports.create = function(transport, infrastructure) {
         return virtualChannel.channel.leftConnection();
     }
 
-    function transportChannel(remoteServiceName, protocolName) {
-        return transport.openChannel(remoteServiceName, protocolName)
-    }
-
     var transportApi = {
         openChannel: function (remoteServiceName, protocolName) {
             logger.debug("Open transclient channel " + remoteServiceName)
@@ -160,7 +167,7 @@ module.exports.create = function(transport, infrastructure) {
                 return virtualChannel(remoteServiceName, protocolName)
             } else {
                 logger.debug("No rmeote support for shared-channel, returning transport channel directly")
-                return transportChannel(remoteServiceName, protocolName)
+                return concreteTransportChannel(remoteServiceName, protocolName)
             }
         },
         onError: function (cb) {
