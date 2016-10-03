@@ -1,7 +1,7 @@
 {
   "name": "muon-core",
   "description": "node.js muon implementation",
-  "version": "7.0.55",
+  "version": "7.1.0",
   "author": "Muon Core Ltd",
   "keywords": [
     "muon",
@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "pako": "1.0.3",
-    "browserify": "13.1.0",
     "console.table": "0.7.0",
     "amqplib": "0.4.2",
     "amqp": "0.2.6",
@@ -52,6 +51,7 @@
     "async-rq": "0.0.1"
   },
   "devDependencies": {
+    "browserify": "13.1.0",
     "mocha": "2.5.3",
     "superagent": "2.2.0",
     "validator": "5.5.0",
