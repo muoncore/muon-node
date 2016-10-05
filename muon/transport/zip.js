@@ -27,8 +27,7 @@ function inflate(payload) {
 }
 
 function deflate(payload) {
-    var packed = Array.prototype.slice.call(
+    if (!payload) return payload
+    return Array.prototype.slice.call(
         pako.deflate(payload));
-
-    return packed
 }
