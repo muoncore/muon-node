@@ -44,10 +44,11 @@ var AmqpDiscovery = function (url, frequency) {
             })
         },
         findServiceWithTags: function (tags) {
-            this.discoverServices(function (services) {
-                return _this.serviceList.find(function(svc) {
-                    return svc.tags.includes(tags)
+            return _this.serviceList.find(function(svc) {
+                var matchingTags = svc.tags.filter(function(tag) {
+                    return tags.indexOf(tag)
                 })
+                return matchingTags.length == tags.length
             })
         },
         serviceList: _this.serviceList

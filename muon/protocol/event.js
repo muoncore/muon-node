@@ -26,7 +26,7 @@ exports.getApi = function (name, infrastructure) {
                 transportPromise.then(function (transport) {
 
                     infrastructure.discovery.discoverServices(function (services) {
-                        var eventStore = services.findServiceWithTags("eventstore")
+                        var eventStore = services.findServiceWithTags(["eventstore"])
 
                         if (!eventStore) {
                             reject({
