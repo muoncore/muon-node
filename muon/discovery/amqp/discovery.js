@@ -39,17 +39,19 @@ var AmqpDiscovery = function (url, frequency) {
     this.discoveredServices = {
         find: function (name) {
             logger.trace("DISCOVERY:AMQP - Searching for service " + name + " in list " + JSON.stringify(_this.serviceList))
-            for (var i = 0; i < _this.serviceList.length; i++) {
-                if (_this.serviceList[i].identifier == name) {
-                    return _this.serviceList[i];
-                }
-                ;
-            }
-            return null;
+            return _this.serviceList.find(function(svc) {
+                return svc.identifier == name
+            })
+        },
+        findServiceWithTags: function (tags) {
+            this.discoverServices(function (services) {
+                return _this.serviceList.find(function(svc) {
+                    return svc.tags.includes(tags)
+                })
+            })
         },
         serviceList: _this.serviceList
     };
-
 };
 
 

@@ -29,10 +29,12 @@ exports.api = function (serviceName, infrastructure, tags) {
     var rpc = require('../protocol/rpc');
     var introspection = require('../protocol/introspection');
     var streaming = require('../protocol/streaming/streaming');
+    var events = require('../protocol/event');
 
     var rpcApi = rpc.getApi(serviceName, infrastructure);
     var introspectionApi = introspection.getApi(serviceName, infrastructure);
     var streamingApi = streaming.getApi(serviceName, infrastructure);
+    var eventApi = events.getApi(serviceName, infrastructure);
 
     introspectionApi.protocols([rpcApi]);
     infrastructure.serverStacks.addProtocol(rpcApi);
@@ -74,6 +76,9 @@ exports.api = function (serviceName, infrastructure, tags) {
         },
         handle: function (endpoint, callback) {
             rpcApi.handle(endpoint, callback);
+        },
+        emit: function(event) {
+            return eventApi.emit(event)
         },
         introspect: function (remoteName, callback) {
             return introspectionApi.introspect(remoteName, callback);
