@@ -80,7 +80,7 @@ function clientHandler(remoteService) {
 
         setTimeout(function () {
             if (!responseReceived) {
-                logger.info('[*** PROTOCOL:CLIENT:INTROSPECT ***] timeout reached responding with timeout message');
+                logger.debug('[*** PROTOCOL:CLIENT:INTROSPECT ***] timeout reached responding with timeout message');
                 var timeoutMsg = introspectionRequest("timeout", remoteService, {}, {
                     status: 'timeout',
                     message: 'response timeout exceeded'
@@ -93,14 +93,14 @@ function clientHandler(remoteService) {
 
     // INCOMING/UPSTREAM  event handling protocol logic
     protocolHandler.incoming(function (introspectionResponse, accept, reject, route) {
-        logger.info("[*** PROTOCOL:CLIENT:INTROSPECT ***] protocol incoming event id=" + introspectionResponse.id);
+        logger.debug("[*** PROTOCOL:CLIENT:INTROSPECT ***] protocol incoming event id=" + introspectionResponse.id);
         //logger.trace("[*** PROTOCOL:CLIENT:INTROSPECT ***] protocol incoming message=%s", JSON.stringify(introspectionResponse));
         responseReceived = true;
         var introspectionReport = messages.decode(introspectionResponse.payload, introspectionResponse.content_type)
         if (introspectionReport.body != undefined) {
             introspectionReport.body = messages.decode(introspectionReport.body, introspectionReport.content_type)
         }
-        logger.info("Sending the introspection payload " + JSON.stringify(introspectionReport));
+        logger.debug("Sending the introspection payload " + JSON.stringify(introspectionReport));
         accept(introspectionReport);
     });
     //logger.trace('**** rpc proto: '+JSON.stringify(rpcProtocolHandler));
@@ -115,7 +115,7 @@ function clientHandler(remoteService) {
 
         // OUTGOING/DOWNSTREAM event handling protocol logic
          protocolHandler.outgoing(function(serverResponseData, accept, reject, route) {
-                logger.info("[*** PROTOCOL:SERVER:INTROSPECT ***] server protocol outgoing requestData=%s", JSON.stringify(serverResponseData));
+                logger.debug("[*** PROTOCOL:SERVER:INTROSPECT ***] server protocol outgoing requestData=%s", JSON.stringify(serverResponseData));
                 accept(serverResponseData);
          });
 

@@ -250,10 +250,10 @@ function createMessage(payload, headers, source) {
     if (typeof payload == 'object') {
         headers.content_type = "application/json";
     } else if (typeof payload == 'string') {
-        logger.info("PAYLOAD IS A STRING, setting to text/plain")
+        logger.debug("PAYLOAD IS A STRING, setting to text/plain")
         headers.content_type = "text/plain";
     } else if (! headers.content_type) {
-        logger.info("Content type is falsed ... , setting to text/plain")
+        logger.debug("Content type is falsy ... , setting to text/plain")
         headers.content_type = "text/plain";
     } else {
         //do nothing?

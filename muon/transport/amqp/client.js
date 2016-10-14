@@ -49,7 +49,7 @@ exports.onError = function (callback) {
 
 
 var findService = function (serviceName, discovery) {
-    logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
+    logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] finding service '" + serviceName + "'");
     return function (prevResult) {
         var promise = new RSVP.Promise(function (resolve, reject) {
             var attempts = 0;
@@ -68,7 +68,7 @@ var findService = function (serviceName, discovery) {
                     var service = services.find(serviceName);
                     logger.trace("[*** TRANSPORT:CLIENT:DISCOVERY ***] discovered services: '" + JSON.stringify(services) + "'");
                     if (service) {
-                        logger.info("[*** TRANSPORT:CLIENT:DISCOVERY ***] found service: '" + JSON.stringify(service) + "'");
+                        logger.debug("[*** TRANSPORT:CLIENT:DISCOVERY ***] found service: '" + JSON.stringify(service) + "'");
                         serviceFound = true;
                         resolve(service);
                     } else if (attempts > maxattempts) {
@@ -99,12 +99,12 @@ var readyInboundSocket = function (recvQueueName, amqpApi, clientChannel, server
 
             amqpApi.inbound(recvQueueName, function () {
                 var channel = amqpApi.outbound(serviceQueueName).send({data: {}, headers: handshakeHeaders});
-                logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'" + JSON.stringify(handshakeHeaders));
+                logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] handshake message sent on queue '" + serviceQueueName + "'" + JSON.stringify(handshakeHeaders));
             }).listen(function (message) {
                 if (helper.isHandshakeAccept(message)) {
                     // we're got a handshake confirmation and are now connected to the remote service
                     logger.trace("[*** TRANSPORT:CLIENT:HANDSHAKE ***]  client received negotiation response message %s", JSON.stringify(message));
-                    logger.info("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully " + JSON.stringify(message));
+                    logger.debug("[*** TRANSPORT:CLIENT:HANDSHAKE ***] client/server handshake protocol completed successfully " + JSON.stringify(message));
                     resolve();
                 } else {
                     logger.debug("[*** TRANSPORT:CLIENT:INBOUND ***]  client received muon event %s", JSON.stringify(message));
@@ -142,7 +142,7 @@ var readyOutboundSocket = function (serviceQueueName, protocol, amqpApi, clientC
                             }, data: message
                         });
                         setTimeout(function () {
-                            logger.info("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound received message channel_op=closed. deleteing queues for socket ");
+                            logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound received message channel_op=closed. deleteing queues for socket ");
                             amqpApi.delete(serverListenQueueName);
                             amqpApi.delete(replyQueueName);
                             muonSocketOpen = false;

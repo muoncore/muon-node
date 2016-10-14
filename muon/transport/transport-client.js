@@ -29,7 +29,8 @@ module.exports.create = function(transport, infrastructure) {
                 var transportChannel = transportChannels[channelName]
                 var lastTime = transportChannel.lastTime
                 var now = new Date().getTime();
-                if (Object.keys((transportChannel.virtualChannels).length == 0) && lastTime < now - sharedChannelTimeout) {
+                logger.info("Virtual channels are " + JSON.stringify(Object.keys((transportChannel.virtualChannels))))
+                if (Object.keys((transportChannel.virtualChannels)).length == 0 && lastTime < now - sharedChannelTimeout) {
                     logger.debug("Transport channel to " + transportChannel.name() + " will shutdown due to timeout")
                     cleanupTransportChannel(transportChannel, messages.shutdownMessage())
                 }
@@ -46,7 +47,7 @@ module.exports.create = function(transport, infrastructure) {
         return left.leftConnection()
         // return transport.openChannel(remoteServiceName, protocolName)
     }
-    
+
     function cleanupTransportChannel(transportChannel, msg) {
         var failMessage = msg
 
@@ -70,7 +71,7 @@ module.exports.create = function(transport, infrastructure) {
         transportChannel.virtualChannels = {}
         transportChannels[remoteServiceName] = transportChannel
         transportChannel.listen(function(msg) {
-            logger.trace("Received message from transport " + JSON.stringify(msg))
+            logger.info("Received message from transport " + JSON.stringify(msg))
             transportChannel.lastTime = new Date().getTime()
             if (msg.channel_op == "closed") {
                 cleanupTransportChannel(transportChannel, msg)
