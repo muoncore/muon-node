@@ -46,7 +46,7 @@ var AmqpDiscovery = function (url, frequency) {
         findServiceWithTags: function (tags) {
             return _this.serviceList.find(function(svc) {
                 var matchingTags = svc.tags.filter(function(tag) {
-                    return tags.indexOf(tag)
+                    return tags.indexOf(tag) >= 0
                 })
                 return matchingTags.length == tags.length
             })
