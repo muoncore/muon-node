@@ -4,15 +4,19 @@ module.exports.connectAndZip= function(inbound, outbound) {
 
     inbound.listen(function(msg) {
         logger.trace("Inflating message " + JSON.stringify(msg))
-        msg.payload = inflate(msg.payload)
-        msg.content_type = "application/json"
+        if (msg.content_type == "application/json+DEFLATE") {
+            msg.payload = inflate(msg.payload)
+            msg.content_type = "application/json"
+        }
         outbound.send(msg)
     })
 
     outbound.listen(function(msg) {
         logger.info("Deflating message " + JSON.stringify(msg))
-        msg.payload = deflate(msg.payload)
-        msg.content_type = "application/json+DEFLATE"
+        if (msg.content_type == "application/json") {
+            msg.payload = deflate(msg.payload)
+            msg.content_type = "application/json+DEFLATE"
+        }
         logger.trace("Message deflated :" + JSON.stringify(msg))
         inbound.send(msg)
     })
