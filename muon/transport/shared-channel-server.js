@@ -26,7 +26,10 @@ module.exports.openSharedServerChannel = function(serverStacks) {
                 logger.debug("Opening new protocol channel for shared channelId " + sharedChannelId)
                 protoChannel = serverStacks.openChannel(protocolMessage.protocol)
                 protocolChannels[sharedChannelId] = protoChannel
-
+                if (!protoChannel) {
+                    logger.warn("Server stacks has returned a null channel for " + JSON.stringify(protocolMessage))
+                    return
+                }
                 protoChannel.listen(function(msg) {
                     logger.debug("Received new mnessage from protocol")
 
