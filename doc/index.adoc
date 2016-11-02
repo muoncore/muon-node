@@ -11,3 +11,21 @@ layout: documentation
 # Muon JavaScript
 
 include::node/latest/intro.adoc[leveloffset=+1]
+
+
+
+# Muon Node
+
+Muon Node is the implementation of the Muon microservices toolkit, for the Node.js platform. Muon enables you to easily build
+microservices in many languages that have richer, more performant and fully reactive communication semantics and gain access
+to Muon compatible services written in other languages without having to sacrifice the rich semantics or performance.
+
+
+.Contributing
+****
+Muon and the ecosystem services are open source.
+Contribute to Muon Node and this documentation at http://github.com/muoncore/muon-node
+****
+
+
+
