@@ -7,6 +7,8 @@ layout: documentation
 :toc: right
 :toc-title: Muon Node
 :toclevels: 6
+
+
 = Muon Node
 
 Muon Node is the implementation of the Muon microservices toolkit, for the Node.js platform. Muon enables you to easily build
@@ -21,11 +23,7 @@ to Muon compatible services written in other languages without having to sacrifi
 . Testing (dev, test and production should not differ)
 
 
-.Contributing
-****
-Muon and the ecosystem services are open source.
-Contribute to Muon Node and this documentation at http://github.com/muoncore/muon-node
-****
+
 
 
 
@@ -51,7 +49,17 @@ now open another terminal window and run a client to test some of the exmaple se
 
 this exmaple service endpoint echos back it's given payload.
 
-```
+[source,indent=1]
+----
 node ./examples/dev-tools-echo-client.js
-```
+----
+
+
+
+
+.Contributing
+****
+Muon and the ecosystem services are open source.
+Contribute to Muon Node and this documentation at http://github.com/muoncore/muon-node
+****
 
