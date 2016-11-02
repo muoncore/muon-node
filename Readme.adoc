@@ -2,9 +2,9 @@
 # Muon Core - NodeJS
 
 
-NodeJS implementation of Muon, a polyglot microservices communications framework. Why? Because RPC/HTTP/REST are terrible protocols for microsrvices and encourage trnasactional behaviour. Muon is a polyglot, multi protocol, high opinionated, inter-communicaiton API for microservices that encourages developers to design application in a CQRS style. Muon handles discovery and message delivery via configurable transports. Muon currently supports RPC, Streaming, eventing, and Pipelining protocols (think posix pipes, one way messaging passing, what Alan Kaye originally intended when he was thinking about OO). TODO: Blockchain, Machine learning protocols.
-
-
+NodeJS implementation of Muon, a polyglot microservices communications framework. Muon enables you to easily build
+microservices in many languages that have richer, more performant and fully reactive communication semantics and gain access
+to Muon compatible services written in other languages without having to sacrifice the rich semantics or performance. 
 
 
 
