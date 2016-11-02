@@ -35,10 +35,11 @@ To get up and running you'll need RabbitMQ running for transport, try running ou
 
 open a terminal and run the exmaples service from the muon node project. This will run an example service with several RPC endpoints:
 
-```
-node examples/muon-dev-tools-server.js
 
-```
+[source,indent=1]
+----
+node examples/muon-dev-tools-server.js
+----
 
 
 
