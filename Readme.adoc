@@ -6,6 +6,13 @@ NodeJS implementation of Muon, a polyglot microservices communications framework
 microservices in many languages that have richer, more performant and fully reactive communication semantics and gain access
 to Muon compatible services written in other languages without having to sacrifice the rich semantics or performance. 
 
+Muon was designed from the ground up with 4 core ideas in mind:
+
+1.) Communicaiton,transactions and protocols useds are the biggest issues facing microservices
+2.) easily pluggable protocols (currently rpc, streaming, evnts, pielining)
+3.) Easily pluggable transports (current supports only amqp)
+4.) Testing (dev, test and production should not differ)
+
 
 
 # Examples
