@@ -2,7 +2,7 @@
 
 var nodeUrl = require("url");
 var channel = require('../infrastructure/channel.js');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 var RSVP = require('rsvp');
 require('sexylog');
 var messages = require('../domain/messages.js');
