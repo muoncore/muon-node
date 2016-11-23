@@ -1,4 +1,4 @@
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 var Joi = require('joi');
 require('sexylog');
 var messages = require('../../domain/messages.js');

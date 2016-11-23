@@ -1,5 +1,5 @@
 var Joi = require('joi');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 require('sexylog');
 var jsonutil = require('jsonutil');
 var stackTrace = require('stack-trace');
