@@ -80,3 +80,13 @@ Generate a uuid
 node ./examples/dev-tools-uuid-client.js
 
 ```
+
+## Publishing this repo
+
+Run
+
+```
+make publish
+```
+
+This will transpile the source to ES5, and publish it to NPM.

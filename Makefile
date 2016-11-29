@@ -16,4 +16,9 @@ test:
 	-docker-compose run nodetests
 	docker-compose down
 
+publish:
+	npm run build
+	npm publish
+
 .PHONY: test
+
