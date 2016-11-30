@@ -1,7 +1,7 @@
 var RSVP = require('rsvp');
 require('sexylog');
 var helper = require('./transport-helper.js');
-var bichannel = require('../../../muon/infrastructure/channel.js');
+var bichannel = require('../../infrastructure/channel.js');
 var uuid = require('node-uuid');
 var messages = require('../../domain/messages.js');
 

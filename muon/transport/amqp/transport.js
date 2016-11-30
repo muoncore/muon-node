@@ -19,7 +19,7 @@ exports.create = function (localServiceName, url, serverStacks, discovery) {
     }
 
     var promise = new RSVP.Promise(function (resolve, reject) {
-        var amqp = require('../../../muon/transport/amqp/amqp-api.js');
+        var amqp = require('../../transport/amqp/amqp-api.js');
         amqp.connect(url).then(function (amqpApi) {
             server.connect(localServiceName, amqpApi, serverStacks, discovery);
             server.onError(transportErrCallback);

@@ -1,4 +1,4 @@
-var ServerStacks = require("../../muon/api/server-stacks");
+var ServerStacks = require("../api/server-stacks");
 var url = require("url");
 var RSVP = require('rsvp');
 var TransportClient = require("../transport/transport-client")
@@ -7,7 +7,7 @@ module.exports.build = function (config) {
     logger.info('builder.build() config=' + JSON.stringify(config));
     var serverStacks = new ServerStacks(config.serviceName);
     var transport;
-    
+
     var infrastructure = {
         config: config,
         discovery: '',

@@ -1,6 +1,6 @@
 
 var RSVP = require('rsvp');
-var bichannel = require('../../../muon/infrastructure/channel.js');
+var bichannel = require('../../infrastructure/channel.js');
 require('sexylog');
 var RSVP = require('rsvp');
 var messages = require('../../domain/messages.js');
@@ -14,8 +14,6 @@ var queueSettings = {
      autoDelete: true,
      confirm: true
 };
-
-
 
 
 var amqpConnectionOk = false;
