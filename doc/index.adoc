@@ -8,14 +8,16 @@ layout: documentation
 :toc-title: Muon Node
 :toclevels: 6
 
+TIP: This document is maintained at https://github.com/muoncore/muon-node.
+Please submit issues at that repository.
 
-= Muon Node
+## Muon Node
 
 Muon Node is the implementation of the Muon microservices toolkit, for the Node.js platform. Muon enables you to easily build
 microservices in many languages that have richer, more performant and fully reactive communication semantics and gain access
 to Muon compatible services written in other languages without having to sacrifice the rich semantics or performance.
 
-=== Muon was designed from the ground up with 4 core ideas in mind:
+### Muon was designed from the ground up with 4 core ideas in mind:
 
 . Communicaiton,transactions and protocols useds are the biggest issues facing microservices
 . easily pluggable protocols (currently rpc, streaming, evnts, pielining)
