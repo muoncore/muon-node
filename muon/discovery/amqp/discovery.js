@@ -33,33 +33,18 @@ var AmqpDiscovery = function (url, frequency) {
 
     _this.addFoundService = function(svc) {
       var service = _.findWhere(_this.serviceList, {"identifier": svc.identifier})
-
-      console.log("Found service " + JSON.stringify(service))
       if (!service) {
         service = svc
         _this.serviceList.push(service);
       }
 
-      console.log("Services list is " + _this.serviceList.length)
-
       service.time = new Date().getTime()
     }
 
     _this.clearCacheInterval = setInterval(function() {
-      console.log("Clearing cache out")
       var now = new Date().getTime()
       _this.serviceList = _.filter(_this.serviceList, function(svc) {
-
-        var b = (now - svc.time) < _this.cacheFillTime
-
-        console.log("Checking if " + svc.identifier + " is within TTL ... " + b)
-        console.dir({
-          now: now,
-          time: svc.time,
-          lastSeenDelta: now - svc.time
-        })
-
-        return b
+        return (now - svc.time) < _this.cacheFillTime
       })
     }, 1000)
 
@@ -113,7 +98,6 @@ AmqpDiscovery.prototype.close = function () {
 
 AmqpDiscovery.prototype.shutdown = function () {
   this.stopAnnounce()
-  console.log("SHUTTING DOWN DISCOVERY")
   clearInterval(this.clearCacheInterval)
   this.connection.close();
 };
