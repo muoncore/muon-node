@@ -21,7 +21,7 @@ module.exports.openSharedServerChannel = function(serverStacks) {
             var protocolMessage = sharedChannelMessage.message
 
             var protoChannel = protocolChannels[sharedChannelId]
-            
+
             if (protoChannel == null) {
                 logger.debug("Opening new protocol channel for shared channelId " + sharedChannelId)
                 protoChannel = serverStacks.openChannel(protocolMessage.protocol)
@@ -33,12 +33,12 @@ module.exports.openSharedServerChannel = function(serverStacks) {
                 protoChannel.listen(function(msg) {
                     logger.debug("Received new mnessage from protocol")
 
-                    var msg = messages.muonMessage({
+                    var sMsg = messages.muonMessage({
                         channelId: sharedChannelId,
                         message: msg
                     }, message.origin_service, message.targetService, "shared-channel", "message")
 
-                    channel.leftConnection().send(msg)
+                    channel.leftConnection().send(sMsg)
                 })
             }
             logger.debug("Routing shared channel message onto channel " + sharedChannelId)
@@ -48,6 +48,6 @@ module.exports.openSharedServerChannel = function(serverStacks) {
              */
         }
     })
-    
+
     return zipchannel.rightConnection();
 }

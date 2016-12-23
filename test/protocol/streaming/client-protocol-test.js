@@ -13,7 +13,7 @@ var args={}
 describe("streaming client protocol", function () {
 
     it("sends subscribe when the protocol starts", function (done) {
-        
+
         var subscription
 
         var transchannel = bichannel.create("transportchannel")
@@ -38,7 +38,7 @@ describe("streaming client protocol", function () {
             assert.equal(msg.step, 'SubscriptionRequested');
             done();
         });
-        
+
         proto.start()
     });
 
@@ -101,7 +101,7 @@ describe("streaming client protocol", function () {
     });
     //
     // it("on transport error, calls subscriber onSubscribe and sub.error", function (done) {
-    //    
+    //
     //     assert.fail("Not done")
     // });
 
@@ -267,5 +267,36 @@ describe("streaming client protocol", function () {
         );
     });
 
-    //TODO, test the subscription generated for an ACK
+  it("on shared-channel.noserver, calls sub.onError", function (done) {
+    var transchannel = bichannel.create("transportchannel")
+
+    var sub = {
+      onSubscribe: function(theSub) {
+
+      },
+      onError: function(error) {
+        done()
+      }
+    };
+
+    var proto = protocol.create(sub,
+      transchannel.leftConnection(),
+      targetService,
+      localService,
+      targetStream,
+      args
+    )
+
+    transchannel.rightConnection().send(
+      messages.muonMessage(
+        {},
+        "tombola",
+        "simples",
+        "shared-channel",
+        "noserver"
+      )
+    );
+  });
+
+  //TODO, test the subscription generated for an ACK
 });

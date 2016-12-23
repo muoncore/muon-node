@@ -13,12 +13,13 @@ var discovery3;
 
 describe("AMQP Discovery: ", function () {
 
-    var discovery;
-
     afterEach(function () {
         discovery1.close();
         discovery2.close();
-        discovery3.close();
+        if (discovery3) discovery3.close();
+        discovery1 = null
+        discovery2 = null
+        discovery3 = null
     });
 
     it("Discoveries can locate each other over the amqp broker", function (done) {
@@ -56,4 +57,37 @@ describe("AMQP Discovery: ", function () {
             done();
         });
     });
+
+  it("Discovery cache will expire", function (done) {
+    this.timeout(15000);
+
+    discovery1 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost", 500);
+    discovery2 = new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost", 500);
+
+    discovery1.advertiseLocalService({
+      identifier: "cachingService",
+      tags: ["node", "tombola"],
+      codecs: ["application/json"],
+      connectionUrls: [process.env.MUON_URL || "amqp://muon:microservices@localhost"]
+    });
+
+    discovery2.advertiseLocalService({
+      identifier: "discoveredService",
+      tags: ["node", "simple"],
+      codecs: ["application/json"],
+      connectionUrls: [process.env.MUON_URL || "amqp://muon:microservices@localhost"]
+    });
+
+    discovery1.discoverServices(function (services) {
+
+      discovery2.shutdown()
+
+      setTimeout(function() {
+        discovery1.discoverServices(function (services) {
+          assert.ok(services.find('discoveredService') == null, 'Found "simple" service in discovery list (services=)' + JSON.stringify(services) + '), and didnt expoect to');
+          done();
+        })
+      }, 6000)
+    });
+  });
 });
