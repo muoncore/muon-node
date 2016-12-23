@@ -13,6 +13,10 @@ var AmqpBroadcast = function (connection) {
     });
 };
 
+AmqpBroadcast.prototype.close = function() {
+  this.broadcastExchange.close()
+}
+
 AmqpBroadcast.prototype.emit = function (event) {
     var _this = this;
     var waitInterval = setInterval(function () {

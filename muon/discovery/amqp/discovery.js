@@ -32,9 +32,36 @@ var AmqpDiscovery = function (url, frequency) {
     _this.serviceList = []
 
     _this.addFoundService = function(svc) {
-        if (_.findWhere(_this.serviceList, {"identifier": svc.identifier})) return
-        _this.serviceList.push(svc);
+      var service = _.findWhere(_this.serviceList, {"identifier": svc.identifier})
+
+      console.log("Found service " + JSON.stringify(service))
+      if (!service) {
+        service = svc
+        _this.serviceList.push(service);
+      }
+
+      console.log("Services list is " + _this.serviceList.length)
+
+      service.time = new Date().getTime()
     }
+
+    _this.clearCacheInterval = setInterval(function() {
+      console.log("Clearing cache out")
+      var now = new Date().getTime()
+      _this.serviceList = _.filter(_this.serviceList, function(svc) {
+
+        var b = (now - svc.time) < _this.cacheFillTime
+
+        console.log("Checking if " + svc.identifier + " is within TTL ... " + b)
+        console.dir({
+          now: now,
+          time: svc.time,
+          lastSeenDelta: now - svc.time
+        })
+
+        return b
+      })
+    }, 1000)
 
     this.discoveredServices = {
         find: function (name) {
@@ -81,12 +108,14 @@ AmqpDiscovery.prototype.discoverServices = function (callback) {
 
 AmqpDiscovery.prototype.close = function () {
     logger.debug("[*** DISCOVERY:SHUTDOWN ***] closing connections...");
-    this.connection.close();
+    this.shutdown();
 };
 
 AmqpDiscovery.prototype.shutdown = function () {
-    logger.debug("[*** DISCOVERY:SHUTDOWN ***] shutting down connections...");
-    this.connection.close();
+  this.stopAnnounce()
+  console.log("SHUTTING DOWN DISCOVERY")
+  clearInterval(this.clearCacheInterval)
+  this.connection.close();
 };
 
 function listenToServices(discovery) {
@@ -100,10 +129,15 @@ function listenToServices(discovery) {
     });
 }
 
+AmqpDiscovery.prototype.stopAnnounce = function() {
+  clearInterval(this.announceInterval);
+  this.broadcast.close()
+}
+
 function startAnnouncements(discovery) {
-    var waitInterval = setInterval(function () {
+  discovery.announceInterval = setInterval(function () {
         if (typeof discovery.broadcast !== 'undefined') {
-            clearInterval(waitInterval);
+            clearInterval(discovery.announceInterval);
 
             _.each(discovery.descriptors, function (it) {
                 discovery.broadcast.emit(

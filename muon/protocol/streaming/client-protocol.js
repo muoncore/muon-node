@@ -10,7 +10,7 @@ require("sexylog")
  * subscriber. This is simplistic, and needs to be updated
  *
  * {
- *   onSubscribe: function( subscription { 
+ *   onSubscribe: function( subscription {
  *      request: function(n)
  *      cancel: function()
  *   })
@@ -22,15 +22,15 @@ require("sexylog")
  */
 
 module.exports.create = function(
-    subscriber, 
-    transportchannel, 
-    targetService, 
+    subscriber,
+    transportchannel,
+    targetService,
     localService,
     targetStream,
     args) {
 
     if (! args) args = {};
-    
+
     transportchannel.listen(function(data) {
        switch(data.step) {
            case "SubAck":
@@ -66,9 +66,9 @@ module.exports.create = function(
                break
            default:
                logger.warn("Reactive Stream Client: Unknown step '" + data.step + "'")
+               subscriber.onError("The connection to the remote has failed, the channel has shutdown unexpectedly")
        }
     })
-
 
     return {
         start: function() {
