@@ -56,14 +56,17 @@ var AmqpDiscovery = function (url, frequency) {
             })
         },
         findServiceWithTags: function (tags) {
-            return _this.serviceList.find(function(svc) {
-                var matchingTags = svc.tags.filter(function(tag) {
+            var ret = _.find(_this.serviceList, function(svc) {
+                var matchingTags = _.filter(svc.tags, function(tag) {
                     return tags.indexOf(tag) >= 0
                 })
                 return matchingTags.length == tags.length
             })
+          return ret
         },
-        serviceList: _this.serviceList
+        serviceList: function() {
+          return _this.serviceList
+        }
     };
 };
 
@@ -79,12 +82,20 @@ AmqpDiscovery.prototype.discoverServices = function (callback) {
     var _this = this
     setTimeout(function () {
         if (_this.discoveryInitiated) {
-            callback(_this.discoveredServices);
+            callback({
+              find: _this.discoveredServices.find.bind(_this.discoveredServices),
+              findServiceWithTags: _this.discoveredServices.findServiceWithTags.bind(_this.discoveredServices),
+              serviceList: _this.discoveredServices.serviceList()
+            });
         } else {
             var interval = setInterval(function() {
                 if (_this.discoveryInitiated) {
                     clearInterval(interval)
-                    callback(_this.discoveredServices);
+                    callback({
+                      find: _this.discoveredServices.find.bind(_this.discoveredServices),
+                      findServiceWithTags: _this.discoveredServices.findServiceWithTags.bind(_this.discoveredServices),
+                      serviceList: _this.discoveredServices.serviceList()
+                    });
                 }
             }, 100)
         }
