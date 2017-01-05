@@ -43,10 +43,7 @@ exports.getApi = function (name, infra) {
             var ret = {}
             var muon = this
             infra.discovery.discoverServices(function(services) {
-                var store = _.find(services.serviceList, function (it) {
-                    logger.info ("checking " + JSON.stringify(it))
-                    return _.contains(it.tags, "eventstore")
-                })
+                var store = services.findServiceWithTags(["eventstore"])
 
                 config['stream-name'] = streamName
 
