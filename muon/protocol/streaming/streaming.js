@@ -45,9 +45,17 @@ exports.getApi = function (name, infra) {
             infra.discovery.discoverServices(function(services) {
                 var store = services.findServiceWithTags(["eventstore"])
 
+                if (store == null) {
+                  errorCallback({
+                    status: "FAILED",
+                    cause: "No event store could be found, is Photon running?"
+                  })
+                  return
+                }
+
                 config['stream-name'] = streamName
 
-                logger.info("eventstore = " +JSON.stringify(store))
+                logger.debug("eventstore = " +JSON.stringify(store))
 
                 var subscriber = muon.subscribe("stream://" + store.identifier + "/stream", config, clientCallback, errorCallback, completeCallback)
 
