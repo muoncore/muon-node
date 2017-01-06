@@ -17,7 +17,7 @@ var zip = require("./zip")
 
 module.exports.create = function(transport, infrastructure) {
 
-    var sharedChannelTimeout = infrastructure.config.sharedChannelTimeout || 60 * 60 * 15 // 15 mins.
+    var sharedChannelTimeout = infrastructure.config.sharedChannelTimeout || 6000 // 15 mins.
     var sharedChannelCheck = infrastructure.config.sharedChannelCheck || 1000
 
     var transportChannels= {}
@@ -29,9 +29,11 @@ module.exports.create = function(transport, infrastructure) {
                 var transportChannel = transportChannels[channelName]
                 var lastTime = transportChannel.lastTime
                 var now = new Date().getTime();
-                logger.info("Virtual channels are " + JSON.stringify(Object.keys((transportChannel.virtualChannels))))
-                if (Object.keys((transportChannel.virtualChannels)).length == 0 && lastTime < now - sharedChannelTimeout) {
-                    logger.debug("Transport channel to " + transportChannel.name() + " will shutdown due to timeout")
+                var transportChannelCount = Object.keys((transportChannel.virtualChannels)).length
+                var messageDelta = now - lastTime
+                logger.info("Virtual channels are " + transportChannelCount + " " + messageDelta)
+                if (transportChannelCount == 0 && messageDelta > sharedChannelTimeout) {
+                    logger.info("Transport channel to " + transportChannel.name() + " will shutdown due to timeout")
                     cleanupTransportChannel(transportChannel, messages.shutdownMessage())
                 }
             }

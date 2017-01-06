@@ -195,7 +195,7 @@ function decode(payload) {
       //logger.trace('message decode: ' + payload);
       //logger.trace('message decode: ' + JSON.stringify(payload));
        if (! payload) {
-         throw new Error('cannot decode undefined payload!');
+         return {}
        }
 
        if (Object.keys(payload).length === 0 && payload.constructor === Object) {

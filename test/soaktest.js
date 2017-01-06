@@ -1,24 +1,33 @@
 var muoncore = require('../muon/api/muoncore.js');
+var RQ = require("async-rq")
 
-
-//
 var amqpurl = "amqp://muon:microservices@localhost";
-//var amqpurl = 'amqp://guest:guest@conciens.mooo.com';
-
-logger.info('starting muon...');
 var muon = muoncore.create("test-client", amqpurl);
 
+logger.info('Starting Soak Test');
 
+function delay(milliseconds) {
+  return function requestor(callback, value) {
+    var timeout_id = setTimeout(function () {
+      return callback(value);
+    }, milliseconds);
+    return function cancel(reason) {
+      return clearTimeout(timeout_id);
+    };
+  };
+}
 
-
-function request() {
+function request(done, val) {
+  logger.info('Requesting data ');
   var then = new Date().getTime()
   var promise = muon.request('rpc://awesomeservicequery/ping', {"search": "red"});
   promise.then(function (event) {
     var now = new Date().getTime()
     console.log("Latency is " + (now - then))
+    done()
   }).catch(function(error) {
     console.dir("FAILED< BOOO " + error)
+    done()
   })
 }
 
@@ -38,11 +47,50 @@ function subscribe() {
     )
 }
 
+var soak = RQ.sequence([
+  RQ.parallel([
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+  ]),
+  request,
+  request,
+  delay(6000),
+  request,
+  request,
+  delay(10000),
+  request,
+  request,
+  delay(20000),
+  RQ.parallel([
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+    request,
+  ]),
+  delay(15000)
+])
 
-request()
+soak(function() {
+  console.log("SOAK TEST DONE")
+  process.exit(0)
+})
 
-setTimeout(request, 6000)
-setTimeout(request, 6000)
+// request()
+//
+// setTimeout(request, 6000)
+// setTimeout(request, 6000)
 
 
 
