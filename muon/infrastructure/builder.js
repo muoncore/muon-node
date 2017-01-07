@@ -2,6 +2,7 @@ var ServerStacks = require("../api/server-stacks");
 var url = require("url");
 var RSVP = require('rsvp');
 var TransportClient = require("../transport/transport-client")
+var BaseDiscovery = require("../discovery/base-discovery")
 
 module.exports.build = function (config) {
     logger.info('builder.build() config=' + JSON.stringify(config));
@@ -41,8 +42,8 @@ module.exports.build = function (config) {
     }
 
     try {
-        var AmqpDiscovery = require('../discovery/' + config.discoveryProtocol() + '/discovery.js');
-        infrastructure.discovery = new AmqpDiscovery(config.discovery_url);
+        var Discovery = require('../discovery/' + config.discoveryProtocol() + '/discovery.js');
+        infrastructure.discovery = new BaseDiscovery(new Discovery(config.discovery_url));
     } catch (err) {
         logger.error('unable to find discovery component for url: ""' + config.discovery_url + '""');
         logger.error(err.stack);

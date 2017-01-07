@@ -18,34 +18,46 @@ AmqpBroadcast.prototype.close = function() {
 }
 
 AmqpBroadcast.prototype.emit = function (event) {
-    var _this = this;
-    var waitInterval = setInterval(function () {
 
-        if (typeof _this.broadcastExchange === 'object') {
+  var _this = this;
 
-            clearInterval(waitInterval);
+  function doEmit() {
+    var headers = {};
+    if (event.headers instanceof Object) {
+      headers = event.headers;
+    }
 
-            var headers = {};
-            if (event.headers instanceof Object) {
-                headers = event.headers;
-            }
+    headers["Content-Type"] = "application/json";
 
-            headers["Content-Type"] = "application/json";
+    var options = {
+      contentType: "application/json",
+      headers: headers
+    };
 
-            var options = {
-                contentType: "application/json",
-                headers: headers
-            };
 
-            _this.broadcastExchange.publish(
-                event.name,
-                event.payload, options, function (resp) {
-                    //wat do
-                });
-        } else {
-            logger.warn("The broadcast exchange is not initialised");
-        }
+    _this.broadcastExchange.publish(
+      event.name,
+      event.payload, options, function (resp) {
+        //wat do
+      });
+  }
+
+
+  if (typeof _this.broadcastExchange === 'object') {
+    doEmit()
+  } else {
+    _this.emitInterval = setInterval(function () {
+
+      if (typeof _this.broadcastExchange === 'object') {
+
+        clearInterval(_this.emitInterval);
+
+        doEmit()
+      } else {
+        logger.warn("The broadcast exchange is not initialised");
+      }
     }, 100);
+  }
 };
 
 AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
