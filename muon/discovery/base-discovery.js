@@ -108,19 +108,12 @@ BaseDiscovery.prototype.stopAnnounce = function () {
 
 function startAnnouncements(discovery) {
   _.each(discovery.descriptors, function (it) {
-    discovery.impl.announce(
-      {
-        name: "discovery",
-        payload: it
-      });
+    discovery.impl.announce(it);
   });
 
   this.announceInterval = setInterval(function () {
     _.each(discovery.descriptors, function (response) {
-      var discMsg = {
-        name: "discovery",
-        payload: response
-      };
+      var discMsg = response;
       logger.debug('[*** DISCOVERY ***] broadcasting discovery services: ' + JSON.stringify(discMsg));
       discovery.impl.announce(discMsg);
     });

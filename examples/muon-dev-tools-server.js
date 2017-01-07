@@ -1,20 +1,10 @@
 var muoncore = require('../muon/api/muoncore.js');
 var amqpurl = "amqp://muon:microservices@localhost";
+var multicast = "multicast://";
 var uuid = require('node-uuid');
 
-var config = {
-    discovery:{
-        type:"amqp",
-        url:amqpurl
-    },
-    transport:{
-        type:"amqp",
-        url:amqpurl
-    }
-};
-
 logger.info('starting muon dev tools server...');
-muon = muoncore.create("muon-node-test-examples", amqpurl);
+muon = muoncore.create("muon-node-test-examples", amqpurl, multicast);
 
 
 

@@ -21,9 +21,9 @@ exports.connect = function (serviceName, amqpApi, serverStacks, discovery) {
             var serverStackChannel = serverStacks.openChannel(msg.headers.protocol);
             var transportChannel = bichannel.create(msg.headers.protocol + "-transport");
 
-            // new MuonSocketAgent(serverStackChannel, transportChannel.leftConnection(), msg.headers.protocol, 1000);
+            new MuonSocketAgent(serverStackChannel, transportChannel.leftConnection(), msg.headers.protocol, 1000);
 
-            initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, serverStackChannel);
+            initMuonClientServerSocket(amqpApi, msg.headers.server_listen_q, msg.headers.server_reply_q, transportChannel.rightConnection());
             var replyHeaders = helper.handshakeAcceptHeaders();
             amqpApi.outbound(msg.headers.server_reply_q).send({headers: replyHeaders, data: {}});
             logger.info("[*** TRANSPORT:SERVER:HANDSAKE ***]  handshake confirmation sent to queue " + msg.headers.server_reply_q);
@@ -45,6 +45,7 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
         logger.debug("[*** TRANSPORT:SERVER:INBOUND ***]  received inbound message: %s", JSON.stringify(message));
         var muonMessage = message.data;
         try {
+            if (muonMessage.step == "keep-alive") return
             messages.validate(muonMessage);
             logger.info("Sending message on channel " + JSON.stringify(muonMessage));
             serverStackChannel.send(muonMessage);
