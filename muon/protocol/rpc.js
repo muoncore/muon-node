@@ -15,6 +15,43 @@ var serviceName;
 var protocolName = 'rpc';
 exports.getApi = function (name, infrastructure) {
     serviceName = name;
+    var _this = this
+
+    this.requestWithAuth = function (remoteServiceUrl, data, auth, clientCallback) {
+
+      var parsedUrl = nodeUrl.parse(remoteServiceUrl, true);
+
+      var promise = new RSVP.Promise(function (resolve, reject) {
+
+        var transportPromise = infrastructure.getTransport();
+        transportPromise.then(function (transport) {
+          var transChannel = transport.openChannel(parsedUrl.hostname, protocolName);
+          var clientChannel = channel.create("client-api");
+          var rpcProtocolClientHandler = clientHandler(remoteServiceUrl, auth);
+          clientChannel.rightHandler(rpcProtocolClientHandler);
+          transChannel.handler(rpcProtocolClientHandler);
+
+          var callback = function (event) {
+            if (!event) {
+              logger.warn('client-api promise failed check! calling promise.reject()');
+              reject(event);
+            } else {
+              logger.trace('promise calling promise.resolve() event.id=' + event.id);
+              logger.debug("RPC Incoming message is " + JSON.stringify(event))
+              resolve(event);
+            }
+          };
+          if (clientCallback) callback = clientCallback;
+          clientChannel.leftConnection().listen(callback);
+          clientChannel.leftConnection().send(data);
+        });
+      });
+
+
+      return promise;
+
+    }
+
 
     var api = {
         name: function () {
@@ -30,64 +67,9 @@ exports.getApi = function (name, infrastructure) {
             return endpoints;
         },
         request: function (remoteServiceUrl, data, clientCallback) {
-
-            var parsedUrl = nodeUrl.parse(remoteServiceUrl, true);
-
-            var promise = new RSVP.Promise(function (resolve, reject) {
-
-                var transportPromise = infrastructure.getTransport();
-                transportPromise.then(function (transport) {
-                    var transChannel = transport.openChannel(parsedUrl.hostname, protocolName);
-                    var clientChannel = channel.create("client-api");
-                    var rpcProtocolClientHandler = clientHandler(remoteServiceUrl);
-                    clientChannel.rightHandler(rpcProtocolClientHandler);
-                    transChannel.handler(rpcProtocolClientHandler);
-
-                    var callback = function (event) {
-                        if (!event) {
-                            logger.warn('client-api promise failed check! calling promise.reject()');
-                            reject(event);
-                        } else {
-                            logger.trace('promise calling promise.resolve() event.id=' + event.id);
-                            logger.debug("RPC Incoming message is " + JSON.stringify(event))
-                            resolve(event);
-                        }
-                    };
-                    if (clientCallback) callback = clientCallback;
-                    clientChannel.leftConnection().listen(callback);
-                    clientChannel.leftConnection().send(data);
-                });
-                /*
-                 setTimeout(function() { //TODO <-- dirty hack to work around lack of promises in ...
-                 // muon stack and so transport can be set in infrastructure before this executes :-(
-                 // must convert api to promises all the way through
-                 var transChannel = infrastructure.transport.openChannel(parsedUrl.hostname, protocolName);
-                 var clientChannel = channel.create("client-api");
-                 var rpcProtocolClientHandler = clientHandler(remoteServiceUrl);
-                 clientChannel.rightHandler(rpcProtocolClientHandler);
-                 transChannel.handler(rpcProtocolClientHandler);
-
-                 var callback = function(event) {
-                 if (! event) {
-                 logger.warn('client-api promise failed check! calling promise.reject()');
-                 reject(event);
-                 } else {
-                 logger.trace('promise calling promise.resolve() event.id=' + event.id);
-                 resolve(event);
-                 }
-                 };
-                 if (clientCallback) callback = clientCallback;
-                 clientChannel.leftConnection().listen(callback);
-                 clientChannel.leftConnection().send(data);
-
-                 }, 150);
-                 */
-            });
-
-
-            return promise;
-
-        },
+          return this.requestWithAuth(remoteServiceUrl, data, null, clientCallback)
+        }.bind(_this),
+        requestWithAuth: this.requestWithAuth,
         handle: function (endpoint, callback) {
             logger.debug('[*** API ***] registering handler endpoint: ' + endpoint);
             handlerMappings[endpoint] = callback;
@@ -99,12 +81,15 @@ exports.getApi = function (name, infrastructure) {
                 server: function () {
                     return serverHandler();
                 },
-                client: function (remoteServiceUrl) {
-                    return clientHandler(remoteServiceUrl);
+                client: function (remoteServiceUrl, auth) {
+                    return clientHandler(remoteServiceUrl, auth);
                 }
             }
         }
     }
+
+
+
     return api;
 }
 
@@ -140,9 +125,10 @@ function serverHandler() {
             logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
             if (message.protocol == 'muon') {
                 logger.error(JSON.stringify(message))
-                // forward(message);
-                // shutdown();
                 return;
+            }
+            if (message.step == "ChannelShutdown") {
+              return
             }
             try {
                 var payload = messages.decode(incomingMuonMessage.payload, incomingMuonMessage.content_type);
@@ -167,7 +153,6 @@ function serverHandler() {
             }
 
             if (message.channel_op == 'closed') {
-                shutdown();
                 close('server_incoming');
                 return;
             }
@@ -180,7 +165,7 @@ function serverHandler() {
 }
 
 
-function clientHandler(remoteServiceUrl) {
+function clientHandler(remoteServiceUrl, auth) {
     var TIMEOUT_MS = 10000;
     var responseReceived = false;
     var remoteService = nodeUrl.parse(remoteServiceUrl, true).hostname;
@@ -190,6 +175,7 @@ function clientHandler(remoteServiceUrl) {
         outgoingFunction(message, forward, back, route, close) {
             logger.debug("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing message=%s", JSON.stringify(message));
             var request = {
+                auth: auth,
                 url: remoteServiceUrl,
                 body: messages.encode(message),
                 content_type: "application/json"
@@ -217,7 +203,6 @@ function clientHandler(remoteServiceUrl) {
             logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message id=" + message.id);
             logger.debug("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(message));
             if (message.channel_op == 'closed') {
-                shutdown();
                 var msg;
                 if (message.step.includes("noserver") ) {
                     msg = createRpcMessage("noserver", remoteServiceUrl, {}, {
@@ -234,7 +219,6 @@ function clientHandler(remoteServiceUrl) {
                 return;
             }
 
-            responseReceived = true;
             var rpcMessage = messages.decode(message.payload, message.content_type)
             if (rpcMessage.body != undefined) {
                 rpcMessage.body = messages.decode(rpcMessage.body, rpcMessage.content_type)
@@ -252,12 +236,6 @@ function clientHandler(remoteServiceUrl) {
     return rpcProtocolHandler;
 
 }
-
-
-function shutdown() {
-    logger.warn('rpc protocol shutdown() called');
-}
-
 
 function createRpcMessage(statusCode, url, body, error) {
     if (!body) body = {};

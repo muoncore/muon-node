@@ -9,6 +9,7 @@ var amqp = require('../../../muon/transport/amqp/amqp-api.js');
 var amqplib = require('amqplib/callback_api');
 
 var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
+var BaseDiscovery = require("../../../muon/discovery/base-discovery");
 
 describe("client test:", function () {
 
@@ -18,7 +19,7 @@ describe("client test:", function () {
 
         var serverName = 'serverabc123';
         var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
-        var discovery = new AmqpDiscovery(url);
+        var discovery = new BaseDiscovery(new AmqpDiscovery(url));
         var fakeAmqpApi = {};
 
         var muonClientChannel = client.connect(serverName, 'rpc', fakeAmqpApi, discovery);

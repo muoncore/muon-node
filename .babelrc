@@ -4,5 +4,6 @@
       "polyfill": false,
       "regenerator": true
     }]
-  ]
+  ],
+  "presets": ["es2015"]
 }

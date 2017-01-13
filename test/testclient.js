@@ -1,4 +1,5 @@
 //
+/*
 require("sexylog")
 
 var Muon = require("../muon/api/muoncore");
@@ -19,5 +20,5 @@ muon.infrastructure().getTransport().then(function(transport) {
         })
 
     }, 5)
-})
-//    
+})*/
+//

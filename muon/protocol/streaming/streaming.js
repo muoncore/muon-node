@@ -1,8 +1,6 @@
 
 var nodeUrl = require("url");
-var channel = require('../../infrastructure/channel');
 var uuid = require('node-uuid');
-var RSVP = require('rsvp');
 require('sexylog');
 var _ = require("underscore")
 var proto = require("./client-protocol")
@@ -11,25 +9,6 @@ var simpleapi = require("./client-simple-api")
 var serviceName;
 var protocols = [];
 var protocolName = 'reactive-stream';
-
-
-/**
- *
- * need to break out the protocol object.
- *
- * break out the api object. Needs to be transformable to other streaming providers
- *
- * Identify the wiring section.
- *
- * The proto object :-
- *
- *  * incoming message handler (from the transport)
- *  * local state
- *  * outgoing message handlers (from the api)
- *  * what is the internal protocol API? document it!
- *
- */
-
 
 exports.getApi = function (name, infra) {
     serviceName = name;
@@ -45,7 +24,7 @@ exports.getApi = function (name, infra) {
             infra.discovery.discoverServices(function(services) {
                 var store = services.findServiceWithTags(["eventstore"])
 
-                if (store == null) {
+                if (store == null || store == undefined) {
                   errorCallback({
                     status: "FAILED",
                     cause: "No event store could be found, is Photon running?"
@@ -55,7 +34,7 @@ exports.getApi = function (name, infra) {
 
                 config['stream-name'] = streamName
 
-                logger.debug("eventstore = " +JSON.stringify(store))
+                logger.debug("Found event store: " +JSON.stringify(store))
 
                 var subscriber = muon.subscribe("stream://" + store.identifier + "/stream", config, clientCallback, errorCallback, completeCallback)
 
@@ -91,18 +70,6 @@ exports.getApi = function (name, infra) {
         },
         protocols: function (ps) {
             protocols = ps;
-        },
-        protocolHandler: function () {
-            return {
-                // todo, are these needed externally?
-
-                server: function () {
-                    return serverHandler();
-                },
-                client: function (remoteServiceUrl) {
-                    return clientHandler(remoteServiceUrl);
-                }
-            }
         }
     }
     return api;
