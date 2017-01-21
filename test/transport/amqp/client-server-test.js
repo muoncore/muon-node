@@ -1,13 +1,15 @@
-var bichannel = require('../../../muon/infrastructure/channel.js');
-var client = require('../../../muon/transport/amqp/client.js');
-var server = require('../../../muon/transport/amqp/server.js');
+var bichannel = require('../../../muon/infrastructure/channel');
+var client = require('../../../muon/transport/amqp/client');
+var server = require('../../../muon/transport/amqp/server');
 var assert = require('assert');
 var expect = require('expect.js');
 var uuid = require('node-uuid');
-var messages = require('../../../muon/domain/messages.js');
-var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
-var amqp = require('../../../muon/transport/amqp/amqp-api.js');
-var AmqpDiscovery = require('../../../muon/discovery/amqp/discovery.js');
+var messages = require('../../../muon/domain/messages');
+
+var BaseDiscovery = require("../../../muon/discovery/base-discovery");
+
+var amqp = require('../../../muon/transport/amqp/amqp-api');
+var AmqpDiscovery = require('../../../muon/discovery/amqp/discovery');
 
 var url = process.env.MUON_URL || "amqp://muon:microservices@localhost";
 var amqpApi;
@@ -16,7 +18,7 @@ var discovery;
 
 describe("muon client/server transport test: ", function () {
 
-    var discovery = new AmqpDiscovery(url);
+    var discovery = new BaseDiscovery(new AmqpDiscovery(url));
 
     this.timeout(15000);
 
@@ -29,7 +31,7 @@ describe("muon client/server transport test: ", function () {
     });
 
     before(function (done) {
-        discovery = new AmqpDiscovery(url);
+        discovery = new BaseDiscovery(new AmqpDiscovery(url))
         amqp.connect(url).then(function (api) {
             logger.info('****************************** AMQP CONNECTED IN TEST **********************************');
             amqpApi = api;
@@ -83,8 +85,9 @@ describe("muon client/server transport test: ", function () {
         console.log('creating muon client..');
         var muonClientChannel = client.connect(serverName, "rpc", amqpApi, discovery);
         muonClientChannel.listen(function (event) {
-            console.log('********** client_server-test.js muonClientChannel.listen() event received: ');
-            //console.dir(event);
+            if (event.step === "keep-alive") return
+            console.log('********** client_server-test.js muonClientChannel.listen() event received: ' + JSON.stringify(event));
+            console.dir(event);
             var responseData = messages.decode(event.payload, 'application/json');
             console.dir(responseData);
             assert.equal(responseData.body, 'PONG');
@@ -96,7 +99,7 @@ describe("muon client/server transport test: ", function () {
             body: "PING",
             content_type: 'text/plain'
         }
-        var event = messages.muonMessage(rpcMsg, clientName, 'server17', 'rpc', "request.made");
+        var event = messages.muonMessage(rpcMsg, clientName, serverName, 'rpc', "request.made");
         muonClientChannel.send(event);
 
     });
@@ -138,21 +141,22 @@ describe("muon client/server transport test: ", function () {
         console.log('creating muon client..');
         var muonClientChannel = client.connect(serverName, "rpc", amqpApi, discovery);
         muonClientChannel.listen(function (event) {
-            console.log('********** client_server-test.js muonClientChannel.listen() event received!');
+            if (event.step == "keep-alive") return
+            console.log('********** client_server-test.js muonClientChannel.listen() event received!' + JSON.stringify(event));
             var responseData = messages.decode(event.payload);
             assert.equal(responseData, 'PONG');
             done();
         });
         console.log('sending muon event via client..');
 
-        var event = messages.muonMessage("PING", clientName, 'server1', 'rpc', "request.made");
+        var event = messages.muonMessage("PING", clientName, serverName, 'rpc', "request.made");
         muonClientChannel.send(event);
 
     });
 
     it("when discovery cache populated, will rapidly connect and exchange messages", function (done) {
 
-        var serverName = 'server2';
+        var serverName = 'server-rapid';
         var clientName = 'client2';
 
         discovery.advertiseLocalService({
@@ -192,14 +196,14 @@ describe("muon client/server transport test: ", function () {
                 console.log('********** client_server-test.js muonClientChannel.listen() event received!');
                 var now = new Date().getTime()
                 var handshakeTime = now - then
-                assert(handshakeTime < 500, "Handshake took too long, " + handshakeTime)
+                assert(handshakeTime < 400, "Handshake took too long, " + handshakeTime)
                 console.log("Handshake is quick - " + handshakeTime)
                 done();
             });
             console.log('sending muon event via client..');
 
-            var event = messages.muonMessage("PING", clientName, 'server1', 'rpc', "request.made");
+            var event = messages.muonMessage("PING", clientName, serverName, 'rpc', "request.made");
             muonClientChannel.send(event);
-        }, 4000);
+        }, 6500);
     });
 });

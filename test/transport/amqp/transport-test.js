@@ -5,6 +5,7 @@ var messages = require('../../../muon/domain/messages.js');
 var bichannel = require('../../../muon/infrastructure/channel.js');
 var builder = require("../../../muon/infrastructure/builder");
 var AmqpDiscovery = require("../../../muon/discovery/amqp/discovery");
+var BaseDiscovery = require("../../../muon/discovery/base-discovery");
 
 
 describe("muon transport test: ", function () {
@@ -28,7 +29,7 @@ describe("muon transport test: ", function () {
                 return fakeServerStackChannel.rightConnection();
             }
         }
-        var discovery = new AmqpDiscovery(url);
+        var discovery = new BaseDiscovery(new AmqpDiscovery(url));
         discovery.advertiseLocalService({
             identifier: server,
             tags: [],

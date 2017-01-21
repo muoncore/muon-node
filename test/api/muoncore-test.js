@@ -203,7 +203,9 @@ describe("Muon core API test:", function () {
         var promise = muon2.introspect('awesome-service', function (response) {
             logger.trace(response);
             assert(response, "introspect response is undefined");
-            doneOnce(response.protocols[0].protocolScheme, 'rpc');
+            if (response && response.protocols) {
+              doneOnce(response.protocols[0].protocolScheme, 'rpc');
+            }
         });
 
     });

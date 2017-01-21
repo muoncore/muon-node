@@ -24,7 +24,7 @@ describe("AMQP Discovery: ", function () {
   });
 
   it("Discoveries can locate each other over the amqp broker", function (done) {
-    this.timeout(12000);
+    this.timeout(30000);
 
     discovery1 = new BaseDiscovery(new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost"), 500)
     discovery2 = new BaseDiscovery(new AmqpDiscovery(process.env.MUON_URL || "amqp://muon:microservices@localhost"), 500)

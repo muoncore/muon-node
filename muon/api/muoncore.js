@@ -74,6 +74,9 @@ exports.api = function (serviceName, infrastructure, tags) {
         request: function (remoteServiceUrl, data, clientCallback) {
             return rpcApi.request(remoteServiceUrl, data, clientCallback);
         },
+        requestWithAuth: function (remoteServiceUrl, data, auth, clientCallback) {
+          return rpcApi.requestWithAuth(remoteServiceUrl, data, auth, clientCallback);
+        },
         handle: function (endpoint, callback) {
             rpcApi.handle(endpoint, callback);
         },
