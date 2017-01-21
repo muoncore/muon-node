@@ -57,31 +57,6 @@ exports.getApi = function (name, infrastructure) {
                     clientChannel.leftConnection().listen(callback);
                     clientChannel.leftConnection().send(data);
                 });
-                /*
-                 setTimeout(function() { //TODO <-- dirty hack to work around lack of promises in ...
-                 // muon stack and so transport can be set in infrastructure before this executes :-(
-                 // must convert api to promises all the way through
-                 var transChannel = infrastructure.transport.openChannel(parsedUrl.hostname, protocolName);
-                 var clientChannel = channel.create("client-api");
-                 var rpcProtocolClientHandler = clientHandler(remoteServiceUrl);
-                 clientChannel.rightHandler(rpcProtocolClientHandler);
-                 transChannel.handler(rpcProtocolClientHandler);
-
-                 var callback = function(event) {
-                 if (! event) {
-                 logger.warn('client-api promise failed check! calling promise.reject()');
-                 reject(event);
-                 } else {
-                 logger.trace('promise calling promise.resolve() event.id=' + event.id);
-                 resolve(event);
-                 }
-                 };
-                 if (clientCallback) callback = clientCallback;
-                 clientChannel.leftConnection().listen(callback);
-                 clientChannel.leftConnection().send(data);
-
-                 }, 150);
-                 */
             });
 
 
