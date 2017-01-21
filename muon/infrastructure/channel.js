@@ -299,11 +299,11 @@ function Channel(name, validator) {
             rightConnection.send(msg);
         },
         close: function() {
-          logger.warn('[***** CSP-CHANNEL *****] Sending channel_op=closed message downstream ' + name);
+          logger.debug('[***** CSP-CHANNEL *****] Sending channel_op=closed message downstream ' + name);
           var shutdownMsg = messages.shutdownMessage();
           csp.putAsync(outbound, shutdownMsg);
           setTimeout(function(){
-            logger.warn('[***** CSP-CHANNEL *****] SHUTDOWN CHANNEL ' + name);
+            logger.debug('[***** CSP-CHANNEL *****] SHUTDOWN CHANNEL ' + name);
 
             inbound.close();
             outbound.close();
@@ -313,7 +313,7 @@ function Channel(name, validator) {
 
     var leftConnection = new LeftConnection(name, inbound, outbound, validator, channelApi);
     var rightConnection = new RightConnection(name, outbound, inbound, validator, channelApi);
-    
+
     return channelApi;
 
 }

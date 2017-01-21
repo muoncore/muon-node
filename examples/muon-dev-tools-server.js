@@ -4,9 +4,13 @@ var multicast = "multicast://";
 var uuid = require('node-uuid');
 
 logger.info('starting muon dev tools server...');
-muon = muoncore.create("muon-node-test-examples", amqpurl, multicast);
+muon = muoncore.create("muon-node-test-examples", amqpurl, amqpurl);
 
 
+muon.handle('/auth', function (event, respond) {
+  logger.debug('rpc://muon-node-test-examples/auth responding to event.id=' + event.id);
+  respond(event.auth);
+});
 
 muon.handle('/ping', function (event, respond) {
     logger.debug('rpc://muon-node-test-examples/ping responding to event.id=' + event.id);
