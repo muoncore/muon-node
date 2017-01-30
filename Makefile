@@ -11,7 +11,7 @@ testlocal:
 test:
 	npm install -d
 	mkdir -p test-results/
-	docker-compose up -d
+	docker-compose up -d rabbitmq
 	docker-compose build nodetests
 	-docker-compose run nodetests
 	docker-compose down

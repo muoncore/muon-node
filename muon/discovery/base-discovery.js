@@ -21,13 +21,9 @@ var BaseDiscovery = function (impl, frequency) {
     })
   }, 1000)
 
-  setTimeout(function () {
-    _this.discoveryInitiated = true
-  }, 5000)
-
   this.discoveredServices = {
     find: function (name) {
-      logger.trace("DISCOVERY: Searching for service " + name + " in list " + JSON.stringify(_this.serviceList))
+      logger.debug("DISCOVERY: Searching for service " + name + " in list " + JSON.stringify(_this.serviceList))
       return _this.serviceList.find(function (svc) {
         return svc.identifier == name
       })
@@ -46,25 +42,47 @@ var BaseDiscovery = function (impl, frequency) {
     }
   }
 
+  var then = new Date().getTime()
+
   this.impl.connect(function () {
-    startAnnouncements(_this)
-  }, _this.addFoundService.bind(_this))
+    var now = new Date().getTime()
+    _this.discoveryInitiated = true
+    _this.startAnnouncements()
+  }, _this.addFoundServices.bind(_this), function() {
+    return _this.serviceList
+  })
 }
 
-BaseDiscovery.prototype.addFoundService = function (svc) {
-  var _this = this
-  var service = _.findWhere(_this.serviceList, {"identifier": svc.identifier})
-  if (!service) {
-    service = svc
-    _this.serviceList.push(service);
-  }
+BaseDiscovery.prototype.discoveryInitiated= function () {
+  this.discoveryInitiated = true
+}
 
-  service.time = new Date().getTime()
+BaseDiscovery.prototype.addFoundServices = function (svcList) {
+  var _this = this
+
+  _.each(svcList, function(svc) {
+    var service = _.findWhere(_this.serviceList, {"identifier": svc.identifier})
+    if (!service) {
+      service = svc
+      _this.serviceList.push(service);
+    }
+
+    service.time = new Date().getTime()
+  })
 }
 
 
 BaseDiscovery.prototype.advertiseLocalService = function (serviceDescriptor) {
   this.descriptors.push(serviceDescriptor);
+  this.addFoundServices([serviceDescriptor])
+
+  var _this = this
+  var reps = 0
+  var interval = setInterval(function() {
+    reps++
+    _this.addFoundServices([serviceDescriptor])
+    if (reps > 5) clearInterval(interval)
+  }, 500)
 };
 
 BaseDiscovery.prototype.discoverServices = function (callback) {
@@ -106,18 +124,19 @@ BaseDiscovery.prototype.stopAnnounce = function () {
   clearInterval(this.announceInterval);
 }
 
-function startAnnouncements(discovery) {
-  _.each(discovery.descriptors, function (it) {
-    discovery.impl.announce(it);
+BaseDiscovery.prototype.startAnnouncements = function() {
+  var _this = this
+  _.each(_this.descriptors, function (it) {
+    _this.impl.announce(it);
   });
 
-  this.announceInterval = setInterval(function () {
-    _.each(discovery.descriptors, function (response) {
+  _this.announceInterval = setInterval(function () {
+    _.each(_this.descriptors, function (response) {
       var discMsg = response;
       logger.debug('[*** DISCOVERY ***] broadcasting discovery services: ' + JSON.stringify(discMsg));
-      discovery.impl.announce(discMsg);
+      _this.impl.announce(discMsg);
     });
-  }, discovery.frequency);
+  }, _this.frequency);
 }
 
 

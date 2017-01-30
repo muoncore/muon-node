@@ -5,8 +5,6 @@ var expect = require('expect.js');
 //
 var amqpurl = "amqp://muon:microservices@localhost";
 
-
-
 logger.info('starting muon...');
 muon = muoncore.create("nodejs-client", amqpurl);
 // or request://photon/projection-keys
