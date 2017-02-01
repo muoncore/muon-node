@@ -2,11 +2,9 @@
 var callbacks = {};
 
 module.exports.create = function(n, handlers) {
-    logger.warn('***** DEPRICATED!!! ********************************************************************************');
-    logger.warn('handler.js DEPRICATED!!! Use handler-class.js instead (@see handler-class-test.js)');
-    logger.warn('****************************************************************************************************');
-
-
+    // logger.warn('***** DEPRICATED!!! ********************************************************************************');
+    // logger.warn('handler.js DEPRICATED!!! Use handler-class.js instead (@see handler-class-test.js)');
+    // logger.warn('****************************************************************************************************');
     if (! n) n = 'default';
     var name = n + '-handler';
 

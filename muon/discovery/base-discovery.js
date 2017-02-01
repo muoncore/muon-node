@@ -47,6 +47,7 @@ var BaseDiscovery = function (impl, frequency) {
   this.impl.connect(function () {
     var now = new Date().getTime()
     _this.discoveryInitiated = true
+
     _this.startAnnouncements()
   }, _this.addFoundServices.bind(_this), function() {
     return _this.serviceList
@@ -124,7 +125,7 @@ BaseDiscovery.prototype.stopAnnounce = function () {
   clearInterval(this.announceInterval);
 }
 
-BaseDiscovery.prototype.startAnnouncements = function() {
+BaseDiscovery.prototype.startAnnouncements = _.once(function() {
   var _this = this
   _.each(_this.descriptors, function (it) {
     _this.impl.announce(it);
@@ -137,7 +138,7 @@ BaseDiscovery.prototype.startAnnouncements = function() {
       _this.impl.announce(discMsg);
     });
   }, _this.frequency);
-}
+})
 
 
 module.exports = BaseDiscovery
