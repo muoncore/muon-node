@@ -63,7 +63,7 @@ function initMuonClientServerSocket(amqpApi, listen_queue, send_queue, serverSta
             logger.trace('deleting send_queue/listen_queue=' + send_queue + '/' + listen_queue);
             amqpApi.delete(listen_queue);
             amqpApi.delete(send_queue);
-            muonSocketOpen = false;
+            var muonSocketOpen = false;
             return;
         } else {
             logger.debug("[*** TRANSPORT:SERVER:OUTBOUND ***]  handling outbound muon event to queue " + send_queue + ": %s", JSON.stringify(message));
