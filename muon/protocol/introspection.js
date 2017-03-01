@@ -121,10 +121,10 @@ function clientHandler(remoteService) {
 
          // INCOMING/UPSTREAM  event handling protocol logic
          protocolHandler.incoming(function(msg, accept, reject, route) {
-                incomingMuonMessage = msg;
+                var incomingMuonMessage = msg;
                 logger.debug("[*** PROTOCOL:SERVER:INTROSPECT ***] incoming message=%s", JSON.stringify(incomingMuonMessage));
 
-                protocolsResponse = [];
+                var protocolsResponse = [];
                 for (var i = 0 ; i < protocols.length ; i++) {
                   var protocol = protocols[i];
                   logger.trace('[*** PROTOCOL:SERVER:INTROSPECT ***] found protocol to advertise: ' + protocol.name() + ' enpoints: ' + JSON.stringify(protocol.endpoints()));
