@@ -31,7 +31,6 @@ module.exports.create = function(transport, infrastructure) {
                 var now = new Date().getTime();
                 var transportChannelCount = Object.keys((transportChannel.virtualChannels)).length
                 var messageDelta = now - lastTime
-                logger.info("Virtual channels are " + transportChannelCount + " " + messageDelta)
                 if (transportChannelCount == 0 && messageDelta > sharedChannelTimeout) {
                     logger.info("Transport channel to " + transportChannel.name() + " will shutdown due to timeout")
                     cleanupTransportChannel(transportChannel, messages.shutdownMessage())
