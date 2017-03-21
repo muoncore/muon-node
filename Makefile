@@ -17,6 +17,10 @@ test:
 	docker-compose down
 
 publish:
+ifndef VERSION
+	$(error VERSION is undefined for NPM release)
+endif
+	npm version $(VERSION)
 	npm run build
 	npm publish
 
