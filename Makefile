@@ -9,7 +9,7 @@ testlocal:
 	./node_modules/mocha/bin/mocha -R mocha-multi --reporter-options xunit=test-results/file.xml,spec=- --recursive
 
 test:
-	npm install -d
+	npm install
 	mkdir -p test-results/
 	docker-compose up -d rabbitmq
 	docker-compose build nodetests
