@@ -9,7 +9,7 @@ testlocal:
 	./node_modules/mocha/bin/mocha -R mocha-multi --reporter-options xunit=test-results/file.xml,spec=- --recursive
 
 test:
-	npm install
+	npm install -d
 	mkdir -p test-results/
 	docker-compose up -d rabbitmq
 	docker-compose build nodetests
@@ -20,6 +20,7 @@ publish:
 ifndef VERSION
 	$(error VERSION is undefined for NPM release)
 endif
+	npm install
 	npm version --no-git-tag-version $(VERSION)
 	npm run build
 	npm publish
