@@ -1,5 +1,8 @@
 # Change Log
 
+## [v7.2.6](https://github.com/muoncore/muon-node/tree/v7.2.6) (2017-03-21)
+[Full Changelog](https://github.com/muoncore/muon-node/compare/v7.2.5...v7.2.6)
+
 ## [v7.2.5](https://github.com/muoncore/muon-node/tree/v7.2.5) (2017-03-21)
 [Full Changelog](https://github.com/muoncore/muon-node/compare/v7.2.4...v7.2.5)
 
