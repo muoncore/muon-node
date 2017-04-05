@@ -8,6 +8,8 @@ layout: documentation
 :toc-title: Muon Node
 :toclevels: 6
 
+Latest version of Muon Node is {node-version}
+
 TIP: This document is maintained at https://github.com/muoncore/muon-node.
 Please submit issues at that repository.
 
