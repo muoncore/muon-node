@@ -90,3 +90,5 @@ make publish
 ```
 
 This will transpile the source to ES5, and publish it to NPM.
+
+image:https://badges.greenkeeper.io/muoncore/muon-node.svg[link="https://greenkeeper.io/"]
