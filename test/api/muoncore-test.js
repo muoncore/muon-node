@@ -40,7 +40,7 @@ describe("Muon core API test:", function () {
         });
 
         muon2 = muoncore.create("example-client", amqpurl);
-79015
+
         setTimeout(() => {
           var promise = muon2.request('rpc://example-service/tennis', "ping");
 

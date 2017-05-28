@@ -33,6 +33,7 @@ exports.api = function (serviceName, infrastructure, tags) {
     var streamingApi = streaming.getApi(serviceName, infrastructure);
     var eventApi = events.getApi(serviceName, infrastructure);
 
+    infrastructure.serviceName = serviceName
     infrastructure.introspection = introspectionApi
 
     infrastructure.serverStacks.addProtocol(introspectionApi);

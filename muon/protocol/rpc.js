@@ -17,6 +17,8 @@ var protocolName = 'rpc';
 
 exports.create = function(muon) {
 
+  logger.info("Calling api with name " + muon.infrastructure().serviceName)
+
   var rpcApi = exports.getApi(muon.infrastructure().serviceName, muon.infrastructure());
 
   muon.addServerStack(rpcApi)
