@@ -13,6 +13,25 @@ var messages = require('../domain/messages.js');
 var handlerMappings = {};
 var serviceName;
 var protocolName = 'rpc';
+
+
+exports.create = function(muon) {
+
+  var rpcApi = exports.getApi(muon.infrastructure().serviceName, muon.infrastructure());
+
+  muon.addServerStack(rpcApi)
+
+  muon.request = function (remoteServiceUrl, data, clientCallback) {
+      return rpcApi.request(remoteServiceUrl, data, clientCallback);
+  }
+  muon.requestWithAuth = function (remoteServiceUrl, data, auth, clientCallback) {
+    return rpcApi.requestWithAuth(remoteServiceUrl, data, auth, clientCallback);
+  }
+  muon.handle = function (endpoint, callback) {
+      rpcApi.handle(endpoint, callback);
+  }
+}
+
 exports.getApi = function (name, infrastructure) {
   serviceName = name;
   var _this = this

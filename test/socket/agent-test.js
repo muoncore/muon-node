@@ -199,7 +199,7 @@ describe("Agent class test:", function () {
             if (message.step == 'keep-alive') keepAlivePingCount++;
             if (message.channel_op == 'closed') shutdownMessage++;
             logger.trace('keep-alive=' + keepAlivePingCount + ' closed=' + shutdownMessage);
-            doneOnce(keepAlivePingCount >= 3 && shutdownMessage == 1);
+            doneOnce(keepAlivePingCount >= 1 && shutdownMessage == 1);
         });
 
         // we've got to make sure the agent has at least one keep-alive ping first as it will not shutdown unless

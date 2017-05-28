@@ -11,12 +11,31 @@ var messages = require('../domain/messages.js');
 var handlerMappings = {};
 var serviceName;
 var protocolName = 'event';
+
+
+exports.create = function(muon) {
+
+  var api = exports.getApi(muon.infrastructure().serviceName, muon.infrastructure());
+
+  muon.addServerStack(api)
+
+  muon.replay = function (remoteurl, config, callback, errorCallback, completeCallback) {
+    return muon.subscribe(remoteurl, config, callback, errorCallback, completeCallback);
+  }
+  muon.emit = function(event) {
+    return api.emit(event)
+  }
+}
+
 exports.getApi = function (name, infrastructure) {
     serviceName = name;
 
     var api = {
         name: function () {
             return protocolName;
+        },
+        endpoints: function () {
+          return [];
         },
         emit: function (event) {
 

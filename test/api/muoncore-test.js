@@ -2,6 +2,7 @@ var muoncore = require('../../muon/api/muoncore.js');
 var assert = require('assert');
 var expect = require('expect.js');
 
+var rpc = require("../../muon/protocol/rpc")
 
 describe("Muon core API test:", function () {
 
@@ -39,24 +40,27 @@ describe("Muon core API test:", function () {
         });
 
         muon2 = muoncore.create("example-client", amqpurl);
+79015
+        setTimeout(() => {
+          var promise = muon2.request('rpc://example-service/tennis', "ping");
 
-        var promise = muon2.request('rpc://example-service/tennis', "ping");
-
-        promise.then(function (response) {
+          promise.then(function (response) {
             logger.warn("rpc://example-client server response received! response=" + JSON.stringify(response));
             logger.warn("muon promise.then() asserting response...");
             logger.info("Response is " + JSON.stringify(response))
             assert(response, "request response is undefined");
             assert.equal(response.body, "pong", "expected 'pong' but was " + response.body)
             done();
-        }, function (err) {
+          }, function (err) {
             logger.error("muon promise.then() error!\n" + err.stack);
             done(err);
-        }).catch(function (error) {
+          }).catch(function (error) {
             logger.error("muoncore-test.js promise.then() error!:\n" + error.stack);
             done(error);
 
-        });
+          });
+        }, 50)
+
     });
 
 
@@ -198,16 +202,17 @@ describe("Muon core API test:", function () {
             respond("I'm awesome, awesome, awesome, awesome");
         });
 
-        muon2 = muoncore.create("awesome-client", amqpurl);
+        setTimeout(() => {
+          muon2 = muoncore.create("awesome-client", amqpurl);
 
-        var promise = muon2.introspect('awesome-service', function (response) {
+          var promise = muon2.introspect('awesome-service', function (response) {
             logger.trace(response);
             assert(response, "introspect response is undefined");
             if (response && response.protocols) {
               doneOnce(response.protocols[0].protocolScheme, 'rpc');
             }
-        });
-
+          });
+        }, 100)
     });
 
 
