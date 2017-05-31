@@ -45,18 +45,20 @@ describe("AMQP Discovery: ", function () {
     });
 
     discovery3.advertiseLocalService({
-      identifier: "awesomeService",
+      identifier: "awesomeservice",
       tags: ["node", "awesomeService"],
       codecs: ["application/json"],
       connectionUrls: [process.env.MUON_URL || "amqp://muon:microservices@localhost"]
     });
 
-    discovery1.discoverServices(function (services) {
-      assert.ok(services.find('simple'), 'could not find "simple" service in discovery list (services=)' + JSON.stringify(services) + ')');
-      assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list (services=' + JSON.stringify(services) + ')');
-      assert.ok(services.find('awesomeService'), 'could not find "awesomeService" service in discovery list (services=' + JSON.stringify(services) + ')');
-      done();
-    });
+    // setTimeout(() => {
+      discovery1.discoverServices(function (services) {
+        assert.ok(services.find('simple'), 'could not find "simple" service in discovery list (services=)' + JSON.stringify(services) + ')');
+        assert.ok(services.find('tombola'), 'could not find "tombola" service in discovery list (services=' + JSON.stringify(services) + ')');
+        assert.ok(services.find('awesomeservice'), 'could not find "awesomeservice" service in discovery list (services=' + JSON.stringify(services) + ')');
+        done();
+      });
+    // }, 7000)
   });
 
   it("Discovery cache will expire", function (done) {
@@ -85,10 +87,10 @@ describe("AMQP Discovery: ", function () {
 
       setTimeout(function () {
         discovery1.discoverServices(function (services) {
-          assert.ok(services.find('discoveredService') == null, 'Found "simple" service in discovery list (services=)' + JSON.stringify(services) + '), and didnt expoect to');
+          assert.ok(services.find('discoveredService') == null, 'Found "discoveredService" service in discovery list (services=)' + JSON.stringify(_.collect(services.serviceList, (s) => s.identifier)) + '), and didnt expoect to');
           done();
         })
-      }, 6000)
+      }, 6500)
     });
   });
 });

@@ -1,7 +1,10 @@
 var _ = require("underscore");
 require('sexylog');
+var uuid = require("node-uuid")
 
 var BaseDiscovery = function (impl, frequency) {
+
+  this.instanceId = uuid.v4()
 
   this.impl = impl
   if (!frequency) frequency = 3000; //broadcast frequency ms
@@ -17,13 +20,14 @@ var BaseDiscovery = function (impl, frequency) {
   _this.clearCacheInterval = setInterval(function () {
     var now = new Date().getTime()
     _this.serviceList = _.filter(_this.serviceList, function (svc) {
-      return (now - svc.time) < _this.cacheFillTime
+      var ret = (now - svc.time) < _this.cacheFillTime
+      return ret
     })
-  }, 1000)
+  }, 500)
 
   this.discoveredServices = {
     find: function (name) {
-      logger.debug("DISCOVERY: Searching for service " + name + " in list " + JSON.stringify(_this.serviceList))
+      logger.debug("DISCOVERY [" + _this.instanceId + "]: Searching for service " + name + " in list " + JSON.stringify(_this.serviceList.length))
       return _this.serviceList.find(function (svc) {
         return svc.identifier == name
       })
@@ -45,7 +49,6 @@ var BaseDiscovery = function (impl, frequency) {
   var then = new Date().getTime()
 
   this.impl.connect(function () {
-    var now = new Date().getTime()
     _this.discoveryInitiated = true
 
     _this.startAnnouncements()
@@ -61,28 +64,30 @@ BaseDiscovery.prototype.discoveryInitiated= function () {
 BaseDiscovery.prototype.addFoundServices = function (svcList) {
   var _this = this
 
+  var time = new Date().getTime()
   _.each(svcList, function(svc) {
     var service = _.findWhere(_this.serviceList, {"identifier": svc.identifier})
     if (!service) {
       service = svc
       _this.serviceList.push(service);
+      logger.debug("[" + _this.instanceId + "] Service " + service.identifier + " is new, adding to the list")
     }
 
-    service.time = new Date().getTime()
+    service.time = time
   })
+
 }
 
 
 BaseDiscovery.prototype.advertiseLocalService = function (serviceDescriptor) {
+  this.instanceId += "|" + serviceDescriptor.identifier
   this.descriptors.push(serviceDescriptor);
   this.addFoundServices([serviceDescriptor])
 
   var _this = this
   var reps = 0
   var interval = setInterval(function() {
-    reps++
     _this.addFoundServices([serviceDescriptor])
-    if (reps > 5) clearInterval(interval)
   }, 500)
 };
 
@@ -117,7 +122,7 @@ BaseDiscovery.prototype.close = function () {
 
 BaseDiscovery.prototype.shutdown = function () {
   this.stopAnnounce()
-  clearInterval(this.clearCacheInterval)
+  // clearInterval(this.clearCacheInterval)
   this.impl.shutdown()
 };
 
@@ -125,7 +130,7 @@ BaseDiscovery.prototype.stopAnnounce = function () {
   clearInterval(this.announceInterval);
 }
 
-BaseDiscovery.prototype.startAnnouncements = _.once(function() {
+BaseDiscovery.prototype.startAnnouncements = function() {
   var _this = this
   _.each(_this.descriptors, function (it) {
     _this.impl.announce(it);
@@ -134,11 +139,10 @@ BaseDiscovery.prototype.startAnnouncements = _.once(function() {
   _this.announceInterval = setInterval(function () {
     _.each(_this.descriptors, function (response) {
       var discMsg = response;
-      logger.debug('[*** DISCOVERY ***] broadcasting discovery services: ' + JSON.stringify(discMsg));
       _this.impl.announce(discMsg);
     });
   }, _this.frequency);
-})
+}
 
 
 module.exports = BaseDiscovery
