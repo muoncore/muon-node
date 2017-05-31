@@ -13,7 +13,8 @@ module.exports = function(api) {
 
       timeoutcontrol = setTimeout(function () {
         api.sendApi(response({
-          status: 408
+          status: 408,
+          message: "Request timed out"
         }))
         api.shutdown()
       }, 10000)
@@ -52,8 +53,8 @@ module.exports = function(api) {
           }))
           break
         default:
-          log.warn("Unexpected step type " + msg.step)
-          log.warn("Msg is " + msg)
+          api.log.warn("Unexpected step type " + msg.step)
+          api.log.warn("Msg is " + msg)
           api.sendApi(response({
             status: 410
           }))

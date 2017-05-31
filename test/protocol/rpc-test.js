@@ -1,6 +1,7 @@
 var bichannel = require('../../muon/infrastructure/channel.js');
 var rpc = require('../../muon/protocol/rpc.js');
 var assert = require('assert');
+var RSVP = require('rsvp');
 var expect = require('expect.js');
 var messages = require('../../muon/domain/messages.js');
 //var eep = require('eep');
@@ -60,7 +61,12 @@ describe("test rpc protocol:", function () {
 
 
     it("rpc client-server happy path", function (done) {
-        var rpcApi = rpc.getApi('server');
+
+        var serverApiChannel = bichannel.create("serverapi");
+
+        var rpcApi = rpc.getApi('server', {getTransport: new RSVP.Promise(function (resolve, reject) {
+          resolve(serverApiChannel.leftConnection())
+        })});
 
         rpcApi.handle('/endpoint', function (request, respond) {
             console.log('rpcApi.handle() called');
@@ -69,46 +75,21 @@ describe("test rpc protocol:", function () {
             respond(responseText);
         });
 
-        var serverApiChannel = bichannel.create("serverapi");
-        var serverTransportChannel = bichannel.create("server-transport");
-
-        var rpcServerProtocol = rpcApi.protocolHandler().server();
-        serverApiChannel.rightHandler(rpcServerProtocol);
-        serverTransportChannel.leftHandler(rpcServerProtocol);
-
-
-        var rpcClientProtocol = rpcApi.protocolHandler().client(requestUrl);
-        var clientApiChannel = bichannel.create("cleintapi");
-        var clientTransportChannel = bichannel.create("client-transport");
-
-        clientApiChannel.rightHandler(rpcClientProtocol);
-        clientTransportChannel.leftHandler(rpcClientProtocol);
-
-
-        clientTransportChannel.rightConnection().listen(function (msg) {
-            serverTransportChannel.rightSend(msg);
-        });
-
-
-        serverTransportChannel.rightConnection().listen(function (msg) {
+        serverApiChannel.rightConnection().listen(function (msg) {
+          logger.info("HELLO")
             if (msg.channel_op == 'closed') return;
             var response = messages.decode(msg.payload, msg.content_type);
             var responseBody = messages.decode(response.body, response.content_type)
             assert.equal(responseText, responseBody);
-            clientTransportChannel.rightSend(msg);
+            // clientTransportChannel.rightSend(msg);
         });
 
 
-        clientApiChannel.leftConnection().listen(function (msg) {
+        rpcApi.requestWithAuth("rpc://hello/endpoint", {}, null, (msg) => {
             console.log('****************************** client response:');
             console.dir(msg);
             done();
         });
-
-
-        clientApiChannel.leftSend(requestText);
-
-
     });
 
 
