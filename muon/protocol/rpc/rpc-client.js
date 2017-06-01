@@ -53,8 +53,7 @@ module.exports = function(api) {
           }))
           break
         default:
-          api.log.warn("Unexpected step type " + msg.step)
-          api.log.warn("Msg is " + msg)
+          // api.log.warn("Unexpected step type " + msg.step)
           api.sendApi(response({
             status: 410
           }))

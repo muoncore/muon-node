@@ -102,7 +102,7 @@ exports.failure = function(protocol, status, text) {
     };
     var msg =  createMessage(payload, headers);
     msg.status = "failure";
-    msg.step = protocol  + '.' + status;
+    msg.step = status;
     msg.channel_op="closed"
     return msg;
 }

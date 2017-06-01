@@ -128,15 +128,16 @@ describe("Muon core API test:", function () {
             logger.warn("rpc://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
+            assert.equal(event.status, "404", "expected 'noserver' response message from muon://invalid-service/blah");
 
 
             console.log('***************************************************************************************************************');
             console.log('*** done');
             console.log('***************************************************************************************************************');
-            if (event.status === 'noserver') {
+            if (event.status === 404) {
                 done();
             } else {
+              console.dir(event)
                 done(new Error('expected noserver error'));
             }
 
@@ -171,14 +172,15 @@ describe("Muon core API test:", function () {
             logger.warn("rpc://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.error.status, "timeout", "expected 'timeout' message from calling rpc://example-service/tennis");
+            assert.equal(event.status, "408", "expected 'timeout' message from calling rpc://example-service/tennis");
 
             console.log('***************************************************************************************************************');
             console.log('*** done');
             console.log('***************************************************************************************************************');
-            if (event.error && event.error.status === 'timeout') {
+            if (event.status === 408) {
                 done();
             } else {
+              console.dir(event)
                 done(new Error('timeout exceeded'));
             }
 

@@ -168,45 +168,5 @@ describe("test rpc protocol:", function () {
 
     });
 
-  it("rpc can access auth token", function (done) {
-
-    var authToken = {
-      provider: "fake",
-      token: "myauthtoken"
-    }
-
-    var rpcApi = rpc.getApi('server');
-
-    rpcApi.handle('/endpoint', function (request, respond) {
-      console.log('rpcApi.handle() called');
-      logger.info("request is " + JSON.stringify(request))
-      assert.equal(authToken.token, request.auth.token);
-      respond(responseText);
-      done()
-    });
-
-    var serverApiChannel = bichannel.create("serverapi");
-    var serverTransportChannel = bichannel.create("server-transport");
-
-    var rpcServerProtocol = rpcApi.protocolHandler().server();
-    serverApiChannel.rightHandler(rpcServerProtocol);
-    serverTransportChannel.leftHandler(rpcServerProtocol);
-
-    var rpcClientProtocol = rpcApi.protocolHandler().client(requestUrl, authToken);
-    var clientApiChannel = bichannel.create("cleintapi");
-    var clientTransportChannel = bichannel.create("client-transport");
-
-    clientApiChannel.rightHandler(rpcClientProtocol);
-    clientTransportChannel.leftHandler(rpcClientProtocol);
-
-
-    clientTransportChannel.rightConnection().listen(function (msg) {
-      serverTransportChannel.rightSend(msg);
-    });
-
-    clientApiChannel.leftSend(requestText);
-
-
-  });
 
 });
