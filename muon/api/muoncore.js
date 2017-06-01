@@ -6,7 +6,6 @@ var ServerStacks = require("./server-stacks");
 var MuonSocketAgent = require('../socket/keep-alive-agent');
 var channel = require("../infrastructure/channel")
 
-
 exports.create = function (serviceName, transportUrl, discoveryUrl, tags) {
     var builder = require("../infrastructure/builder");
     var config = builder.config(serviceName, transportUrl, discoveryUrl);
@@ -26,18 +25,17 @@ exports.Messages = require("../domain/messages")
 
 exports.api = function (serviceName, infrastructure, tags) {
 
-    var rpc = require('../protocol/rpc');
     var introspection = require('../protocol/introspection');
     var streaming = require('../protocol/streaming/streaming');
     var events = require('../protocol/event');
 
-    var rpcApi = rpc.getApi(serviceName, infrastructure);
     var introspectionApi = introspection.getApi(serviceName, infrastructure);
     var streamingApi = streaming.getApi(serviceName, infrastructure);
     var eventApi = events.getApi(serviceName, infrastructure);
 
-    introspectionApi.protocols([rpcApi]);
-    infrastructure.serverStacks.addProtocol(rpcApi);
+    infrastructure.serviceName = serviceName
+    infrastructure.introspection = introspectionApi
+
     infrastructure.serverStacks.addProtocol(introspectionApi);
     infrastructure.serverStacks.addProtocol(streamingApi);
 
@@ -57,7 +55,11 @@ exports.api = function (serviceName, infrastructure, tags) {
         connectionUrls: [infrastructure.config.transport_url]
     });
 
-    return {
+    var api = {
+        addServerStack: function(protocol) {
+          infrastructure.introspection.addProtocol(protocol)
+          infrastructure.serverStacks.addProtocol(protocol);
+        },
         infrastructure: function () {
             return infrastructure
         },
@@ -71,26 +73,14 @@ exports.api = function (serviceName, infrastructure, tags) {
             logger.warn("Shutting down muon!");
             infrastructure.shutdown();
         },
-        request: function (remoteServiceUrl, data, clientCallback) {
-            return rpcApi.request(remoteServiceUrl, data, clientCallback);
-        },
-        requestWithAuth: function (remoteServiceUrl, data, auth, clientCallback) {
-          return rpcApi.requestWithAuth(remoteServiceUrl, data, auth, clientCallback);
-        },
-        handle: function (endpoint, callback) {
-            rpcApi.handle(endpoint, callback);
-        },
-        emit: function(event) {
-            return eventApi.emit(event)
-        },
         introspect: function (remoteName, callback) {
             return introspectionApi.introspect(remoteName, callback);
-        },
-        replay: function (remoteurl, config, callback, errorCallback, completeCallback) {
-            return streamingApi.replay(remoteurl, config, callback, errorCallback, completeCallback);
-        },
-        subscribe: function (remoteurl, params, callback, errorCallback, completeCallback) {
-            return streamingApi.subscribe(remoteurl, params, callback, errorCallback, completeCallback);
         }
     };
+
+    require('../protocol/rpc').create(api)
+    require('../protocol/event').create(api)
+    require('../protocol/streaming/streaming').create(api)
+
+    return api;
 }

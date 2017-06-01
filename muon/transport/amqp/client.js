@@ -26,7 +26,7 @@ exports.connect = function (serviceName, protocol, api, discovery) {
       if (err.message.indexOf('unable to find muon service') > -1) {
         try {
           // return muon socket messages unable to find server
-          var failureMsg = messages.failure(protocol, 'noserver', 'transport cannot find service "' + serviceName + '"');
+          var failureMsg = messages.failure(protocol, 'ServiceNotFound', 'transport cannot find service "' + serviceName + '"');
           clientChannel.rightConnection().send(failureMsg);
         } catch (err2) {
           logger.error(err2.stack);

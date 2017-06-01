@@ -2,6 +2,7 @@ var muoncore = require('../../muon/api/muoncore.js');
 var assert = require('assert');
 var expect = require('expect.js');
 
+var rpc = require("../../muon/protocol/rpc")
 
 describe("Muon core API test:", function () {
 
@@ -40,23 +41,26 @@ describe("Muon core API test:", function () {
 
         muon2 = muoncore.create("example-client", amqpurl);
 
-        var promise = muon2.request('rpc://example-service/tennis', "ping");
+        setTimeout(() => {
+          var promise = muon2.request('rpc://example-service/tennis', "ping");
 
-        promise.then(function (response) {
+          promise.then(function (response) {
             logger.warn("rpc://example-client server response received! response=" + JSON.stringify(response));
             logger.warn("muon promise.then() asserting response...");
             logger.info("Response is " + JSON.stringify(response))
             assert(response, "request response is undefined");
             assert.equal(response.body, "pong", "expected 'pong' but was " + response.body)
             done();
-        }, function (err) {
+          }, function (err) {
             logger.error("muon promise.then() error!\n" + err.stack);
             done(err);
-        }).catch(function (error) {
+          }).catch(function (error) {
             logger.error("muoncore-test.js promise.then() error!:\n" + error.stack);
             done(error);
 
-        });
+          });
+        }, 50)
+
     });
 
 
@@ -124,15 +128,16 @@ describe("Muon core API test:", function () {
             logger.warn("rpc://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.status, "noserver", "expected 'noserver' response message from muon://invalid-service/blah");
+            assert.equal(event.status, "404", "expected 'noserver' response message from muon://invalid-service/blah");
 
 
             console.log('***************************************************************************************************************');
             console.log('*** done');
             console.log('***************************************************************************************************************');
-            if (event.status === 'noserver') {
+            if (event.status === 404) {
                 done();
             } else {
+              console.dir(event)
                 done(new Error('expected noserver error'));
             }
 
@@ -167,14 +172,15 @@ describe("Muon core API test:", function () {
             logger.warn("rpc://example-client server response received! event=" + JSON.stringify(event));
             logger.warn("muon promise.then() asserting response...");
             assert(event, "request event is undefined");
-            assert.equal(event.error.status, "timeout", "expected 'timeout' message from calling rpc://example-service/tennis");
+            assert.equal(event.status, "408", "expected 'timeout' message from calling rpc://example-service/tennis");
 
             console.log('***************************************************************************************************************');
             console.log('*** done');
             console.log('***************************************************************************************************************');
-            if (event.error && event.error.status === 'timeout') {
+            if (event.status === 408) {
                 done();
             } else {
+              console.dir(event)
                 done(new Error('timeout exceeded'));
             }
 
@@ -198,16 +204,17 @@ describe("Muon core API test:", function () {
             respond("I'm awesome, awesome, awesome, awesome");
         });
 
-        muon2 = muoncore.create("awesome-client", amqpurl);
+        setTimeout(() => {
+          muon2 = muoncore.create("awesome-client", amqpurl);
 
-        var promise = muon2.introspect('awesome-service', function (response) {
+          var promise = muon2.introspect('awesome-service', function (response) {
             logger.trace(response);
             assert(response, "introspect response is undefined");
             if (response && response.protocols) {
               doneOnce(response.protocols[0].protocolScheme, 'rpc');
             }
-        });
-
+          });
+        }, 100)
     });
 
 

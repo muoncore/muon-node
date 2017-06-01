@@ -89,7 +89,6 @@ AmqpDiscovery.prototype.listenToServices = function () {
 AmqpDiscovery.prototype.announce = function (svc) {
   var _this = this
   if (this.running && typeof this.broadcast !== 'undefined') {
-    logger.debug('[*** DISCOVERY ***] broadcasting discovery services: ' + JSON.stringify(svc));
     _this.broadcast.emit({
       name: "discovery",
       payload: svc

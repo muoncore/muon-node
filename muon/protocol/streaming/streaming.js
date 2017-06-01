@@ -10,6 +10,17 @@ var serviceName;
 var protocols = [];
 var protocolName = 'reactive-stream';
 
+exports.create = function(muon) {
+
+  var api = exports.getApi(muon.infrastructure().serviceName, muon.infrastructure());
+
+  muon.addServerStack(api)
+
+  muon.subscribe = function (remoteurl, params, callback, errorCallback, completeCallback) {
+    return api.subscribe(remoteurl, params, callback, errorCallback, completeCallback);
+  }
+}
+
 exports.getApi = function (name, infra) {
     serviceName = name;
 
@@ -17,7 +28,9 @@ exports.getApi = function (name, infra) {
         name: function () {
             return protocolName;
         },
-
+        endpoints: function () {
+          return [];
+        },
         replay: function(streamName, config, clientCallback, errorCallback, completeCallback) {
             var ret = {}
             var muon = this

@@ -9,10 +9,33 @@ require('sexylog');
 var Handler = require('../infrastructure/handler-class.js');
 var messages = require('../domain/messages.js');
 
+var client = require("./rpc/rpc-client")
+var server = require("./rpc/rpc-server")
 
 var handlerMappings = {};
 var serviceName;
 var protocolName = 'rpc';
+
+
+exports.create = function (muon) {
+
+  logger.info("Calling api with name " + muon.infrastructure().serviceName)
+
+  var rpcApi = exports.getApi(muon.infrastructure().serviceName, muon.infrastructure());
+
+  muon.addServerStack(rpcApi)
+
+  muon.request = function (remoteServiceUrl, data, clientCallback) {
+    return rpcApi.request(remoteServiceUrl, data, clientCallback);
+  }
+  muon.requestWithAuth = function (remoteServiceUrl, data, auth, clientCallback) {
+    return rpcApi.requestWithAuth(remoteServiceUrl, data, auth, clientCallback);
+  }
+  muon.handle = function (endpoint, callback) {
+    rpcApi.handle(endpoint, callback);
+  }
+}
+
 exports.getApi = function (name, infrastructure) {
   serviceName = name;
   var _this = this
@@ -21,32 +44,70 @@ exports.getApi = function (name, infrastructure) {
 
     var parsedUrl = nodeUrl.parse(remoteServiceUrl, true);
 
+    var request = {
+      url: remoteServiceUrl,
+      auth: auth,
+      body: data
+    }
+
     var promise = new RSVP.Promise(function (resolve, reject) {
+
+      var exec = (event) => {
+        if (!event) {
+          logger.warn('client-api promise failed check! calling promise.reject()');
+          reject(event);
+        } else {
+          logger.trace('promise calling promise.resolve() event.id=' + event.id);
+          logger.debug("RPC Incoming message is " + JSON.stringify(event))
+          resolve(event);
+        }
+      }
+
+      if (clientCallback) exec = clientCallback
 
       var transportPromise = infrastructure.getTransport();
       transportPromise.then(function (transport) {
         var transChannel = transport.openChannel(parsedUrl.hostname, protocolName);
-        var clientChannel = channel.create("client-api");
-        var rpcProtocolClientHandler = clientHandler(remoteServiceUrl, auth);
-        clientChannel.rightHandler(rpcProtocolClientHandler);
-        transChannel.handler(rpcProtocolClientHandler);
 
-        var callback = function (event) {
-          if (!event) {
-            logger.warn('client-api promise failed check! calling promise.reject()');
-            reject(event);
-          } else {
-            logger.trace('promise calling promise.resolve() event.id=' + event.id);
-            logger.debug("RPC Incoming message is " + JSON.stringify(event))
-            resolve(event);
+        transChannel.listen((msg) => {
+          proto.fromTransport(msg)
+        })
+
+        var proto = client({
+          log: logger,
+          type: (name, payload) => {
+            //TODO, validation & conversion?
+            return payload
+          },
+          sendApi: (msg) => {
+            msg.body = messages.decode(msg.body, msg.content_type)
+            delete msg.content_type
+            exec(msg)
+          },
+          shutdown: () => {
+            logger.debug("Shutdown has been called on RPC Client. No-op")
+          },
+          encodeFor: (msg, service) => {
+            return {
+              payload: messages.encode(msg),
+              contentType: "application/json"
+            }
+          },
+          sendTransport: (msg) => {
+            try {
+              transChannel.send(messages.muonMessage(msg.payload, serviceName, msg.targetService, protocolName, msg.step))
+            } catch (e) {
+              logger.warn(e)
+            }
+          },
+          decode: (type, msg) => {
+            return messages.decode(msg.payload, msg.content_type);
           }
-        };
-        if (clientCallback) callback = clientCallback;
-        clientChannel.leftConnection().listen(callback);
-        clientChannel.leftConnection().send(data);
+        })
+
+        proto.fromApi(request)
       });
     });
-
 
     return promise;
 
@@ -79,9 +140,6 @@ exports.getApi = function (name, infrastructure) {
       return {
         server: function () {
           return serverHandler();
-        },
-        client: function (remoteServiceUrl, auth) {
-          return clientHandler(remoteServiceUrl, auth);
         }
       }
     }
@@ -92,31 +150,21 @@ exports.getApi = function (name, infrastructure) {
 
 function serverHandler() {
 
-  var incomingMuonMessage;
+  class RpcProtocolHandler {
 
-  class RpcProtocolHandler extends Handler {
+    setDownstreamConnection(channelConnection) { this.left = channelConnection }
+    setUpstreamConnection(channelConnection) { this.right = channelConnection }
 
-    outgoingFunction(message, forward, back, route, close) {
-      logger.debug("[*** PROTOCOL:SERVER:RPC ***] server rpc protocol outgoing message=%s", JSON.stringify(message));
-      var serverResponse = {
-        status: 200,
-        body: messages.encode(message),
-        content_type: "application/json"
-      };
-      var outboundMuonMessage = messages.muonMessage(serverResponse, serviceName, incomingMuonMessage.origin_service, protocolName, "request.response");
-      logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol outgoing muonMessage=" + JSON.stringify(outboundMuonMessage));
-      forward(outboundMuonMessage);
-      close('server_outgoing');
+    sendUpstream(message) {
 
-    }
-
-    incomingFunction(message, forward, back, route, close) {
+      var _this = this;
 
       if (!message) {
         logger.warn('received empty message');
-        back({});
+        this.left.send({})
+        return
       }
-      incomingMuonMessage = message;
+      var incomingMuonMessage = message;
       logger.debug("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message=%s", JSON.stringify(incomingMuonMessage));
       logger.trace("[*** PROTOCOL:SERVER:RPC ***] rpc protocol incoming message type=%s", (typeof incomingMuonMessage));
       if (message.protocol == 'muon') {
@@ -126,161 +174,79 @@ function serverHandler() {
       if (message.step == "ChannelShutdown") {
         return
       }
-      try {
-        var payload = messages.decode(incomingMuonMessage.payload, incomingMuonMessage.content_type);
-        logger.info("[*** PROTOCOL:SERVER:RPC ***] RPC payload =%s", JSON.stringify(payload));
-        logger.trace('handlermappings=' + JSON.stringify(handlerMappings));
-        if (payload && payload.url) {
-          var endpoint = payload.url;
-          payload.body = messages.decode(payload.body, payload.content_type);
-          var path = '/' + endpoint.split('/')[3];
-          var handler = handlerMappings[path];
-          if (!handler) {
-            logger.warn('[*** PROTOCOL:SERVER:RPC ***] NO HANDLER FOUND FOR ENDPOINT: "' + path + '" RETURN 404! event.id=' + incomingMuonMessage.id);
-            payload.status = 404;
-            var return404msg = messages.resource404(incomingMuonMessage, payload);
-            back(return404msg);
-          } else {
-            logger.info('[*** PROTOCOL:SERVER:RPC ***] Handler found for endpoint "' + path + '" event.id=' + incomingMuonMessage.id);
-            route(payload, path);
-          }
-        }
-      } catch (err) {
-        logger.warn('[*** PROTOCOL:SERVER:RPC ***] error thrown during protocol message decoding and handling');
-        logger.warn(err);
-      }
 
-      if (message.channel_op == 'closed') {
-        shutdown();
-        close('server_incoming');
-        return;
-      }
+      var serverProto = server({
+        log: logger,
+        state: (name) => {
+          if (name == "getHandler") {
+            return  (request) => {
+
+              console.dir(request)
+              var url = nodeUrl.parse(request.url, true);
+              var path = url.pathname
+
+              var handler = handlerMappings[path]
+
+              if (!handler) {
+                return (respondToProto) => {
+                  respondToProto({
+                    status: 404,
+                    payload: "not found"
+                  })
+                }
+              }
+
+              return (respondToProto) => {
+                handler(request, (response) => {
+                  respondToProto({
+                    status: 200,
+                    payload: response
+                  })
+                })
+              }
+            }
+          }
+          return {}
+        },
+        type: (name, payload) => {
+          //TODO, validation & conversion?
+          return payload
+        },
+        shutdown: () => {
+          logger.debug("Shutdown has been called on RPC Server. No-op")
+          _this.left.close();
+        },
+        encodeFor: (msg, service) => {
+          return {
+            payload: messages.encode(msg),
+            contentType: "application/json"
+          }
+        },
+        sendTransport: (msg) => {
+          try {
+            _this.left.send(messages.muonMessage(msg.payload, serviceName, msg.targetService, protocolName, msg.step))
+          } catch (e) {
+            logger.warn(e)
+          }
+        },
+        decode: (type, msg) => {
+          var unwrapped = messages.decode(msg.payload, msg.content_type);
+          unwrapped.body = messages.decode(unwrapped.body)
+
+          return unwrapped
+        }
+      });
+
+      message.sourceServiceName = message.origin_service
+
+      serverProto.fromTransport(message)
     }
   }
-  ;
 
   var rpcProtocolHandler = new RpcProtocolHandler('server-rpc', handlerMappings);
   return rpcProtocolHandler;
 }
 
-
-function clientHandler(remoteServiceUrl, auth) {
-  var TIMEOUT_MS = 10000;
-  var responseReceived = false;
-  var remoteService = nodeUrl.parse(remoteServiceUrl, true).hostname;
-
-  class RpcProtocolHandler extends Handler {
-
-    outgoingFunction(message, forward, back, route, close) {
-      logger.debug("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing message=%s", JSON.stringify(message));
-      var request = {
-        url: remoteServiceUrl,
-        auth: auth,
-        body: messages.encode(message),
-        content_type: "application/json"
-      }
-      var muonMessage = messages.muonMessage(request, serviceName, remoteService, protocolName, "request.made");
-      logger.trace("[*** PROTOCOL:CLIENT:RPC ***] client rpc protocol outgoing muonMessage=%s", JSON.stringify(muonMessage));
-      forward(muonMessage)
-
-      setTimeout(function () {
-        if (!responseReceived) {
-          logger.info('[*** PROTOCOL:CLIENT:RPC ***] timeout reached responding with timeout message');
-          var timeoutMsg = createRpcMessage("timeout", remoteServiceUrl, {}, {
-            status: 'timeout',
-            body: 'rpc response timeout exceeded'
-          });
-          back(timeoutMsg)
-          close('client_outgoing');
-        }
-      }, TIMEOUT_MS);
-    }
-
-
-    incomingFunction(message, forward, back, route, close) {
-
-      logger.info("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message id=" + message.id);
-      logger.debug("[*** PROTOCOL:CLIENT:RPC ***] rpc protocol incoming message=%s", JSON.stringify(message));
-      if (message.channel_op == 'closed') {
-        shutdown();
-        var msg;
-        if (message.step.includes("noserver")) {
-          msg = createRpcMessage("noserver", remoteServiceUrl, {}, {
-            status: 'closed',
-            body: 'server cannot be found'
-          });
-        } else {
-          msg = createRpcMessage("closed", remoteServiceUrl, {}, {
-            status: 'closed',
-            body: 'rpc socket closed by muon'
-          });
-        }
-        forward(msg);
-        return;
-      }
-
-      responseReceived = true;
-      var rpcMessage = messages.decode(message.payload, message.content_type)
-      if (rpcMessage.body != undefined) {
-        rpcMessage.body = messages.decode(rpcMessage.body, rpcMessage.content_type)
-      }
-      logger.info("Sending the response payload " + JSON.stringify(rpcMessage));
-      forward(rpcMessage);
-      close('client_incoming');
-    }
-
-  }
-  ; //RpcProtocolHandler
-
-
-  var rpcProtocolHandler = new RpcProtocolHandler('client-rpc');
-  return rpcProtocolHandler;
-
-}
-
-
 function shutdown() {
   logger.warn('rpc protocol shutdown() called');
-}
-
-
-function createRpcMessage(statusCode, url, body, error) {
-  if (!body) body = {};
-  if (!error) error = {};
-  if (!statusCode) {
-    var error = new Error('rpcMessage() invalid status: "' + statusCode + '"');
-    logger.error(error);
-    throw error;
-  }
-  var rpcMsg = {
-    id: 'rpc-gen',
-    body: body,
-    status: statusCode,
-    url: url,
-    error: error,
-    endpoint: function () {
-      return nodeUrl.parse(url, true).path;
-    }
-  }
-  return rpcMsg;
-}
-
-function rpcRequest(statusCode, url, body, error) {
-  if (!body) body = {};
-  if (!error) error = {};
-  if (!statusCode) {
-    var error = new Error('rpcMessage() invalid status: "' + statusCode + '"');
-    logger.error(error);
-    throw error;
-  }
-  var rpcMsg = {
-    body: body,
-    status: statusCode,
-    url: url,
-    error: error,
-    endpoint: function () {
-      return nodeUrl.parse(url, true).path;
-    }
-  }
-  return rpcMsg;
 }

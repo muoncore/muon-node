@@ -62,10 +62,10 @@ AmqpBroadcast.prototype.emit = function (event) {
 
 AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
     var _this = this;
+    var queue = "muon-discovery-node-" + event + uuid.v4()
     var waitInterval = setInterval(function () {
         if (typeof _this.broadcastExchange == 'object') {
             clearInterval(waitInterval);
-            var queue = "muon-node-broadcastlisten-" + uuid.v1();
 
             logger.debug("Creating broadcast listen queue " + queue);
 
@@ -111,7 +111,7 @@ AmqpBroadcast.prototype.listenOnBroadcast = function (event, callback) {
                 });
             });
         }
-    }, 100);
+    }, 200);
 };
 
 module.exports = AmqpBroadcast;

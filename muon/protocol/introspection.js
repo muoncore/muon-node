@@ -18,6 +18,9 @@ exports.getApi = function (name, infrastructure) {
         name: function () {
             return protocolName;
         },
+        endpoints: function () {
+          return [];
+        },
         introspect: function (remoteService, clientCallback) {
 
             var transportPromise = infrastructure.getTransport();
@@ -47,8 +50,8 @@ exports.getApi = function (name, infrastructure) {
             });
             return promise;
         },
-        protocols: function(ps) {
-            protocols = ps;
+        addProtocol: function(proto) {
+          protocols.push(proto)
         },
         protocolHandler: function () {
             return {
@@ -61,6 +64,7 @@ exports.getApi = function (name, infrastructure) {
             }
         }
     }
+    protocols.push(api)
     return api;
 }
 
