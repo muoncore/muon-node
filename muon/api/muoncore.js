@@ -26,18 +26,13 @@ exports.Messages = require("../domain/messages")
 exports.api = function (serviceName, infrastructure, tags) {
 
     var introspection = require('../protocol/introspection');
-    var streaming = require('../protocol/streaming/streaming');
-    var events = require('../protocol/event');
 
     var introspectionApi = introspection.getApi(serviceName, infrastructure);
-    var streamingApi = streaming.getApi(serviceName, infrastructure);
-    var eventApi = events.getApi(serviceName, infrastructure);
 
     infrastructure.serviceName = serviceName
     infrastructure.introspection = introspectionApi
 
     infrastructure.serverStacks.addProtocol(introspectionApi);
-    infrastructure.serverStacks.addProtocol(streamingApi);
 
     logger.info("[*** INFRASTRUCTURE:BOOTSTRAP ***] advertising service '" + serviceName + "' on muon discovery");
     //logger.error('amqpApi=' + JSON.stringify(amqpApi));
@@ -77,8 +72,6 @@ exports.api = function (serviceName, infrastructure, tags) {
             return introspectionApi.introspect(remoteName, callback);
         }
     };
-
-    require('../protocol/event').create(api)
 
     return api;
 }
