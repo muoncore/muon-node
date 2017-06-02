@@ -6,11 +6,27 @@ var ServerStacks = require("./server-stacks");
 var MuonSocketAgent = require('../socket/keep-alive-agent');
 var channel = require("../infrastructure/channel")
 
+var discoveries = {
+  // amqp: require("../discovery/amqp/discovery")
+}
+
+var transports = {
+  // amqp: require("../transport/amqp/transport")
+}
+
+exports.addTransport = (name, transport) => {
+  transports[name] = transport
+}
+
+exports.addDiscovery = (name, discovery) => {
+  discoveries[name] = discovery
+}
+
 exports.create = function (serviceName, transportUrl, discoveryUrl, tags) {
     var builder = require("../infrastructure/builder");
     var config = builder.config(serviceName, transportUrl, discoveryUrl);
 
-    var infrastructure = new builder.build(config);
+    var infrastructure = new builder.build(config, transports, discoveries);
 
     return this.api(serviceName, infrastructure, tags)
 }

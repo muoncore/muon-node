@@ -4,7 +4,7 @@ var RSVP = require('rsvp');
 var TransportClient = require("../transport/transport-client")
 var BaseDiscovery = require("../discovery/base-discovery")
 
-module.exports.build = function (config) {
+module.exports.build = function (config, transports, discoveries) {
     logger.info('builder.build() config=' + JSON.stringify(config));
     var serverStacks = new ServerStacks(config.serviceName);
     var transport;
@@ -42,7 +42,8 @@ module.exports.build = function (config) {
     }
 
     try {
-        var Discovery = require('../discovery/' + config.discoveryProtocol() + '/discovery.js');
+        // var Discovery = require('../discovery/' + config.discoveryProtocol() + '/discovery.js');
+        var Discovery = discoveries[config.discoveryProtocol()]
         infrastructure.discovery = new BaseDiscovery(new Discovery(config.discovery_url));
     } catch (err) {
         logger.error('unable to find discovery component for url: ""' + config.discovery_url + '""');
@@ -51,8 +52,12 @@ module.exports.build = function (config) {
     }
 
     try {
-        var amqpTransport = require('../transport/' + config.transportProtocol() + '/transport.js');
-        var muonPromise = amqpTransport.create(config.serviceName, config.transport_url, serverStacks, infrastructure.discovery);
+
+        var transportFactory = transports[config.transportProtocol()]
+
+        // var amqpTransport = require('../transport/' + config.transportProtocol() + '/transport.js');
+
+        var muonPromise = transportFactory.create(config.serviceName, config.transport_url, serverStacks, infrastructure.discovery);
         muonPromise.then(function (transportObj) {
             logger.debug('[*** INFRASTRUCTURE:BOOTSTRAP ***] TRANSPORT CREATED SUCCESS');
             transport = TransportClient.create(transportObj, infrastructure);

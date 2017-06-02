@@ -1,18 +1,10 @@
-var _ = require("underscore");
 var bichannel = require('../infrastructure/channel');
-var rpcProtocol = require('../protocol/rpc.js');
-var messages = require('../domain/messages.js');
-var MuonSocketAgent = require('../socket/keep-alive-agent');
 var sharedChannelServer = require('../transport/shared-channel-server');
-
-
 
 var ServerStacks = function (serverName) {
    this.serverName = serverName;
    this.protocols = {};
 };
-
-
 
 ServerStacks.prototype.openChannel = function(protocolName) {
     logger.debug("[*** API ***] opening muon server stacks channel..." + protocolName);
@@ -37,7 +29,7 @@ ServerStacks.prototype.addProtocol = function(protocolApi) {
 }
 
 ServerStacks.prototype.shutdown = function() {
-    
+
 }
 
 module.exports = ServerStacks;
