@@ -78,9 +78,7 @@ exports.api = function (serviceName, infrastructure, tags) {
         }
     };
 
-    require('../protocol/rpc').create(api)
     require('../protocol/event').create(api)
-    require('../protocol/streaming/streaming').create(api)
 
     return api;
 }
