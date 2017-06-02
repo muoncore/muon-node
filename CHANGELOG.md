@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased](https://github.com/muoncore/muon-node/tree/HEAD)
+
+[Full Changelog](https://github.com/muoncore/muon-node/compare/v7.2.6...HEAD)
+
+**Merged pull requests:**
+
+- Extract RPC proto and port to use shared proto files. [\#42](https://github.com/muoncore/muon-node/pull/42) ([daviddawson](https://github.com/daviddawson))
+
 ## [v7.2.6](https://github.com/muoncore/muon-node/tree/v7.2.6) (2017-03-21)
 [Full Changelog](https://github.com/muoncore/muon-node/compare/v7.2.5...v7.2.6)
 
