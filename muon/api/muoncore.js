@@ -22,6 +22,8 @@ exports.addDiscovery = (name, discovery) => {
   discoveries[name] = discovery
 }
 
+exports.BaseDiscovery = require("../discovery/base-discovery")
+
 exports.create = function (serviceName, transportUrl, discoveryUrl, tags) {
     var builder = require("../infrastructure/builder");
     var config = builder.config(serviceName, transportUrl, discoveryUrl);

@@ -22,6 +22,10 @@ module.exports.connectAndZip= function(inbound, outbound) {
     })
 }
 
+module.exports.inflate = function(payload) {
+  return inflate(payload)
+}
+
 function inflate(payload) {
     try {
         return pako.inflate(Uint8Array.from(payload));

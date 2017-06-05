@@ -1,6 +1,6 @@
 
 var _ = require("underscore")
-var uuid = require("node-uuid")
+var uuid = require("uuid")
 var messages = require("../domain/messages")
 var bichannel = require("../infrastructure/channel")
 var zip = require("../transport/zip")

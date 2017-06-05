@@ -144,13 +144,14 @@ describe("test messages:", function () {
 
 
     it("test message validation", function (done) {
+      console.log(JSON.stringify(arguments.callee))
           var msg =     {
                 id: '696f4064-2cc5-44c2-a4dd-6c61bdb1e799',
                 created: new Date(),
                 provenance_id: '696f4064-2cc5-44c2-a4dd-6c61bdb1e799',
                 step: 'request.made',
                 protocol: 'request',
-                event_source: arguments.callee.caller.name,
+                event_source: "ME!",
                 target_service: 'server1',
                 origin_service: 'client1',
                 channel_op: 'normal',

@@ -1,7 +1,7 @@
 var nodeUrl = require("url");
 //var RpcProtocol = require('../protocol/rpc-protocol.js');
 var channel = require('../infrastructure/channel.js');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 var RSVP = require('rsvp');
 require('sexylog');
 var handler = require('../infrastructure/handler.js');

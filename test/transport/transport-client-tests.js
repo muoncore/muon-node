@@ -10,7 +10,7 @@ require('sexylog');
 describe("transport-client:", function () {
 
     this.timeout(8000);
-    
+
     var infra = {
         config: {
             serviceName: "local-service",
@@ -60,28 +60,6 @@ describe("transport-client:", function () {
         transport.verify();
     })
 
-    it("on shutdown virtual channel, propogate the shutdown message to the server", function (done) {
-        var transportApi = { openChannel: function (remoteService, protocolName) {} };
-        var transport = sinon.mock(transportApi);
-
-        var transportChannel = bichannel.create("transportchannel")
-        transportChannel.rightConnection().listen(function(msg) {
-            logger.info("Got message " + JSON.stringify(msg))
-            var payload = messages.decode(msg.payload)
-            logger.info("Got message " + JSON.stringify(payload))
-            assert.equal(payload.message.channel_op, "closed")
-            done()
-        })
-
-        transport.expects("openChannel").once().returns(transportChannel.leftConnection());
-
-        var transclient = transportclient.create(transportApi, infra)
-
-        var returnedChannel = transclient.openChannel("simples", "rpc")
-
-        returnedChannel.close()
-    })
-
     it("on shutdown received from transport on the transport channel, send shutdown to all virtual channels", function (done) {
         var transportApi = { openChannel: function (remoteService, protocolName) {} };
         var transport = sinon.mock(transportApi);
@@ -125,7 +103,8 @@ describe("transport-client:", function () {
 
         var transportChannel = bichannel.create("simples")
         transportChannel.rightConnection().listen(function(msg) {
-            var payload = messages.decode(msg.payload)
+            var unzipped  = require("../../muon/transport/zip").inflate(msg.payload)
+            var payload = messages.decode(unzipped)
             console.log("Transport 1 got message " + JSON.stringify(payload))
             if (payload.message) {
                 if (payload.message.step == "step2") {

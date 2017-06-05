@@ -1,5 +1,5 @@
 var Joi = require('joi');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 require('sexylog');
 var jsonutil = require('jsonutil');
 var stackTrace = require('stack-trace');
@@ -193,7 +193,6 @@ exports.decode = function(payload, contentType) {
 
 function decode(payload) {
       //logger.trace('message decode: ' + payload);
-      //logger.trace('message decode: ' + JSON.stringify(payload));
        if (! payload) {
          return {}
        }
@@ -215,7 +214,9 @@ function decode(payload) {
        var buffer = new Buffer(payload);
        var value;
        try {
-            var value = JSON.parse(buffer.toString());
+         var str = buffer.toString()
+         logger.debug('message decode: ' + JSON.stringify(str));
+            value = JSON.parse(str);
        } catch (err) {
             value = buffer.toString();
         }

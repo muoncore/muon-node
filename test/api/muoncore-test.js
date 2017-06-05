@@ -2,7 +2,9 @@ var muoncore = require('../../muon/api/muoncore.js');
 var assert = require('assert');
 var expect = require('expect.js');
 
+return;
 var rpc = require("muon-stack-rpc")
+
 var amqp = require("../../muon/transport/amqp/")
 
 describe("Muon core API test:", function () {

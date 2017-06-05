@@ -1,3 +1,11 @@
+
+|===
+| Master Build | NPM Stable | Snapshots
+| image:https://img.shields.io/teamcity/http/teamcity.simplicityitself.com/e/OpenSource_MuonReleases_Libraries_ReleaseMuonNode_2.svg[Status]
+| image:https://img.shields.io/npm/v/muon-core.svg[NPM]
+| image:https://img.shields.io/npm/v/muon-core/next.svg[NPM]
+|===
+
 # Muon Core - Node.js
 
 This repo contains the Nodejs implementation of Muon Core.
