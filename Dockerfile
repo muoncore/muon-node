@@ -1,4 +1,4 @@
-FROM node:4.4.3
+FROM node:7
 
 RUN apt-get install libstdc++6
 
