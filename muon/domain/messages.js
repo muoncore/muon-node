@@ -114,7 +114,6 @@ exports.shutdownMessage = function() {
   var headers = {
         step: 'ChannelShutdown',
         protocol: 'n/a',
-        event_source: callingObject(),
         target_service: 'n/a',
         origin_service: 'n/a',
         content_type: 'application/json',
@@ -133,7 +132,6 @@ exports.pingMessage = function() {
   var headers = {
         step: 'keep-alive',
         protocol: 'muon',
-        event_source: callingObject(),
         target_service: 'n/a',
         origin_service: 'n/a',
         content_type: 'application/json'
@@ -152,7 +150,6 @@ exports.muonMessage = function(payload, sourceService, targetService, protocol, 
     var headers = {
           step: step,
           protocol: protocol,
-          event_source: callingObject(),
           target_service: targetService,
           origin_service: sourceService,
     };
@@ -175,7 +172,6 @@ exports.responseMessage = function(payload, client, server) {
     var headers = {
           step: "request.response",
           protocol: "rpc",
-          event_source: callingObject(),
           target_service: client,
           origin_service: server,
     };
@@ -225,7 +221,6 @@ function decode(payload) {
 
 }
 
-
 exports.encode = function(payload) {
 return encode(payload);
 
@@ -264,7 +259,6 @@ function createMessage(payload, headers, source) {
 
     if (! headers.channel_op) headers.channel_op = 'normal';
     if (source) headers.event_source = source;
-    if (! headers.event_source) headers.event_source = callingObject();
     if (! headers.channel_op) headers.channel_op = 'normal';
 
      var message =  {
@@ -284,34 +278,4 @@ function createMessage(payload, headers, source) {
 
     // logger.trace('createMessage() return message='  + JSON.stringify(message));
     return message;
-}
-
-
-function callingObject() {
-
-    if (typeof window != 'undefined' && typeof window.location != undefined) {
-        logger.debug("Running in a browser context, not collecting calling object")
-        return "web"
-    }
-    var err = new Error('something went wrong');
-    var trace = stackTrace.parse(err);
-    var stackCounter = 1;
-     // <-- TODO to get correct file name you may need to tweak the call stack index
-
-    var inThisObject = true;
-    var object = 'messages.js';
-    while(inThisObject) {
-        var call = trace[stackCounter];
-        var file = call.getFileName();
-        var pathElements = file.split('/');
-        var object = pathElements[pathElements.length - 1];
-        //logger.trace('in stacktrace: object=' + object);
-        if (object === 'messages.js') {
-            stackCounter++;
-        } else {
-            inThisObject = false;
-        }
-        object = object + ':' + call.getLineNumber();
-    }
-	return object;
 }
