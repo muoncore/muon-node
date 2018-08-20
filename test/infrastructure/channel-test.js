@@ -2,7 +2,7 @@ var bichannel = require('../../muon/infrastructure/channel.js');
 var handler = require('../../muon/infrastructure/handler.js');
 var assert = require('assert');
 var expect = require('expect.js');
-require('sexylog');
+var logger = require('../../muon/infrastructure/logger');;
 var csp = require("js-csp");
 
 describe("Bi directional channel test", function () {

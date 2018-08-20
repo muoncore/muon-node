@@ -3,7 +3,7 @@
 var Agent = require('../../muon/socket/keep-alive-agent.js');
 var assert = require('assert');
 var expect = require('expect.js');
-require('sexylog');
+var logger = require('../../muon/infrastructure/logger');;
 var bichannel = require('../../muon/infrastructure/channel.js');
 
 

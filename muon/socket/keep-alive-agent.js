@@ -1,5 +1,5 @@
 "use strict";
-require('sexylog');
+var logger = require('../infrastructure/logger');
 var moment = require('moment');
 var messages = require('../domain/messages.js');
 

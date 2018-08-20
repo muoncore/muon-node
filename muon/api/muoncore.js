@@ -1,5 +1,5 @@
 var channel = require('../infrastructure/channel.js');
-require('sexylog');
+var logger = require('../infrastructure/logger');
 
 var ServerStacks = require("./server-stacks");
 

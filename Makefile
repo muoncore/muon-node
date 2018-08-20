@@ -26,9 +26,6 @@ endif
 	npm publish
 
 publish-snapshot:
-ifndef VERSION
-	$(error VERSION is undefined for NPM snapshot release)
-endif
 	npm install
 	npm version --no-git-tag-version prerelease
 	npm run build

@@ -5,7 +5,7 @@ var sinon = require("sinon")
 var transportclient = require("../../muon/transport/transport-client")
 var bichannel = require("../../muon/infrastructure/channel")
 var messages = require("../../muon/domain/messages")
-require('sexylog');
+var logger = require('../../muon/infrastructure/logger');;
 
 describe("transport-client:", function () {
 

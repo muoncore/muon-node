@@ -5,20 +5,20 @@ var sinon = require("sinon")
 var transportclient = require("../../muon/transport/transport-client")
 var bichannel = require("../../muon/infrastructure/channel")
 var messages = require("../../muon/domain/messages")
-require('sexylog');
+var logger = require('../../muon/infrastructure/logger');;
 
 describe("shared channel server:", function () {
 
     this.timeout(8000);
 
     it("when openChannel, return a new shared channel connection", function () {
-        var serverStacks = {} 
+        var serverStacks = {}
 
         var sharedChannel = require("../../muon/transport/shared-channel-server").openSharedServerChannel(serverStacks)
 
         assert.notEqual(sharedChannel, null)
     })
-    
+
     it("on the connection, when a message is received, calls openChannel on serverStacks and routes message", function (done) {
         var serverStacksApi = { openChannel: function (protocolName) {} };
         var serverStacks = sinon.mock(serverStacksApi);
@@ -83,7 +83,7 @@ describe("shared channel server:", function () {
             assert(msg)
             //protocol
             //payload
-            
+
             done()
         })
 

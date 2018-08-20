@@ -1,5 +1,5 @@
 var csp = require("js-csp");
-require('sexylog');
+var logger = require('../infrastructure/logger');
 var messages = require('../domain/messages.js');
 
 var SHUTDOWN_DELAY = 1000;

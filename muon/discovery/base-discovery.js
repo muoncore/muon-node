@@ -1,5 +1,5 @@
 var _ = require("underscore");
-require('sexylog');
+var logger = require('../infrastructure/logger');
 var uuid = require("uuid")
 
 var BaseDiscovery = function (impl, frequency) {
